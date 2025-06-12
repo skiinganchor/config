@@ -1,0 +1,89 @@
+---
+name: Tests
+
+"on":
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ">=0.5.24"
+
+      - name: Create venv
+        run: |
+          uv venv
+
+      - name: Install yamllint
+        run: |
+          uv pip install --constraint=.github/workflows/constraints.txt yamllint
+
+      - name: Lint code.
+        run: |
+          uv run yamllint .
+
+  tests:
+    name: Flake Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dynamically update flake input URL
+        run: |
+          # Replace with your repository details
+          DEFAULT_URL="github:skiinganchor/config"
+          FLAKE_FOLDER="flakes"
+
+          FLAKE_FILE="${FLAKE_FOLDER}/flake.nix"
+
+          # Default to the current repo and branch (for pushes)
+          REPO_SLUG="${{ github.repository }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+
+          # If the trigger is a pull request, use its specific context
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Pull request event detected. Using PR head context."
+            REPO_SLUG="${{ github.event.pull_request.head.repo.full_name }}"
+            BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          fi
+
+          # The final URL points to the correct repository and branch
+          FINAL_URL="github:${REPO_SLUG}/${BRANCH_NAME}"
+
+          echo "Source Repository: ${REPO_SLUG}"
+          echo "Source Branch:     ${BRANCH_NAME}"
+          echo "Final Flake URL:   ${FINAL_URL}"
+
+          # Replace the default URL with the dynamically constructed one
+          sed -i "s|${DEFAULT_URL}|${FINAL_URL}|" "$FLAKE_FILE"
+
+          echo "--- Verifying ${FLAKE_FILE} modification --"
+          cat "$FLAKE_FILE"
+          echo "-------------------------------------------"
+
+      - name: Check flake
+        run: |
+          cd "$FLAKE_FOLDER"
+          nix flake check
