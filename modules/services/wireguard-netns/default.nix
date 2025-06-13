@@ -24,13 +24,12 @@ in
       example = lib.literalExpression ''
         pkgs.writeText "wg0.conf" '''
           [Interface]
-          Address = 192.168.2.2
           PrivateKey = <client's privatekey>
-          ListenPort = 21841
 
           [Peer]
           PublicKey = <server's publickey>
           Endpoint = <server's ip>:51820
+          AllowedIPs = 0.0.0.0/0
         '''
       '';
     };

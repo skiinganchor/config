@@ -172,8 +172,9 @@
       gfa = "git fetch --all --prune";
       gfo = "git fetch origin";
       gfp = "git push --force-with-lease";
-      gl = ''git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'';
-      gp = "git pull";
+      glg = ''git log --graph --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset" --abbrev-commit'';
+      gl = "git pull";
+      gp = "git push";
       gr = "git reset";
       grb = "git rebase";
       grba = "git rebase --abort";

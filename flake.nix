@@ -10,6 +10,14 @@
       url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    my-secrets = {
+      url = "git+ssh://git@github.com/skiinganchor/config-private.git?ref=main&shallow=1";
+      flake = false;
+    };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -20,6 +28,7 @@
 
       # Modules
       defaultModules = [
+        sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         nixvim.nixosModules.nixvim
         (import "${self}/pkgs/overlays.nix" inputs)
@@ -48,6 +57,8 @@
             specialArgs = {
               inherit stateVersion;
               inherit (attrs) hostName;
+              my-secrets = inputs.my-secrets;
+              sops-nix = inputs.sops-nix;
             };
             modules = [
               (import "${self}/machines/nixos.nix")
