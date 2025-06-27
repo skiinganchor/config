@@ -7,6 +7,7 @@
   imports = [
     ./arr/prowlarr
     ./arr/bazarr
+    ./arr/lidarr
     ./arr/sonarr
     ./arr/radarr
     ./deluge
