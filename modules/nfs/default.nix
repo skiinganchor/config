@@ -29,8 +29,8 @@ in
           };
 
           options = lib.mkOption {
-            type = lib.types.str;
-            default = "defaults";
+            type = lib.types.listOf lib.types.str;
+            default = [ "defaults" ];
             description = "Mount options for the NFS mount";
           };
 
@@ -49,7 +49,7 @@ in
           remoteHost = "nas.local";
           remotePath = "/exports/backups";
           localPath = "/mnt/backups";
-          options = "noatime";
+          options = [ "noatime" ];
         };
       };
     };
@@ -67,7 +67,7 @@ in
       value = {
         device = "${m.remoteHost}:${m.remotePath}";
         fsType = m.fsType;
-        options = [ m.options ];
+        options = m.options;
       };
     }) cfg.mounts;
 

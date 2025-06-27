@@ -7,6 +7,7 @@
   imports = [
     ./arr/prowlarr
     ./arr/bazarr
+    ./arr/jellyseerr
     ./arr/lidarr
     ./arr/sonarr
     ./arr/radarr
