@@ -24,6 +24,7 @@
         ];
       lockScreenNotifications = false;
       nightLight = false;
+      suspend = true;
     };
     git = {
       userName = "Rick Sanches";

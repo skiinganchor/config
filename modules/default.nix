@@ -63,6 +63,11 @@ in {
             default = false;
             description = "Whether to enable night light on Gnome.";
           };
+          suspend = mkOption {
+            type = bool;
+            default = true;
+            description = "Whether to suspend is enabled on Gnome.";
+          };
         };
       };
       default = {};
@@ -81,6 +86,7 @@ in {
         ];
         lockScreenNotifications = false;
         nightLight = true;
+        suspend = true;
       };
       description = "DConf configuration for Gnome.";
     };
