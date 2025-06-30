@@ -13,6 +13,7 @@
     ./arr/radarr
     ./deluge
     ./jellyfin
+    ./sabnzbd
     ./wireguard-netns
   ];
 }
