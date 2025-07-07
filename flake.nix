@@ -1,5 +1,9 @@
 {
   inputs = {
+    disko = {
+      url = "github:nix-community/disko/latest";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixvim = {
@@ -75,6 +79,7 @@
               inherit (attrs) hostName;
             };
             modules = [
+              disko.nixosModules.disko
               (import "${self}/machines/emilia")
             ]
             ++ defaultModules
