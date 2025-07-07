@@ -21,6 +21,7 @@
     {
       nixosConfigurations = builtins.mapAttrs mkHost {
         nixos = cfg.systemTypes.x86_64;
+        emilia = cfg.systemArch.x86_64;
       };
     };
 }

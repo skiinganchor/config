@@ -61,7 +61,21 @@
               sops-nix = inputs.sops-nix;
             };
             modules = [
-              (import "${self}/machines/nixos.nix")
+              (import "${self}/machines/nixos")
+            ]
+            ++ defaultModules
+            ++ optionalLocalModules attrs.modules;
+          };
+        emilia =
+          attrs:
+          nixpkgs.lib.nixosSystem {
+            system = self.systemArch.amd;
+            specialArgs = {
+              inherit stateVersion;
+              inherit (attrs) hostName;
+            };
+            modules = [
+              (import "${self}/machines/emilia")
             ]
             ++ defaultModules
             ++ optionalLocalModules attrs.modules;
