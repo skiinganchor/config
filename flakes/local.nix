@@ -7,6 +7,9 @@
   };
   # END - DO NOT ADD THIS PART - ONLY FOR TESTING
 
+  services.fail2ban-cloudflare = {
+    enable = false;
+  };
   homelab = {
     dconf = {
       favoriteApps = [ "brave-browser.desktop" "org.gnome.Nautilus.desktop" "org.gnome.Terminal.desktop" ];
