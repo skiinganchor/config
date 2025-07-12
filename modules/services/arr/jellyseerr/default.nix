@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   service = "jellyseerr";
   cfg = config.homelab.services.${service};

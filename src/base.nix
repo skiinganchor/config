@@ -84,7 +84,7 @@ in
   # Open ports in the firewall.
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 8096 ]; # Jellyfin
+    allowedTCPPorts = [ 5055 8096 ]; # Jellyseerrr and Jellyfin
     checkReversePath = "loose"; # Fix VPN issue
   };
 
