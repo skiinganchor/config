@@ -45,18 +45,6 @@ in
       type = lib.types.str;
       default = "Services";
     };
-    cloudflared.credentialsFile = lib.mkOption {
-      type = lib.types.str;
-      example = lib.literalExpression ''
-        pkgs.writeText "cloudflare-credentials.json" '''
-        {"AccountTag":"secret"."TunnelSecret":"secret","TunnelID":"secret"}
-        '''
-      '';
-    };
-    cloudflared.tunnelId = lib.mkOption {
-      type = lib.types.str;
-      example = "00000000-0000-0000-0000-000000000000";
-    };
   };
   config = lib.mkIf cfg.enable {
     services.nginx = {
@@ -69,15 +57,6 @@ in
         ];
       };
     };
-    services.cloudflared = {
-      enable = true;
-      tunnels.${cfg.cloudflared.tunnelId} = {
-        credentialsFile = cfg.cloudflared.credentialsFile;
-        default = "http_status:404";
-        ingress."${cfg.url}".service = "http://127.0.0.1:8083";
-      };
-    };
-
     services.postgresql = {
       enable = true;
       ensureDatabases = [ "nextcloud" ];
@@ -92,15 +71,6 @@ in
     systemd.services."nextcloud-setup" = {
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
-    };
-
-    services.fail2ban-cloudflare = lib.mkIf config.services.fail2ban-cloudflare.enable {
-      jails = {
-        nextcloud = {
-          serviceName = "phpfpm-nextcloud";
-          failRegex = "^.*Login failed:.*(Remote IP: <HOST>).*$";
-        };
-      };
     };
 
     services.${service} = {

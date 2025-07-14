@@ -207,7 +207,6 @@ in {
   config = { };
 
   imports = [
-    ./fail2ban-cloudflare
     ./nfs
     ./services
     ./tmux.nix
