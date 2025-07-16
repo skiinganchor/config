@@ -39,7 +39,6 @@
         (import "${self}/modules")
         (import "${self}/src")
         (import "${self}/src/base.nix")
-        (import "${self}/modules/gui")
       ];
       optionalLocalModules =
         nix_paths:
@@ -66,6 +65,7 @@
             };
             modules = [
               (import "${self}/machines/nixos")
+              (import "${self}/modules/gui")
             ]
             ++ defaultModules
             ++ optionalLocalModules attrs.modules;
