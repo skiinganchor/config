@@ -6,6 +6,7 @@ let
   pkgs-unstable = _: prev: {
     pkgs-unstable = import nixpkgs-unstable {
       inherit (prev.stdenv) system;
+      inherit (overlayConfig) config;
     };
   };
 in
