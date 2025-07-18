@@ -1,5 +1,4 @@
-{ lib, pkgs, options, ... }:
-
+{ lib, options, ... }:
 {
   # DO NOT ADD THIS PART - ONLY FOR TESTING
   fileSystems."/" = lib.mkForce {
@@ -7,78 +6,6 @@
   };
   # END - DO NOT ADD THIS PART - ONLY FOR TESTING
 
-  homelab = {
-    dconf = {
-      favoriteApps = [ "brave-browser.desktop" "org.gnome.Nautilus.desktop" "org.gnome.Terminal.desktop" ];
-      # gnome extesions require wayland restart
-      gnomeExtensions = with pkgs.gnomeExtensions; [
-        appindicator
-        tiling-assistant
-        vitals
-      ];
-      guakeHotkey = "F12";
-      hotCorners = false;
-      keyboardLayout = [
-          { layout = "us"; variant = "intl"; }
-          { layout = "de"; variant = null; }
-        ];
-      lockScreenNotifications = false;
-      nightLight = false;
-      suspend = true;
-    };
-    git = {
-      userName = "Rick Sanches";
-      email = "Rick.Sanches@Wabala.dub";
-      defaultBranch = "main";
-      createWorkspaces = true;
-      workspaces = [
-        {
-          folderName = "workspace_personal";
-          email = "personal@example.com";
-          userName = "Rick Personal";
-          sshKeyFile = "/home/rick/.ssh/id_personal";
-        }
-        {
-          folderName = "workspace_work";
-          email = "rick@rick.com";
-          userName = "Rick Professional";
-        }
-      ];
-    };
-    mainUser = {
-      name = "username";
-      group = "groupname";
-      pkgs = with pkgs; [
-        brave
-        pkgs-unstable.devenv
-        git
-        htop
-        obs-studio
-        onlyoffice-desktopeditors
-        thefuck
-        tmux
-        vscodium
-        wl-clipboard
-      ];
-    };
-    services = {
-      enable = true;
-      nextcloud.enable = true;
-    };
-    systemWidePkgs = with pkgs; [
-      ansible
-      openssl
-      wget
-    ];
-    timeZone = "Europe/Amsterdam";
-  };
-
-  programs.chromium = {
-    enable = true;
-    extensions = [
-      "cjpalhdlnbpafiamejdnhcphjbkeiagm" # ublock origin
-    ];
-  };
   # fix issues with running ruff being dynamically linked
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = options.programs.nix-ld.libraries.default;

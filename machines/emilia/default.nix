@@ -6,6 +6,7 @@
 {
   imports = [
     (import ./disko-config.nix)
+    ./homelab
   ];
 
   boot = {

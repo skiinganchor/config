@@ -77,6 +77,8 @@
             specialArgs = {
               inherit stateVersion;
               inherit (attrs) hostName;
+              my-secrets = inputs.my-secrets;
+              sops-nix = inputs.sops-nix;
             };
             modules = [
               disko.nixosModules.disko
