@@ -9,7 +9,8 @@ in
 
   sops.defaultSopsFile = "${secretsPath}/secrets/services.yaml";
   sops.age.keyFile = "/home/share/.config/sops/age/keys.txt";
-  sops.secrets.nextcloud-config = {};
+  sops.secrets.nextcloud-adminuser = {};
+  sops.secrets.nextcloud-adminPassword = {};
 
   homelab = {
     mainUser = {
@@ -21,8 +22,8 @@ in
       enable = true;
       nextcloud = {
         enable = true;
-        adminuser = config.sops.secrets.nextcloud-config.adminuser.path;
-        adminpassFile = config.sops.secrets.nextcloud-config.adminPassword.path;
+        adminuser = config.sops.secrets.nextcloud-adminuser.path;
+        adminpassFile = config.sops.secrets.nextcloud-adminPassword.path;
       };
     };
     timeZone = "Europe/Amsterdam";
