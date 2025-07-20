@@ -4,6 +4,16 @@ let
   inherit (lib) mkOption types;
 in {
   options.homelab = {
+    enable = lib.mkEnableOption "The homelab services and configuration variables";
+
+    baseDomain = lib.mkOption {
+      default = "";
+      type = lib.types.str;
+      description = ''
+        Base domain name to be used to access the homelab services via Caddy reverse proxy
+      '';
+    };
+
     dconf = mkOption {
       type = with types; submodule {
         options = {
