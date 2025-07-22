@@ -12,7 +12,6 @@ in
     ./arr/lidarr
     ./arr/sonarr
     ./arr/radarr
-    ./deluge
     ./jellyfin
     ./nextcloud
     ./sabnzbd
