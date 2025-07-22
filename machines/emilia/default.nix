@@ -17,6 +17,7 @@ in
   networking = {
     firewall.enable = lib.mkForce false;
     useDHCP = false;
+    networking.hostName = "emilia";
     interfaces = {
       wlan0.useDHCP = true;
       eth0.useDHCP = true;
