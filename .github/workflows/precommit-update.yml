@@ -4,7 +4,7 @@ name: Pre-commit auto-update
 "on":
   # every day at midnight
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "*/2 * * * *"
 
 jobs:
   pre-commit-auto-update:

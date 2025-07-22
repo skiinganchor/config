@@ -22,7 +22,7 @@ in
       eth0.useDHCP = true;
     };
   };
-  
+
   services.duckdns = {
     enable = true;
     domainsFile = config.sops.secrets."duckdns/domains-file".path;

@@ -17,27 +17,11 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Set up Python 3.
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Install UV
-        uses: astral-sh/setup-uv@v6
-        with:
-          version: ">=0.5.24"
-
-      - name: Create venv
-        run: |
-          uv venv
-
-      - name: Install yamllint
-        run: |
-          uv pip install --constraint=.github/workflows/constraints.txt yamllint
-
-      - name: Lint code.
-        run: |
-          uv run yamllint .
+      - uses: cachix/install-nix-action@v31
+      - name: Install devenv.sh
+        run: nix profile install nixpkgs#devenv
+      - name: Build the devenv shell and run any git hooks
+        run: devenv test
 
   tests:
     name: Flake Test
