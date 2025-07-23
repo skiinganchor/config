@@ -28,8 +28,6 @@
     { self, ... }@inputs:
     with inputs;
     let
-      stateVersion = "25.05";
-
       # Modules
       defaultModules = [
         sops-nix.nixosModules.sops
@@ -49,6 +47,7 @@
         );
     in
     {
+      stateVersion = "25.05";
       systemArch = {
         amd = "x86_64-linux";
       };
@@ -58,6 +57,7 @@
           nixpkgs.lib.nixosSystem {
             system = self.systemArch.amd;
             specialArgs = {
+              inherit self;
               inherit stateVersion;
               my-secrets = inputs.my-secrets;
               sops-nix = inputs.sops-nix;
@@ -74,6 +74,7 @@
           nixpkgs.lib.nixosSystem {
             system = self.systemArch.amd;
             specialArgs = {
+              inherit self;
               inherit stateVersion;
               my-secrets = inputs.my-secrets;
               sops-nix = inputs.sops-nix;

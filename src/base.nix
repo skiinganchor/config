@@ -8,8 +8,6 @@ let
   homelab = config.homelab;
 in
 {
-  boot = {};
-
   # Set your time zone.
   time.timeZone = config.homelab.timeZone;
 

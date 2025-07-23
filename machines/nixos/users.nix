@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 let
   homelab = config.homelab;
@@ -15,8 +15,18 @@ in
     extraGroups = [
       "docker" # Run docker without ‘sudo’
       "wheel" # Enable ‘sudo’ for the user.
+      "render" # For video transcoding
+      "video" # For video transcoding
     ];
     packages = config.homelab.mainUser.pkgs;
+  };
+
+  home-manager = {
+    sharedModules = [ (import "${self}/src/home.nix") ];
+    extraSpecialArgs = {
+      inherit (self) stateVersion;
+      inherit homelab;
+    };
   };
 
   home-manager.users = {

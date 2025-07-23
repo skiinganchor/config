@@ -14,6 +14,16 @@ in
   sops.secrets."duckdns/domains-file" = {};
   sops.secrets."duckdns/token-file" = {};
 
+  boot.loader = {
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
+  boot.initrd = {
+    systemd.enable = true;
+    # kernel modules for virtualized disks
+    availableKernelModules = [ "virtio_scsi" "virtio_pci" "sr_mod" ];
+  };
+
   networking = {
     firewall.enable = lib.mkForce false;
     useDHCP = false;

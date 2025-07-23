@@ -1,4 +1,4 @@
-{ lib, stateVersion, homelab, pkgs, ... }@attrs:
+{ pkgs, stateVersion, ... }@attrs:
 
 # here we have system-wide configuration - for user configurations see: src/users.nix
 {
