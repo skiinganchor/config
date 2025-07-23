@@ -4,6 +4,10 @@ let
   homelab = config.homelab;
 in
 {
+  imports = [
+    ../../modules/zsh.nix
+  ];
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."${homelab.mainUser.name}" = {
     isNormalUser = true;

@@ -199,6 +199,11 @@ in {
       description = "The main user of the system: name and pkgs";
     };
 
+    shell = mkOption {
+      type = types.nullOr (types.either types.shellPackage (types.passwdEntry types.path));
+      default = pkgs.shadow;
+    };
+
     systemWidePkgs = mkOption {
         type = types.listOf types.package;
         default = with pkgs; [
