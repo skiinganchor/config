@@ -7,8 +7,6 @@ in
     sops-nix.nixosModules.sops
   ];
 
-  sops.defaultSopsFile = "${secretsPath}/secrets/services.yaml";
-  sops.age.keyFile = "/home/share/.config/sops/age/keys.txt";
   sops.secrets."nextcloud/admin-user" = {};
   sops.secrets."nextcloud/admin-password" = {};
 
