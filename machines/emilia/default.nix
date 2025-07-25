@@ -12,9 +12,6 @@ in
 
   sops.defaultSopsFile = "${secretsPath}/secrets/emilia.yaml";
   sops.age.keyFile = "/home/wookie/.config/sops/age/keys.txt";
-  sops.secrets."acme/dns-provider" = {};
-  sops.secrets."acme/dns-resolver" = {};
-  sops.secrets."acme/email" = {};
   sops.secrets."acme/environment-file" = {};
   sops.secrets."duckdns/domains-file" = {};
   sops.secrets."duckdns/token-file" = {};
@@ -44,13 +41,13 @@ in
 
   security.acme = {
     acceptTerms = true;
-    defaults.email = config.sops.secrets."acme/email".path;
+    defaults.email = "gradient_stiffen452@simplelogin.com";
     certs.${config.homelab.baseDomain} = {
       reloadServices = [ "caddy.service" ];
       domain = "${config.homelab.baseDomain}";
       extraDomainNames = [ "*.${config.homelab.baseDomain}" ];
-      dnsProvider = config.sops.secrets."acme/dns-provider".path;
-      dnsResolver = config.sops.secrets."acme/dns-resolver".path;
+      dnsProvider = "duckdns";
+      dnsResolver = "1.1.1.1:53";
       dnsPropagationCheck = true;
       group = config.services.caddy.group;
       environmentFile = config.sops.secrets."acme/environment-file".path;

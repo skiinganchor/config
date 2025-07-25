@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1749398372,
-        "narHash": "sha256-tYBdgS56eXYaWVW3fsnPQ/nFlgWi/Z2Ymhyu21zVM98=",
+        "lastModified": 1753121425,
+        "narHash": "sha256-TVcTNvOeWWk1DXljFxVRp+E0tzG1LhrVjOGGoMHuXio=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "9305fe4e5c2a6fcf5ba6a3ff155720fbe4076569",
+        "rev": "644e0fc48951a860279da645ba77fe4a6e814c5e",
         "type": "github"
       },
       "original": {
@@ -112,10 +112,10 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1753358798,
-        "narHash": "sha256-ed82zpRfaZmi7k8KgHluYiuCWFuBcpKygAddOZOf8to=",
+        "lastModified": 1753461289,
+        "narHash": "sha256-RtlKFtvfECAlG/LwQF4e5k7M2EgwTNhTejRZU/pN4JM=",
         "ref": "main",
-        "rev": "53e8b69a540e9babd7408d30010cc92f0e7e9540",
+        "rev": "1252c5e6d097043bceaf818adc127c5a84e38e1f",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/skiinganchor/config-private.git"
@@ -169,11 +169,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1752010420,
-        "narHash": "sha256-fboKrq2WeEC2Y4LaZNiiH2dptUYHtSbYhzE0FTN/u+M=",
+        "lastModified": 1753460807,
+        "narHash": "sha256-nqKDJqATaOyKS6oMRMKD5gsQDaYBJ30ZT0XSVCj8dOg=",
         "owner": "nix-community",
         "repo": "nixvim",
-        "rev": "a11133507a930dfd235324cdf776bdb5e6ddd717",
+        "rev": "9c198924557b68a7874edd7b8c9b6e24693268a7",
         "type": "github"
       },
       "original": {
