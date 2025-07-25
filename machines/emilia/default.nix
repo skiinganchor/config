@@ -11,6 +11,7 @@ in
   ];
 
   sops.defaultSopsFile = "${secretsPath}/secrets/emilia.yaml";
+  sops.age.keyFile = "/home/wookie/.config/sops/age/keys.txt";
   sops.secrets."acme/dns-provider" = {};
   sops.secrets."acme/dns-resolver" = {};
   sops.secrets."acme/email" = {};
