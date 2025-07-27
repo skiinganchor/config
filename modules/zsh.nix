@@ -40,10 +40,5 @@
       ls = "ls --color=auto";
       nixup = "sudo nix flake update --flake /etc/nixos && sudo nixos-rebuild switch";
     };
-    shellInit = ''
-      if [ ! -f ~/.zshrc ]; then
-        echo 'eval "$(direnv hook zsh)"' > ~/.zshrc
-      fi
-    '';
   };
 }
