@@ -26,36 +26,11 @@ in
   # $ nix search wget
   environment.systemPackages = homelab.systemWidePkgs;
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
-
-  nix = {
-    optimise = {
-      automatic = true;
-      dates = [
-        "00:00"
-        "12:00"
-        "18:00"
-      ];
-    };
+  services.openssh = {
+    enable = true;
     settings = {
-      flake-registry = "";
-      auto-optimise-store = true;
-      tarball-ttl = 0;
-      experimental-features = [
-        "nix-command"
-        "flakes"
-      ];
+      PasswordAuthentication = false;
     };
   };
 }

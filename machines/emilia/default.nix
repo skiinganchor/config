@@ -29,10 +29,7 @@ in
   networking = {
     firewall = {
       enable = true;
-      allowedTCPPorts = [
-        80
-        443
-      ];
+      allowedTCPPorts = [ 443 ];
     };
     useDHCP = false;
     hostName = "emilia";

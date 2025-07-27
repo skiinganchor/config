@@ -18,6 +18,7 @@
       # git aliases inspired on https://kapeli.com/cheat_sheets/Oh-My-Zsh_Git.docset/Contents/Resources/Documents/index
       ga = "git add";
       gac = "git commit --amend --no-edit --all";
+      gap = "git commit --amend --no-edit --all && git push --force-with-lease";
       gc = "git commit -m";
       gcf = "git config --list";
       gco = "git checkout";

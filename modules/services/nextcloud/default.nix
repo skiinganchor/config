@@ -48,13 +48,25 @@ in
   };
   config = lib.mkIf cfg.enable {
     services.nginx = {
+      enable = true;
+
+      recommendedOptimisation = true;
+      recommendedProxySettings = true;
+
+      # Modern SSL configuration
+      commonHttpConfig = ''
+        # Use TLS 1.3 only for modern security
+        ssl_protocols TLSv1.3;
+        ssl_ecdh_curve X25519:prime256v1:secp384r1;
+        ssl_prefer_server_ciphers off;
+
+        # Add HSTS header to force HTTPS
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+      '';
+
       virtualHosts."${config.services.nextcloud.hostName}" = {
-        listen = [
-          {
-            addr = "127.0.0.1";
-            port = 8083;
-          }
-        ];
+        forceSSL = true;
+        enableACME = true;
       };
     };
     services.postgresql = {
@@ -76,17 +88,17 @@ in
     services.${service} = {
       enable = true;
       package = pkgs.nextcloud31;
-      hostName = "nextcloud";
+      hostName = "cloud.${homelab.baseDomain}";
+      https = true;
+
       configureRedis = true;
       caching = {
         redis = true;
       };
+
       maxUploadSize = "50G";
       settings = {
-        trusted_proxies = [ "127.0.0.1" ];
         overwriteprotocol = "https";
-        overwritehost = "cloud.${homelab.baseDomain}";
-        overwrite.cli.url = "https://cloud.${homelab.baseDomain}";
         mail_smtpmode = "sendmail";
         mail_sendmailmode = "pipe";
         user_oidc = {

@@ -1,14 +1,10 @@
-{ config, my-secrets, sops-nix, ... }:
-let
-  secretsPath = builtins.toString my-secrets;
-in
+{ config, sops-nix, ... }:
 {
   imports = [
     sops-nix.nixosModules.sops
   ];
 
-  sops.secrets."nextcloud/admin-user" = {};
-  sops.secrets."nextcloud/admin-password" = {};
+  sops.secrets."nextcloud-admin-password" = {};
 
   homelab = {
     baseDomain = "alavanca.duckdns.org";
@@ -21,8 +17,8 @@ in
       enable = true;
       nextcloud = {
         enable = true;
-        adminuser = config.sops.secrets."nextcloud/admin-user".path;
-        adminpassFile = config.sops.secrets."nextcloud/admin-password".path;
+        adminuser = "share";
+        adminpassFile = config.sops.secrets."nextcloud-admin-password".path;
       };
     };
     timeZone = "Europe/Amsterdam";
