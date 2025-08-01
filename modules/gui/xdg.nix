@@ -1,21 +1,25 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    nautilus
-    papers
     eog
+    nautilus
+    onlyoffice-desktopeditors
+    papers
     vlc
+    vscodium
   ];
 
   # enable screen sharing
   xdg = {
     mime =
       let
-        web = "brave-browser.desktop";
-        inode = "org.gnome.Nautilus.desktop";
-        pdf = "org.gnome.Papers.desktop";
         image = "org.gnome.eog.desktop";
+        inode = "org.gnome.Nautilus.desktop";
+        office = "onlyoffice-desktopeditors.desktop";
+        pdf = "org.gnome.Papers.desktop";
+        text = "codium.desktop";
         video = "vlc.desktop";
+        web = "brave-browser.desktop";
       in
       {
         enable = true;
@@ -96,6 +100,86 @@
           "video/x-mpeg-system" = [ video ];
         };
         defaultApplications = {
+          # Word processing
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = office;  # .docx
+          "application/msword" = office;                                                    # .doc
+          "application/vnd.oasis.opendocument.text" = office;                               # .odt
+          "application/rtf" = office;                                                       # .rtf
+
+          # Spreadsheets
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = office;     # .xlsx
+          "application/vnd.ms-excel" = office;                                              # .xls
+          "application/vnd.oasis.opendocument.spreadsheet" = office;                        # .ods
+          "text/csv" = office;                                                              # .csv
+
+          # Presentations
+          "application/vnd.openxmlformats-officedocument.presentationml.presentation" = office; # .pptx
+          "application/vnd.ms-powerpoint" = office;                                             # .ppt
+          "application/vnd.oasis.opendocument.presentation" = office;                          # .odp
+
+          # Templates & misc
+          "application/vnd.ms-word.document.macroEnabled.12" = office; # .docm
+          "application/vnd.ms-excel.sheet.macroEnabled.12" = office;   # .xlsm
+          "application/vnd.ms-powerpoint.presentation.macroEnabled.12" = office; # .pptm
+
+          # Generic text
+          "text/plain" = text;
+
+          # YAML, JSON, TOML, INI
+          "text/yaml" = text;
+          "application/x-yaml" = text;
+          "application/json" = text;
+          "application/toml" = text;
+          "text/x-ini" = text;
+
+          # Shell & scripting
+          "text/x-shellscript" = text;  # .sh, .bash
+          "application/x-shellscript" = text;
+          "application/x-sh" = text;
+          "text/x-python" = text;
+          "text/x-perl" = text;
+          "text/x-ruby" = text;
+          "text/x-php" = text;
+
+          # Markup & config
+          "text/html" = text;
+          "application/xml" = text;
+          "text/xml" = text;
+          "text/markdown" = text;      # .md
+          "text/x-readme" = text;
+
+          # Programming source files
+          "text/x-c" = text;
+          "text/x-c++src" = text;
+          "text/x-java" = text;
+          "text/x-go" = text;
+          "text/x-rustsrc" = text;
+          "text/x-haskell" = text;
+          "text/x-scala" = text;
+          "text/x-ocaml" = text;
+
+          # Web development
+          "text/css" = text;
+          "application/javascript" = text;
+          "application/x-javascript" = text;
+          "text/javascript" = text;
+          "text/x-typescript" = text;
+
+          # SQL
+          "application/sql" = text;
+
+          # LaTeX
+          "application/x-tex" = text;
+          "text/x-tex" = text;
+
+          # Docker and DevOps
+          "text/x-dockerfile-config" = text;  # some systems
+          "text/x-makefile" = text;
+
+          # Misc dev
+          "application/x-nix" = text;         # .nix files
+          "application/x-patch" = text;       # .diff, .patch
+
           "inode/directory" = [ inode ];
           "x-scheme-handler/http" = [ web ];
           "x-scheme-handler/https" = [ web ];
