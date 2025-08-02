@@ -19,8 +19,9 @@ in
   #   useXkbConfig = true; # use xkb.options in tty.
   # };
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  hardware = {
+    enableAllFirmware = true;
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
