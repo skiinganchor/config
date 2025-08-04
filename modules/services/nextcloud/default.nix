@@ -66,7 +66,10 @@ in
 
       virtualHosts."${config.services.nextcloud.hostName}" = {
         forceSSL = true;
-        enableACME = true;
+        # uses security.acme instead
+        enableACME = false;
+        sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
       };
     };
     services.postgresql = {

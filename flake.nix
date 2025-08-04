@@ -66,6 +66,7 @@
               (import "${self}/machines/nixos")
               (import "${self}/modules/gui")
               (import "${self}/modules/tailscale")
+              (import "${self}/modules/virtualbox")
             ]
             ++ defaultModules
             ++ optionalLocalModules attrs.modules;

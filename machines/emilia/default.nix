@@ -38,13 +38,13 @@ in
     acceptTerms = true;
     defaults.email = "gradient_stiffen452@simplelogin.com";
     certs.${config.homelab.baseDomain} = {
-      reloadServices = [ "caddy.service" ];
+      reloadServices = [ "nginx.service" ];
       domain = "${config.homelab.baseDomain}";
       extraDomainNames = [ "*.${config.homelab.baseDomain}" ];
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       dnsPropagationCheck = true;
-      group = config.services.caddy.group;
+      group = config.services.nginx.group;
       environmentFile = config.sops.secrets."acme/environment-file".path;
     };
   };
