@@ -13,8 +13,6 @@ in
   sops.defaultSopsFile = "${secretsPath}/secrets/emilia.yaml";
   sops.age.keyFile = "/home/wookie/.config/sops/age/keys.txt";
   sops.secrets."acme/environment-file" = {};
-  sops.secrets."duckdns/domains-file" = {};
-  sops.secrets."duckdns/token-file" = {};
 
   boot.loader = {
     systemd-boot.enable = true;
@@ -43,17 +41,11 @@ in
       reloadServices = [ "caddy.service" ];
       domain = "${config.homelab.baseDomain}";
       extraDomainNames = [ "*.${config.homelab.baseDomain}" ];
-      dnsProvider = "duckdns";
+      dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       dnsPropagationCheck = true;
       group = config.services.caddy.group;
       environmentFile = config.sops.secrets."acme/environment-file".path;
     };
-  };
-
-  services.duckdns = {
-    enable = true;
-    domainsFile = config.sops.secrets."duckdns/domains-file".path;
-    tokenFile = config.sops.secrets."duckdns/token-file".path;
   };
 }

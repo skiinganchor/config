@@ -7,7 +7,7 @@
   sops.secrets."nextcloud-admin-password" = {};
 
   homelab = {
-    baseDomain = "alavanca.duckdns.org";
+    baseDomain = "tapirus.cc";
     mainUser = {
       name = "share";
       group = "users";
