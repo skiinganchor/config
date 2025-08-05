@@ -10,7 +10,7 @@ in {
       default = "";
       type = lib.types.str;
       description = ''
-        Base domain name to be used to access the homelab services via Caddy reverse proxy
+        Base domain name to be used to access the homelab services via reverse proxy
       '';
     };
 

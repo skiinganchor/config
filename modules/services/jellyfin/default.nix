@@ -65,7 +65,7 @@ in
       group = homelab.mainUser.group;
     };
 
-    services.caddy.virtualHosts."${cfg.url}" = {
+    services.nginx.virtualHosts."${cfg.url}" = {
       useACMEHost = homelab.baseDomain;
       extraConfig = ''
         reverse_proxy http://127.0.0.1:8096

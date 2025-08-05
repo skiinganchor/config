@@ -23,11 +23,8 @@ in
   };
 
   config = lib.mkIf (config.homelab.services.enable && homelab.baseDomain != "" ) {
-    services.caddy = {
+    services.nginx = {
       enable = true;
-      globalConfig = ''
-        auto_https off
-      '';
       virtualHosts = {
         "http://${homelab.baseDomain}" = {
           extraConfig = ''
