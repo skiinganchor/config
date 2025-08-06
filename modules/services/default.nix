@@ -6,14 +6,15 @@ in
 {
   imports = [
     sops-nix.nixosModules.sops
-    ./arr/prowlarr
     ./arr/bazarr
     ./arr/jellyseerr
     ./arr/lidarr
-    ./arr/sonarr
+    ./arr/prowlarr
     ./arr/radarr
+    ./arr/sonarr
     ./jellyfin
     ./nextcloud
+    ./nfs
     ./sabnzbd
     ./tftpd
     ./wireguard-netns

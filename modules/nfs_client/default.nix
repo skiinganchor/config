@@ -2,10 +2,10 @@
 
 let
   hl = config.homelab;
-  cfg = hl.nfs;
+  cfg = hl.nfs_client;
 in
 {
-  options.homelab.nfs = {
+  options.homelab.nfs_client = {
     enable = lib.mkEnableOption {
       description = "Enable declarative NFS mounts for the homelab";
     };
@@ -43,7 +43,7 @@ in
       });
 
       default = { };
-      description = "List of NFS shares to mount on this machine";
+      description = "List of NFS shares to mount on this machine (client functionality)";
       example = {
         backups = {
           remoteHost = "nas.local";
@@ -70,9 +70,5 @@ in
         options = m.options;
       };
     }) cfg.mounts;
-
-    # Optionally allow NFS client ports through firewall if needed
-    networking.firewall.allowedTCPPorts = lib.mkDefault [ 2049 ];
-    networking.firewall.allowedUDPPorts = lib.mkDefault [ 2049 ];
   };
 }

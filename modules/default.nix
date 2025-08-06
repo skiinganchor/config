@@ -222,7 +222,7 @@ in {
   config = { };
 
   imports = [
-    ./nfs
+    ./nfs_client
     ./services
     ./tmux.nix
   ];
