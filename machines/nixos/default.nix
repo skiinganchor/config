@@ -18,7 +18,11 @@
     # Open ports in the firewall.
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 5055 8096 ]; # Jellyseerrr and Jellyfin
+      allowedTCPPorts = [
+        5055 # Jellyseerrr
+        8096 # Jellyfin
+      ];
+      allowedUDPPorts = [ 69 ]; # TFTP
       checkReversePath = "loose"; # Fix VPN issue
     };
   };

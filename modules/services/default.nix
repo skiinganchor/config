@@ -15,6 +15,7 @@ in
     ./jellyfin
     ./nextcloud
     ./sabnzbd
+    ./tftpd
     ./wireguard-netns
   ];
 
