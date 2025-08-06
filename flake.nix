@@ -33,6 +33,7 @@
         sops-nix.nixosModules.sops
         home-manager.nixosModules.home-manager
         nixvim.nixosModules.nixvim
+        (import "${self}/pkgs")
         (import "${self}/pkgs/overlays.nix" inputs)
         (import "${self}/modules")
         (import "${self}/src")
