@@ -21,6 +21,19 @@ in
             type = lib.types.listOf lib.types.str;
             description = "List of client rules (e.g., '192.168.1.0/24(rw,sync,no_subtree_check)')";
           };
+
+          # uid and gid are used for access control
+          uid = lib.mkOption {
+            type = lib.types.nullOr lib.types.int;
+            default = null;
+            description = "User ID to own the exported directory (optional)";
+          };
+
+          gid = lib.mkOption {
+            type = lib.types.nullOr lib.types.int;
+            default = null;
+            description = "Group ID to own the exported directory (optional)";
+          };
         };
       });
 
@@ -34,7 +47,11 @@ in
     systemd.tmpfiles.rules =
       lib.flatten (
         lib.mapAttrsToList (_: export:
-          [ "d ${export.path} 0755 root root -" ]
+          let
+            ownerUid = if export.uid == null then "root" else toString export.uid;
+            ownerGid = if export.gid == null then "root" else toString export.gid;
+          in
+          [ "d ${export.path} 0755 ${ownerUid} ${ownerGid} -" ]
         ) cfg.exports
       );
 
