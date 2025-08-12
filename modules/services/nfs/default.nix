@@ -30,6 +30,14 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # Ensure required export directories exist
+    systemd.tmpfiles.rules =
+      lib.flatten (
+        lib.mapAttrsToList (_: export:
+          [ "d ${export.path} 0755 root root -" ]
+        ) cfg.exports
+      );
+
     services.${service}.server = {
       enable = true;
 
