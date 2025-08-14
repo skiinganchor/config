@@ -15,13 +15,14 @@ in
 
   };
   config = lib.mkIf cfg.enable {
-    services.${service} = {
+    services.dnsmasq = {
       enable = true;
-      path = cfg.rootDir;
+
+      settings = {
+        enable-tftp = true;
+        tftp-root = cfg.rootDir;
+        user = "nobody";
+      };
     };
-    # creates rootDir folder
-    systemd.tmpfiles.rules = [
-      "d ${cfg.rootDir} 0755 root root -"
-    ];
   };
 }
