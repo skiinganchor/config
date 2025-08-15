@@ -55,15 +55,24 @@ in
         ) cfg.exports
       );
 
-    services.${service}.server = {
-      enable = true;
-
-      # Convert your custom export structure to the format expected by the NixOS module
-      exports = lib.concatStringsSep "\n" (
-        lib.mapAttrsToList (_: export:
-          lib.concatMapStringsSep "\n" (client: "${export.path} ${client}") export.clients
-        ) cfg.exports
-      );
+    services.${service} = {
+      server = {
+        enable = true;
+        # Convert your custom export structure to the format expected by the NixOS module
+        exports = lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (_: export:
+            lib.concatMapStringsSep "\n" (client: "${export.path} ${client}") export.clients
+          ) cfg.exports
+        );
+      };
+      # Disables old versions of NFS
+      settings = {
+        nfsd.udp = false;
+        nfsd."vers3" = false;
+        nfsd."vers4.0" = false;
+        nfsd."vers4.1" = false;
+        nfsd."vers4.2" = true;
+      };
     };
 
     # Basic firewall rules for NFSv4
