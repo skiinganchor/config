@@ -35,8 +35,8 @@ in
           };
 
           fsType = lib.mkOption {
-            type = lib.types.enum [ "nfs" "nfs4" ];
-            default = "nfs4";
+            type = lib.types.enum [ "nfs" "nfs4" "nfs4.1" "nfs4.2" ];
+            default = "nfs4.2";
             description = "NFS version to use (nfs or nfs4)";
           };
         };

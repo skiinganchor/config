@@ -27,18 +27,6 @@ in
   config = lib.mkIf (config.homelab.services.enable && homelab.baseDomain != "" ) {
     services.nginx = {
       enable = true;
-      virtualHosts = {
-        "http://${homelab.baseDomain}" = {
-          extraConfig = ''
-            redir https://{host}{uri}
-          '';
-        };
-        "http://*.${homelab.baseDomain}" = {
-          extraConfig = ''
-            redir https://{host}{uri}
-          '';
-        };
-      };
     };
   };
 }

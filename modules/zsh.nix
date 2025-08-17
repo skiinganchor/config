@@ -8,7 +8,7 @@
     shellAliases = {
       clip = "wl-copy";
       cplocal = "viewlocal|clip";
-      df = "df -h";
+      df = "df -hT";
       editflake = "sudo nvim /etc/nixos/flake.nix";
       editlocal = "sudo nvim /etc/nixos/local.nix";
       viewflake = "cat /etc/nixos/flake.nix";
