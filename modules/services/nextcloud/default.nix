@@ -94,6 +94,11 @@ in
       hostName = "cloud.${homelab.baseDomain}";
       https = true;
 
+      extraApps = {
+        inherit (config.services.nextcloud.package.packages.apps) calendar contacts deck news notes tasks twofactor_webauthn;
+      };
+      extraAppsEnable = true;
+
       configureRedis = true;
       caching = {
         redis = true;
@@ -101,6 +106,8 @@ in
 
       maxUploadSize = "50G";
       settings = {
+        datadirectory = "/mnt/nextcloud/ndata";
+        default_phone_region = "BE";
         overwriteprotocol = "https";
         mail_smtpmode = "sendmail";
         mail_sendmailmode = "pipe";
@@ -132,6 +139,8 @@ in
         adminuser = cfg.adminuser;
         adminpassFile = cfg.adminpassFile;
       };
+      # Suggested by Nextcloud's health check.
+      phpOptions."opcache.interned_strings_buffer" = "16";
     };
   };
 }

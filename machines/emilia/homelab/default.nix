@@ -19,7 +19,7 @@
         media = {
           remoteHost = "192.168.41.5";
           remotePath = "/ndata";
-          localPath = "/mnt/ndata";
+          localPath = "/mnt/nextcloud";
           fsType = "nfs";
           options = [ "rw" "hard" "intr" "vers=4.1"];
         };
@@ -31,10 +31,6 @@
         enable = true;
         adminuser = "share";
         adminpassFile = config.sops.secrets."nextcloud-admin-password".path;
-        extraApps = {
-          inherit (config.services.nextcloud.package.packages.apps) news contacts calendar tasks;
-        };
-        extraAppsEnable = true;
       };
     };
     timeZone = "Europe/Amsterdam";
