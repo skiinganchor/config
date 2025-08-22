@@ -35,6 +35,19 @@ in
     ncDbPassFile = lib.mkOption {
       type = lib.types.path;
     };
+    secretsJsonFile = lib.mkOption {
+      type = lib.types.path;
+      description = "Path to a JSON file containing passwordsalt, secret and instanceid.";
+      example = lib.literalExpression ''
+        pkgs.writeText "secrets.json" '''
+          {
+            "passwordsalt": "REPLACE_WITH_RANDOM_64HEX",
+            "secret":       "REPLACE_WITH_RANDOM_64HEX",
+            "instanceid":   "REPLACE_WITH_RANDOM_12HEX"
+          }
+        '''
+      '';
+    };
     url = lib.mkOption {
       type = lib.types.str;
       default = "cloud.${homelab.baseDomain}";
@@ -131,6 +144,8 @@ in
       };
 
       maxUploadSize = "50G";
+      secretFile = cfg.secretsJsonFile;
+
       settings = {
         datadirectory = "/mnt/nextcloud/ndata";
         default_phone_region = "BE";

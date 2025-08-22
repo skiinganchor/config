@@ -5,13 +5,14 @@
   ];
 
   sops.secrets."db-password" = {};
-  sops.secrets."nextcloud-db-password" = {
+  sops.secrets."nextcloud/db-password" = {
     key = "db-password";
     owner = "nextcloud";
     group = "nextcloud";
     mode = "0440";
   };
-  sops.secrets."nextcloud-admin-password" = {};
+  sops.secrets."nextcloud/admin-password" = {};
+  sops.secrets."nextcloud/secrets" = {};
 
   homelab = {
     baseDomain = "tapirus.cc";
@@ -37,10 +38,11 @@
       nextcloud = {
         enable = true;
         adminUser = "share";
-        adminPassFile = config.sops.secrets."nextcloud-admin-password".path;
+        adminPassFile = config.sops.secrets."nextcloud/admin-password".path;
         dbUser = "ncadmin";
         dbPassFile = config.sops.secrets."db-password".path;
-        ncDbPassFile = config.sops.secrets."nextcloud-db-password".path;
+        ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
+        secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
     };
     timeZone = "Europe/Amsterdam";
