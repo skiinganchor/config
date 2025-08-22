@@ -112,10 +112,10 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1754305493,
-        "narHash": "sha256-1hsX+XwDniuzA2mOBKKgFcwuJfA0m4gZgGk2TujNwBE=",
+        "lastModified": 1755848755,
+        "narHash": "sha256-Z1JOty3kTs5bcfNUfPYfDRv8BbqLMnOVE3kEnn4Etpc=",
         "ref": "main",
-        "rev": "206180ae750182b21177a92dab94245d907e17b0",
+        "rev": "b3489c5970425b68f03d2a4a42b4d8f1d3930e50",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/skiinganchor/config-private.git"

@@ -14,16 +14,26 @@ in
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
     };
-    adminpassFile = lib.mkOption {
+    adminPassFile = lib.mkOption {
       type = lib.types.path;
     };
-    adminuser = lib.mkOption {
+    adminUser = lib.mkOption {
       type = lib.types.str;
       default = "someonepowerful";
     };
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/${service}";
+    };
+    dbUser = lib.mkOption {
+      type = lib.types.str;
+      default = "nextcloud";
+    };
+    dbPassFile = lib.mkOption {
+      type = lib.types.path;
+    };
+    ncDbPassFile = lib.mkOption {
+      type = lib.types.path;
     };
     url = lib.mkOption {
       type = lib.types.str;
@@ -46,6 +56,7 @@ in
       default = "Services";
     };
   };
+
   config = lib.mkIf cfg.enable {
     services.nginx = {
       enable = true;
@@ -72,20 +83,35 @@ in
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
       };
     };
-    services.postgresql = {
+
+    services.mysql = {
       enable = true;
+      package = pkgs.mariadb;
       ensureDatabases = [ "nextcloud" ];
-      ensureUsers = [
-        {
-          name = "nextcloud";
-          ensureDBOwnership = true;
-        }
-      ];
+      settings.mysqld.init_file = "/var/lib/mysql/init.sql";
+    };
+
+    # This is needed to create a user with a password since ensureUsers is only for socket connections and Nextcloud requires password
+    systemd.services.mysql-init = {
+      wantedBy = [ "mysql.service" ];
+      before = [ "mysql.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        User = "root";
+      };
+      script = ''
+        DB_PASS=$(cat ${cfg.dbPassFile})
+        echo "CREATE OR REPLACE USER '${cfg.dbUser}'@'localhost' IDENTIFIED WITH mysql_native_password USING PASSWORD('$DB_PASS');
+        GRANT ALL PRIVILEGES ON nextcloud.* TO '${cfg.dbUser}'@'localhost';
+        FLUSH PRIVILEGES;" > /var/lib/mysql/init.sql
+        chown mysql:mysql /var/lib/mysql/init.sql
+        chmod 0600 /var/lib/mysql/init.sql
+      '';
     };
 
     systemd.services."nextcloud-setup" = {
-      requires = [ "postgresql.service" ];
-      after = [ "postgresql.service" ];
+      requires = [ "mysql.service" ];
+      after = [ "mysql.service" ];
     };
 
     services.${service} = {
@@ -132,14 +158,15 @@ in
         ];
       };
       config = {
-        dbtype = "pgsql";
-        dbuser = "nextcloud";
-        dbhost = "/run/postgresql";
+        dbtype = "mysql";
+        dbhost = "127.0.0.1";
         dbname = "nextcloud";
-        adminuser = cfg.adminuser;
-        adminpassFile = cfg.adminpassFile;
+        dbuser = cfg.dbUser;
+        dbpassFile = cfg.ncDbPassFile;
+        adminuser = cfg.adminUser;
+        adminpassFile = cfg.adminPassFile;
       };
-      # Suggested by Nextcloud's health check.
+
       phpOptions."opcache.interned_strings_buffer" = "16";
     };
   };

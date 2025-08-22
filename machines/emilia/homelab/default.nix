@@ -4,6 +4,13 @@
     sops-nix.nixosModules.sops
   ];
 
+  sops.secrets."db-password" = {};
+  sops.secrets."nextcloud-db-password" = {
+    key = "db-password";
+    owner = "nextcloud";
+    group = "nextcloud";
+    mode = "0440";
+  };
   sops.secrets."nextcloud-admin-password" = {};
 
   homelab = {
@@ -29,8 +36,11 @@
       enable = true;
       nextcloud = {
         enable = true;
-        adminuser = "share";
-        adminpassFile = config.sops.secrets."nextcloud-admin-password".path;
+        adminUser = "share";
+        adminPassFile = config.sops.secrets."nextcloud-admin-password".path;
+        dbUser = "ncadmin";
+        dbPassFile = config.sops.secrets."db-password".path;
+        ncDbPassFile = config.sops.secrets."nextcloud-db-password".path;
       };
     };
     timeZone = "Europe/Amsterdam";
