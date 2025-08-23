@@ -177,6 +177,7 @@
           datadirectory = "/mnt/nextcloud/ndata";
           default_phone_region = "BE";
           overwriteprotocol = "https";
+          "overwrite.cli.url" = "https://cloud.${homelab.baseDomain}";
           mail_smtpmode = "sendmail";
           mail_sendmailmode = "pipe";
           user_oidc = {
