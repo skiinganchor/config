@@ -178,8 +178,10 @@
           default_phone_region = "BE";
           overwriteprotocol = "https";
           "overwrite.cli.url" = "https://cloud.${homelab.baseDomain}";
-          mail_smtpmode = "sendmail";
           mail_sendmailmode = "pipe";
+          mail_smtpmode = "sendmail";
+          # execute maintenance jobs between 01:00am UTC and 05:00am UTC
+          maintenance_window_start = 1;
           user_oidc = {
             allow_multiple_user_backends = 0;
           };
