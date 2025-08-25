@@ -1,8 +1,9 @@
-{ pkgs, lib, config, ... }:
+{ ... }:
 
 {
   imports = [
     ./gnome.nix
+    ./steam.nix
     ./vscode.nix
     ./xdg.nix
   ];
