@@ -15,7 +15,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.GH_PRIVATE_KEY }}
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v12
+      - uses: DeterminateSystems/nix-installer-action@v19
       - id: update
         uses: DeterminateSystems/update-flake-lock@v27
         with:
