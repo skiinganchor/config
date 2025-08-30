@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   service = "lidarr";
   cfg = config.homelab.services.${service};
@@ -39,6 +39,7 @@ in
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
+      package = pkgs.pkgs-unstable.lidarr;
     };
     services.nginx.virtualHosts."${cfg.url}" = {
       useACMEHost = homelab.baseDomain;
@@ -47,5 +48,4 @@ in
       '';
     };
   };
-
 }
