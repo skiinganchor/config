@@ -66,7 +66,8 @@
             modules = [
               (import "${self}/machines/nixos")
               (import "${self}/modules/gui")
-              (import "${self}/modules/tailscale")
+              # temporary problem with 1.82.5
+              # (import "${self}/modules/tailscale")
               (import "${self}/modules/virtualbox")
             ]
             ++ defaultModules
