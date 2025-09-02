@@ -39,6 +39,7 @@
       gstl = "git stash list";
       la = "ls --color -lha";
       ls = "ls --color=auto";
+      nfu = "nix flake update";
       nixup = "sudo nix flake update --flake /etc/nixos && sudo nixos-rebuild switch";
     };
   };
