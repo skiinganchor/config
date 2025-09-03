@@ -135,31 +135,31 @@ in
 
       extraApps = {
         inherit (config.services.nextcloud.package.packages.apps) calendar contacts deck news notes tasks twofactor_webauthn;
-        cospend = pkgs.fetchNextcloudApp rec {
+        cospend = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
           url =
             "https://github.com/julien-nc/cospend-nc/releases/download/v3.0.11/cospend-3.0.11.tar.gz";
-          license = "agpl3Plus";
           sha256 = "adf6e6971899d2c43189d159ebcfe2705cc798ba18c4b0261f6d0d7a38f51eff";
         };
 
-        drawio = pkgs.fetchNextcloudApp rec {
+        drawio = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
           url =
             "https://github.com/jgraph/drawio-nextcloud/releases/download/v3.1.0/drawio-v3.1.0.tar.gz";
-          license = "agpl3Plus";
           sha256 = "8f19b4ed7fb98bb49bc5f303ac638b3241789927862e661ea5202f44e76f2701";
         };
 
-        phonetrack = pkgs.fetchNextcloudApp rec {
+        phonetrack = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
           url =
             "https://github.com/julien-nc/phonetrack/releases/download/v0.8.2/phonetrack-0.8.2.tar.gz";
-          license = "agpl3Plus";
           sha256 = "7c4252186e0ff8e0b97fc3d30131eeadd51bd2f9cc6aa321eb0c1c541f9572c0";
         };
 
-        twofactor_admin = pkgs.fetchNextcloudApp rec {
+        twofactor_admin = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
           url =
             "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.8.0/twofactor_admin.tar.gz";
-          license = "agpl3Plus";
           sha256 = "cd9bc7ef17d2a282811b808abd2b9ff03ffa2a7284ba72daf8344b024586a28c";
         };
       };
