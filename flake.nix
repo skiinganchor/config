@@ -69,6 +69,7 @@
               # temporary problem with 1.82.5
               # (import "${self}/modules/tailscale")
               (import "${self}/modules/virtualbox")
+              (import "${self}/src/libvirt.nix")
             ]
             ++ defaultModules
             ++ optionalLocalModules attrs.modules;
@@ -86,9 +87,9 @@
             modules = [
               disko.nixosModules.disko
               (import "${self}/machines/emilia")
+              (import "${self}/src/containers.nix")
             ]
-            ++ defaultModules
-            ++ optionalLocalModules attrs.modules;
+            ++ defaultModules;
           };
       };
     };

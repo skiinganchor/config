@@ -35,6 +35,7 @@
     };
     services = {
       enable = true;
+      netboot-xyz.enable = true;
       nextcloud = {
         enable = true;
         adminUser = "share";

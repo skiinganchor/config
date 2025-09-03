@@ -27,7 +27,11 @@ in
   networking = {
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 443 ];
+      allowedTCPPorts = [
+        443
+        3000 # Netboot.xyz
+      ];
+      allowedUDPPorts = [ 69 ]; # TFTP
     };
     useDHCP = false;
     hostName = "emilia";

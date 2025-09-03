@@ -13,6 +13,7 @@ in
     ./arr/radarr
     ./arr/sonarr
     ./jellyfin
+    ./netboot-xyz
     ./nextcloud
     ./nfs
     ./sabnzbd

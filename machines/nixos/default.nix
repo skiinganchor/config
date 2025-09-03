@@ -22,7 +22,6 @@
         5055 # Jellyseerrr
         8096 # Jellyfin
       ];
-      allowedUDPPorts = [ 69 ]; # TFTP
       checkReversePath = "loose"; # Fix VPN issue
     };
   };
