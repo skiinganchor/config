@@ -21,6 +21,7 @@
       allowedTCPPorts = [
         5055 # Jellyseerrr
         8096 # Jellyfin
+        11111 # Open-WebUI
       ];
       checkReversePath = "loose"; # Fix VPN issue
     };
