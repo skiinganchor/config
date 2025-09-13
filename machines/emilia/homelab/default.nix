@@ -44,10 +44,10 @@
     };
     services = {
       enable = true;
-      bazarr.enable = true;
+      bazarr.enable = false;
       jellyfin.enable = false;
-      jellyseerr.enable = true;
-      lidarr.enable = true;
+      jellyseerr.enable = false;
+      lidarr.enable = false;
       netboot-xyz.enable = false;
       nextcloud = {
         enable = true;
@@ -58,10 +58,10 @@
         ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
-      prowlarr.enable = true;
-      radarr.enable = true;
-      sabnzbd.enable = true;
-      sonarr.enable = true;
+      prowlarr.enable = false;
+      radarr.enable = false;
+      sabnzbd.enable = false;
+      sonarr.enable = false;
     };
     timeZone = "Europe/Amsterdam";
   };
