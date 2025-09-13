@@ -40,12 +40,5 @@ in
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
     };
-    services.nginx.virtualHosts."${cfg.url}" = {
-      useACMEHost = homelab.baseDomain;
-      extraConfig = ''
-        reverse_proxy http://127.0.0.1:8989
-      '';
-    };
   };
-
 }

@@ -41,11 +41,5 @@ in
       group = homelab.mainUser.group;
       package = pkgs.pkgs-unstable.lidarr;
     };
-    services.nginx.virtualHosts."${cfg.url}" = {
-      useACMEHost = homelab.baseDomain;
-      extraConfig = ''
-        reverse_proxy http://127.0.0.1:8686
-      '';
-    };
   };
 }
