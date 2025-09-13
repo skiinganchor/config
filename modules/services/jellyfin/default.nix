@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   lib,
   ...
 }:
@@ -40,10 +39,10 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    nixpkgs.overlays = with pkgs; [
-      (final: prev: {
+    nixpkgs.overlays = [
+      (_final: prev: {
         jellyfin-web = prev.jellyfin-web.overrideAttrs (
-          finalAttrs: previousAttrs: {
+          _finalAttrs: _previousAttrs: {
             installPhase = ''
               runHook preInstall
 
