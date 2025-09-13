@@ -24,7 +24,16 @@
     nfs_client = {
       enable = true;
       mounts = {
+        # rw makes it not readonly
+        # hard and intr are often helpful for better behavior during network issues
         media = {
+          remoteHost = "192.168.41.5";
+          remotePath = "/media";
+          localPath = "/mnt/media";
+          fsType = "nfs";
+          options = [ "rw" "hard" "intr" "vers=4.1"];
+        };
+        nextcloud = {
           remoteHost = "192.168.41.5";
           remotePath = "/ndata";
           localPath = "/mnt/nextcloud";
@@ -35,7 +44,11 @@
     };
     services = {
       enable = true;
-      netboot-xyz.enable = true;
+      bazarr.enable = true;
+      jellyfin.enable = false;
+      jellyseerr.enable = true;
+      lidarr.enable = true;
+      netboot-xyz.enable = false;
       nextcloud = {
         enable = true;
         adminUser = "share";
@@ -45,6 +58,10 @@
         ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
+      prowlarr.enable = true;
+      radarr.enable = true;
+      sabnzbd.enable = true;
+      sonarr.enable = true;
     };
     timeZone = "Europe/Amsterdam";
   };

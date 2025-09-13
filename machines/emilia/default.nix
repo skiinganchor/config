@@ -29,9 +29,10 @@ in
       enable = true;
       allowedTCPPorts = [
         443
-        3000 # Netboot.xyz
+        # 3000 # Netboot.xyz
+        5055 # Jellyseerrr
       ];
-      allowedUDPPorts = [ 69 ]; # TFTP
+      # allowedUDPPorts = [ 69 ]; # TFTP
     };
     useDHCP = false;
     hostName = "emilia";
