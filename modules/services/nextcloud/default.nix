@@ -78,9 +78,9 @@ in
       recommendedProxySettings = true;
 
       # Modern SSL configuration
+      sslProtocols = "TLSv1.3";
       commonHttpConfig = ''
         # Use TLS 1.3 only for modern security
-        ssl_protocols TLSv1.3;
         ssl_ecdh_curve X25519:prime256v1:secp384r1;
         ssl_prefer_server_ciphers off;
 
