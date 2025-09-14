@@ -28,9 +28,15 @@ in
     firewall = {
       enable = true;
       allowedTCPPorts = [
-        443
+        443 # Nginx
         # 3000 # Netboot.xyz
         5055 # Jellyseerrr
+        6767 # Bazarr
+        7878 # Radarr
+        8080 # Sabnzbd
+        8686 # Lidarr
+        8686 # Prowlarr
+        8989 # Sonarr
       ];
       # allowedUDPPorts = [ 69 ]; # TFTP
     };
