@@ -24,6 +24,12 @@ in
       packages = homelab.mainUser.pkgs;
     };
 
+    # homelab media services user
+    users.users."${homelab.mainUser.name}" = {
+      isNormalUser = true;
+      group = homelab.mainUser.group;
+    };
+
     system.activationScripts.silencezsh.text = ''
       [ ! -e "/home/${user}/.zshrc" ] && echo "# dummy file" > /home/${user}/.zshrc
     '';
