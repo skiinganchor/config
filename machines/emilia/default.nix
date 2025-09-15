@@ -35,8 +35,8 @@ in
         7878 # Radarr
         8080 # Sabnzbd
         8686 # Lidarr
-        8686 # Prowlarr
         8989 # Sonarr
+        9696 # Prowlarr
       ];
       # allowedUDPPorts = [ 69 ]; # TFTP
     };

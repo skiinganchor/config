@@ -60,7 +60,10 @@
       };
       prowlarr.enable = true;
       radarr.enable = true;
-      sabnzbd.enable = true;
+      sabnzbd = {
+        enable = true;
+        host = "0.0.0.0";
+      };
       sonarr.enable = true;
     };
     timeZone = "Europe/Amsterdam";
