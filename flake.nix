@@ -87,7 +87,6 @@
             modules = [
               disko.nixosModules.disko
               (import "${self}/machines/emilia")
-              (import "${self}/src/containers.nix")
             ]
             ++ defaultModules;
           };
