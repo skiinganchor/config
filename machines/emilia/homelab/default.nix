@@ -1,4 +1,8 @@
 { config, sops-nix, ... }:
+let
+  mainUserName = "share";
+  mainUserGroup = "users";
+in
 {
   imports = [
     sops-nix.nixosModules.sops
@@ -17,8 +21,8 @@
   homelab = {
     baseDomain = "tapirus.cc";
     mainUser = {
-      name = "share";
-      group = "users";
+      name = mainUserName;
+      group = mainUserGroup;
       pkgs = [];
     };
     nfs_client = {
@@ -32,6 +36,8 @@
           localPath = "/mnt/media";
           fsType = "nfs";
           options = [ "rw" "hard" "intr" "vers=4.1"];
+          owner = mainUserName;
+          group = mainUserGroup;
         };
         nextcloud = {
           remoteHost = "192.168.41.5";
@@ -39,6 +45,8 @@
           localPath = "/mnt/nextcloud";
           fsType = "nfs";
           options = [ "rw" "hard" "intr" "vers=4.1"];
+          owner = "nextcloud";
+          group = "nextcloud";
         };
       };
     };
@@ -51,7 +59,7 @@
       netboot-xyz.enable = false;
       nextcloud = {
         enable = true;
-        adminUser = "share";
+        adminUser = mainUserName;
         adminPassFile = config.sops.secrets."nextcloud/admin-password".path;
         dbUser = "ncadmin";
         dbPassFile = config.sops.secrets."db-password".path;

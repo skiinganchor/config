@@ -39,6 +39,18 @@ in
             default = "nfs4.2";
             description = "NFS version to use (nfs or nfs4)";
           };
+
+          owner = lib.mkOption {
+            type = lib.types.str;
+            default = "root";
+            description = "Owner of the mount point directory";
+          };
+
+          group = lib.mkOption {
+            type = lib.types.str;
+            default = "root";
+            description = "Group of the mount point directory";
+          };
         };
       });
 
@@ -58,7 +70,7 @@ in
   config = lib.mkIf cfg.enable {
     # Ensure required directories exist
     systemd.tmpfiles.rules = map
-      (m: "d ${m.localPath} 0755 root root - -")
+      (m: "d ${m.localPath} 0755 ${m.owner} ${m.group} - -")
       (lib.attrValues cfg.mounts);
 
     # Mount NFS shares via fileSystems
