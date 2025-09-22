@@ -44,12 +44,27 @@ in
     let
       # this sets up a service before the execution to dynamically replace the cfg.host
       updateHostScript = pkgs.writeShellScript "update-sabnzbd-host.sh" ''
-        if [ -f ${cfg.configFile} ]; then
-          cp ${cfg.configFile} ${cfg.configFile}.bak
-          sed -i "s/^[[:space:]]*host[[:space:]]*=.*$/host = ${lib.escapeShellArg cfg.host}/" ${cfg.configFile}
+        configFile=${cfg.configFile}
+        hostValue=${lib.escapeShellArg cfg.host}
+
+        if [ -f "$configFile" ]; then
+          cp "$configFile" "$configFile.bak"
+
+          # Replace host in [misc] section if it exists
+          sed -i '/^\[misc\]/,/^\[.*\]/ {
+            /^[[:space:]]*host[[:space:]]*=/ {
+              s/^[[:space:]]*host[[:space:]]*=.*$/host = '"$hostValue"'/
+              t
+            }
+          }' "$configFile"
+
+          # Add host if missing in [misc]
+          if ! grep -q -E '^[[:space:]]*host[[:space:]]*=' "$configFile" && grep -q '^\[misc\]' "$configFile"; then
+            sed -i "/^\[misc\]/a host = $hostValue" "$configFile"
+          fi
         fi
       '';
-    in {
+      in {
       services.${service} = {
         enable = true;
         user = homelab.mainUser.name;
