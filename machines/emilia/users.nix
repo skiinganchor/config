@@ -26,7 +26,7 @@ in
 
     # homelab media services user
     users.users."${homelab.mainUser.name}" = {
-      isNormalUser = true;
+      isSystemUser = true;
       group = homelab.mainUser.group;
     };
 
