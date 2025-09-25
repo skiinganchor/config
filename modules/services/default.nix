@@ -13,6 +13,8 @@ in
     ./arr/radarr
     ./arr/sonarr
     ./jellyfin
+    ./keycloak
+    ./mariadb
     ./netboot-xyz
     ./nextcloud
     ./nfs

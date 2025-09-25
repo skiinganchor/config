@@ -101,13 +101,6 @@ in
       };
     };
 
-    services.mysql = {
-      enable = true;
-      package = pkgs.mariadb;
-      ensureDatabases = [ "nextcloud" ];
-      settings.mysqld.init_file = "/var/lib/mysql/init.sql";
-    };
-
     # This is needed to create a user with a password since ensureUsers is only for socket connections and Nextcloud requires password
     systemd.services.mysql-init = {
       wantedBy = [ "mysql.service" ];

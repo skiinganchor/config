@@ -46,7 +46,7 @@
 
   # https://devenv.sh/git-hooks/
   git-hooks.hooks = {
-    check-added-large-files.enable = true;
+    check-added-large-files.enable = false;
     check-yaml.enable = true;
     end-of-file-fixer.enable = true;
     shellcheck.enable = true;

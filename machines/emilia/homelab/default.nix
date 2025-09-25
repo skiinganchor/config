@@ -55,7 +55,11 @@ in
       bazarr.enable = true;
       jellyfin.enable = false;
       jellyseerr.enable = true;
+      keycloak = {
+        enable = false;
+      };
       lidarr.enable = true;
+      mariadb.enable = true;
       netboot-xyz.enable = false;
       nextcloud = {
         enable = true;
