@@ -12,6 +12,7 @@ in
     ./arr/prowlarr
     ./arr/radarr
     ./arr/sonarr
+    ./audiobookshelf
     ./jellyfin
     ./keycloak
     ./mariadb

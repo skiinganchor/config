@@ -52,6 +52,7 @@ in
     };
     services = {
       enable = true;
+      audiobookshelf.enable = true;
       bazarr.enable = true;
       jellyfin.enable = false;
       jellyseerr.enable = true;

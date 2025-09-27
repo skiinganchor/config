@@ -34,6 +34,7 @@ in
         6767 # Bazarr
         7878 # Radarr
         8080 # Sabnzbd
+        8113 # AudioBookShelf
         8686 # Lidarr
         8989 # Sonarr
         9696 # Prowlarr
