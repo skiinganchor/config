@@ -37,8 +37,8 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
-      user = homelab.user;
-      group = homelab.group;
+      user = homelab.mainUser.name;
+      group = homelab.mainUser.group;
       port = 8113;
     };
   };
