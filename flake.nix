@@ -46,6 +46,7 @@
             path: inputs.nixpkgs.lib.optional (builtins.pathExists path) (import path)
           )
         );
+      forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
     in
     {
       stateVersion = "25.05";
@@ -91,5 +92,19 @@
             ++ defaultModules;
           };
       };
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = (import nixpkgs { inherit system; });
+          defaultShells = (import "${self}/shells/default.nix" { inherit pkgs; });
+          pythonShells = (import "${self}/shells/python.nix" { inherit pkgs; });
+          goShells = (import "${self}/shells/go.nix" { inherit pkgs; });
+        in
+        {
+          default = defaultShells.shell;
+          python = pythonShells.shell;
+          go = goShells.shell;
+        }
+      );
     };
 }

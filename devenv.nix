@@ -53,6 +53,5 @@
     trim-trailing-whitespace.enable = true;
     yamllint.enable = true;
   };
-
   # See full reference at https://devenv.sh/reference/options/
 }
