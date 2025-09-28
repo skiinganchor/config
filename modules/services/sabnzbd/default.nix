@@ -40,41 +40,31 @@ in
       default = "Downloads";
     };
   };
-  config = lib.mkIf cfg.enable (
-    let
-      # this sets up a service before the execution to dynamically replace the cfg.host
-      updateHostScript = pkgs.writeShellScript "update-sabnzbd-host.sh" ''
-        configFile=${cfg.configFile}
-        hostValue=${lib.escapeShellArg cfg.host}
+  config = lib.mkIf cfg.enable {
+    services.${service} = {
+      enable = true;
+      user = homelab.mainUser.name;
+      group = homelab.mainUser.group;
+    };
 
-        if [ -f "$configFile" ]; then
-          cp "$configFile" "$configFile.bak"
+    services.nginx = {
+      virtualHosts."${cfg.url}" = {
+        forceSSL = true;
+        # uses security.acme instead
+        enableACME = false;
+        extraConfig = ''
+          # Add HSTS header to force HTTPS
+          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
-          # Replace host in [misc] section if it exists
-          sed -i '/^\[misc\]/,/^\[.*\]/ {
-            /^[[:space:]]*host[[:space:]]*=/ {
-              s/^[[:space:]]*host[[:space:]]*=.*$/host = '"$hostValue"'/
-              t
-            }
-          }' "$configFile"
-
-          # Add host if missing in [misc]
-          if ! grep -q -E '^[[:space:]]*host[[:space:]]*=' "$configFile" && grep -q '^\[misc\]' "$configFile"; then
-            sed -i "/^\[misc\]/a host = $hostValue" "$configFile"
-          fi
-        fi
-      '';
-      in {
-      services.${service} = {
-        enable = true;
-        user = homelab.mainUser.name;
-        group = homelab.mainUser.group;
-      };
-      systemd.services.${service} = {
-        serviceConfig = {
-          ExecStartPre = [ "+${updateHostScript}" ];  # + prefix allows script to modify files as root
+          # Add X-XSS-Protection header for additional XSS protection
+          add_header X-XSS-Protection "1; mode=block" always;
+        '';
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:8080";
         };
+        sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
       };
-    }
-  );
+    };
+  };
 }

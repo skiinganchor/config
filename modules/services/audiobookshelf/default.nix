@@ -54,6 +54,9 @@ in
           # Add X-XSS-Protection header for additional XSS protection
           add_header X-XSS-Protection "1; mode=block" always;
         '';
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString config.services.${service}.port}";
+        };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
       };

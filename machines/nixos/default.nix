@@ -15,17 +15,10 @@
 
   networking = {
     hostName = "nixos";
-    hosts = {
-      "192.168.31.21" = [
-        "emilia.tapirus.cc"
-        "audiobookshelf.tapirus.cc"
-      ];
-    };
     # Open ports in the firewall.
     firewall = {
       enable = true;
       allowedTCPPorts = [
-        5055 # Jellyseerrr
         8096 # Jellyfin
         11111 # Open-WebUI
       ];
