@@ -41,7 +41,7 @@ in
     services.glances.enable = true;
     services.${service} = {
       enable = true;
-      environmentFile = builtins.toFile "homepage.env" "HOMEPAGE_ALLOWED_HOSTS=${homelab.baseDomain}";
+      environmentFile = builtins.toFile "homepage.env" "HOMEPAGE_ALLOWED_HOSTS=${config.networking.hostName}.${homelab.baseDomain}";
       customCSS = ''
         body, html {
           font-family: SF Pro Display, Helvetica, Arial, sans-serif !important;
@@ -113,7 +113,7 @@ in
             "Services"
             "Smart Home"
           ];
-          homelab = config.homelab;
+          hl = config.homelab.services;
           homepageServices =
             x:
             (lib.attrsets.filterAttrs (
@@ -124,11 +124,11 @@ in
           "${cat}" =
             lib.lists.forEach (lib.attrsets.mapAttrsToList (name: _value: name) (homepageServices "${cat}"))
               (x: {
-                "${homelab.${x}.homepage.name}" = {
-                  icon = homelab.${x}.homepage.icon;
-                  description = homelab.${x}.homepage.description;
-                  href = "https://${homelab.${x}.url}";
-                  siteMonitor = "https://${homelab.${x}.url}";
+                "${hl.${x}.homepage.name}" = {
+                  icon = hl.${x}.homepage.icon;
+                  description = hl.${x}.homepage.description;
+                  href = "https://${hl.${x}.url}";
+                  siteMonitor = "https://${hl.${x}.url}";
                 };
               });
         })
@@ -190,7 +190,7 @@ in
     };
 
     services.nginx = {
-      virtualHosts."${homelab.baseDomain}" = {
+      virtualHosts."${config.networking.hostName}.${homelab.baseDomain}" = {
         forceSSL = true;
         # uses security.acme instead
         enableACME = false;
@@ -201,6 +201,9 @@ in
           # Add X-XSS-Protection header for additional XSS protection
           add_header X-XSS-Protection "1; mode=block" always;
         '';
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString config.services.${service}.listenPort}";
+        };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
       };
