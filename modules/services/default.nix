@@ -13,6 +13,7 @@ in
     ./arr/radarr
     ./arr/sonarr
     ./audiobookshelf
+    ./homepage
     ./jellyfin
     ./keycloak
     ./mariadb
