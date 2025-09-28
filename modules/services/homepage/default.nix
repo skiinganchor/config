@@ -113,7 +113,7 @@ in
             "Services"
             "Smart Home"
           ];
-          homelab = config.homelab.services;
+          homelab = config.homelab;
           homepageServices =
             x:
             (lib.attrsets.filterAttrs (
