@@ -72,19 +72,6 @@ in
 
   config = lib.mkIf cfg.enable {
     services.nginx = {
-      enable = true;
-
-      recommendedOptimisation = true;
-      recommendedProxySettings = true;
-
-      # Modern SSL configuration
-      sslProtocols = "TLSv1.3";
-      commonHttpConfig = ''
-        # Use TLS 1.3 only for modern security
-        ssl_ecdh_curve X25519:prime256v1:secp384r1;
-        ssl_prefer_server_ciphers off;
-      '';
-
       virtualHosts."${config.services.nextcloud.hostName}" = {
         forceSSL = true;
         # uses security.acme instead
@@ -127,7 +114,7 @@ in
     services.${service} = {
       enable = true;
       package = pkgs.nextcloud31;
-      hostName = "cloud.${homelab.baseDomain}";
+      hostName = cfg.url;
       https = true;
 
       extraApps = {
@@ -174,7 +161,7 @@ in
         datadirectory = "/mnt/nextcloud/ndata";
         default_phone_region = "BE";
         overwriteprotocol = "https";
-        "overwrite.cli.url" = "https://cloud.${homelab.baseDomain}";
+        "overwrite.cli.url" = "https://${cfg.url}";
         mail_sendmailmode = "pipe";
         mail_smtpmode = "sendmail";
         # execute maintenance jobs between 01:00am UTC and 05:00am UTC

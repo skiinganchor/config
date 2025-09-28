@@ -71,6 +71,7 @@ in
         ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
+      nginx.enable = true;
       prowlarr.enable = true;
       radarr.enable = true;
       sabnzbd = {

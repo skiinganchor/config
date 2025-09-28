@@ -19,6 +19,7 @@ in
     ./netboot-xyz
     ./nextcloud
     ./nfs
+    ./nginx
     ./sabnzbd
     ./tftpd
     ./wireguard-netns
