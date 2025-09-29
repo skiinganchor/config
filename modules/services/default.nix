@@ -14,7 +14,6 @@ in
     ./arr/sonarr
     ./audiobookshelf
     ./backup
-    ./fail2ban
     ./homeassistant
     ./homepage
     ./immich
