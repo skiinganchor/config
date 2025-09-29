@@ -23,6 +23,7 @@ in
     ./nextcloud
     ./nfs
     ./nginx
+    ./paperless-ngx
     ./sabnzbd
     ./tftpd
     ./wireguard-netns
