@@ -54,6 +54,7 @@ in
       enable = true;
       audiobookshelf.enable = true;
       bazarr.enable = true;
+      homeassistant.enable = true;
       homepage.enable = true;
       jellyfin.enable = false;
       jellyseerr.enable = true;
