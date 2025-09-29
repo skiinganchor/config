@@ -47,7 +47,7 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations."/" = {
-          proxyPass = "http://192.168.31.7:8123";
+          proxyPass = "http://192.168.31.8:8123";
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
