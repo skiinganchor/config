@@ -13,6 +13,7 @@ in
     ./arr/radarr
     ./arr/sonarr
     ./audiobookshelf
+    ./fail2ban
     ./homeassistant
     ./homepage
     ./jellyfin

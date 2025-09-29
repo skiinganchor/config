@@ -56,6 +56,7 @@ in
       bazarr.enable = true;
       homeassistant.enable = true;
       homepage.enable = true;
+      fail2ban.enable = false;
       jellyfin.enable = false;
       jellyseerr.enable = true;
       keycloak = {
