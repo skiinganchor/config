@@ -26,6 +26,7 @@ in
     ./paperless-ngx
     ./sabnzbd
     ./tftpd
+    ./vaultwarden
     ./wireguard-netns
   ];
 

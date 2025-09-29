@@ -83,6 +83,7 @@ in
         host = "0.0.0.0";
       };
       sonarr.enable = true;
+      vaultwarden.enable = false;
     };
     timeZone = "Europe/Amsterdam";
   };
