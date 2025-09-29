@@ -1,8 +1,8 @@
 { config, lib, ... }:
 
 let
-  hl = config.homelab;
-  cfg = hl.nfs_client;
+  homelab = config.homelab;
+  cfg = homelab.nfs_client;
 in
 {
   options.homelab.nfs_client = {
