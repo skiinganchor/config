@@ -77,7 +77,7 @@ in
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
       nginx.enable = true;
-      paperless-ngx.enable = false;
+      paperless.enable = false;
       prowlarr.enable = true;
       radarr.enable = true;
       sabnzbd = {
