@@ -16,6 +16,7 @@ in
     ./fail2ban
     ./homeassistant
     ./homepage
+    ./immich
     ./jellyfin
     ./keycloak
     ./mariadb

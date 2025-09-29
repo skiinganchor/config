@@ -54,9 +54,10 @@ in
       enable = true;
       audiobookshelf.enable = true;
       bazarr.enable = true;
+      fail2ban.enable = false;
       homeassistant.enable = true;
       homepage.enable = true;
-      fail2ban.enable = false;
+      immich.enable = false;
       jellyfin.enable = false;
       jellyseerr.enable = true;
       keycloak = {
