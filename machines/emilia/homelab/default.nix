@@ -9,12 +9,9 @@ in
   ];
 
   sops.secrets."db-password" = {};
-  # sops.secrets."keycloak-db-password" = {
-  #   key = "keycloak-db-password";
-  #   owner = "keycloak";
-  #   group = "keycloak";
-  #   mode = "0440";
-  # };
+  sops.secrets."keycloak/db-password" = {
+    key = "keycloak-db-password";
+  };
   sops.secrets."nextcloud/db-password" = {
     key = "db-password";
     owner = "nextcloud";
@@ -66,8 +63,8 @@ in
       jellyfin.enable = false;
       jellyseerr.enable = true;
       keycloak = {
-        enable = false;
-        # dbPasswordFile = config.sops.secrets."keycloak-db-password".path;
+        enable = true;
+        dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
       };
       lidarr.enable = true;
       mariadb.enable = true;
