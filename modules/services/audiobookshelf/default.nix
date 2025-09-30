@@ -56,6 +56,11 @@ in
         '';
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString config.services.${service}.port}";
+          # from official docs https://www.audiobookshelf.org/docs#linux-install-nix
+          proxyWebsockets = true;
+          extraConfig = ''
+            proxy_redirect http:// $scheme://;
+          '';
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
