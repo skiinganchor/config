@@ -122,8 +122,8 @@ in
         cospend = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/julien-nc/cospend-nc/releases/download/v3.0.11/cospend-3.0.11.tar.gz";
-          sha256 = "adf6e6971899d2c43189d159ebcfe2705cc798ba18c4b0261f6d0d7a38f51eff";
+            "https://github.com/julien-nc/cospend-nc/releases/download/v3.1.3/cospend-3.1.3.tar.gz";
+          sha256 = "db493f66827b3930ca5bc445d0dbffd700d53bb1ad5f6959939114bf5ef71ee3";
         };
 
         drawio = pkgs.fetchNextcloudApp {
@@ -136,8 +136,8 @@ in
         phonetrack = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/julien-nc/phonetrack/releases/download/v0.8.2/phonetrack-0.8.2.tar.gz";
-          sha256 = "7c4252186e0ff8e0b97fc3d30131eeadd51bd2f9cc6aa321eb0c1c541f9572c0";
+            "https://github.com/julien-nc/phonetrack/releases/download/v0.9.1/phonetrack-0.9.1.tar.gz";
+          sha256 = "2dedf2bdec1e8bcbedcbc7ebcfae97ee28f61fd8eeda1e0959d18d7f8e8bf4c6";
         };
 
         twofactor_admin = pkgs.fetchNextcloudApp {
@@ -145,6 +145,12 @@ in
           url =
             "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.8.0/twofactor_admin.tar.gz";
           sha256 = "cd9bc7ef17d2a282811b808abd2b9ff03ffa2a7284ba72daf8344b024586a28c";
+        };
+
+        user_oidc = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
+          url = "https://github.com/nextcloud-releases/user_oidc/releases/download/v8.0.0/user_oidc-v8.0.0.tar.gz";
+          sha256 = "17dd96fa388af0e27ba3f438b55b1b01fc4e487dee87192f8e89a6d599136573";
         };
       };
       extraAppsEnable = true;
