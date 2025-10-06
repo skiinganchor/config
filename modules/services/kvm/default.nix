@@ -43,7 +43,12 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations."/" = {
-          proxyPass = "http://192.168.31.42";
+          proxyPass = "http://192.168.31.42:80";
+          extraConfig = ''
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $http_connection;
+          '';
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
