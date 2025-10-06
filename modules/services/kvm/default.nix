@@ -1,32 +1,32 @@
 { config, lib, ... }:
 let
   homelab = config.homelab;
-  cfg = config.homelab.services.homeassistant;
+  cfg = config.homelab.services.kvm;
 in
 {
-  options.homelab.services.homeassistant = {
+  options.homelab.services.kvm = {
     enable = lib.mkEnableOption {
-      description = "Enable Home Assistant";
+      description = "Enable KVM";
     };
     url = lib.mkOption {
       type = lib.types.str;
-      default = "home.${homelab.baseDomain}";
+      default = "kvm.${homelab.baseDomain}";
     };
     homepage.name = lib.mkOption {
       type = lib.types.str;
-      default = "Home Assistant";
+      default = "KVM";
     };
     homepage.description = lib.mkOption {
       type = lib.types.str;
-      default = "Home automation platform";
+      default = "Keyboard, video, and mouse control";
     };
     homepage.icon = lib.mkOption {
       type = lib.types.str;
-      default = "home-assistant.svg";
+      default = "jetkvm.svg";
     };
     homepage.category = lib.mkOption {
       type = lib.types.str;
-      default = "Smart Home";
+      default = "Services";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -43,7 +43,7 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations."/" = {
-          proxyPass = "http://192.168.31.8:8123";
+          proxyPass = "http://192.168.31.42";
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";

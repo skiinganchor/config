@@ -66,6 +66,7 @@ in
         enable = true;
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
       };
+      kvm.enable = true;
       lidarr.enable = true;
       mariadb.enable = true;
       netboot-xyz.enable = false;

@@ -19,6 +19,7 @@ in
     ./immich
     ./jellyfin
     ./keycloak
+    ./kvm
     ./mariadb
     ./netboot-xyz
     ./nextcloud

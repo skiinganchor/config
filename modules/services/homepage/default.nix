@@ -28,6 +28,7 @@ in
               siteMonitor = lib.mkOption {
                 type = lib.types.str;
               };
+              # Icon from https://github.com/homarr-labs/dashboard-icons/tree/main/svg
               icon = lib.mkOption {
                 type = lib.types.str;
               };
