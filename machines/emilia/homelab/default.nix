@@ -1,5 +1,6 @@
 { config, sops-nix, ... }:
 let
+  domain = "tapirus.cc";
   mainUserName = "share";
   mainUserGroup = "users";
 in
@@ -22,7 +23,7 @@ in
   sops.secrets."nextcloud/secrets" = {};
 
   homelab = {
-    baseDomain = "tapirus.cc";
+    baseDomain = domain;
     mainUser = {
       name = mainUserName;
       group = mainUserGroup;
@@ -57,6 +58,7 @@ in
       enable = true;
       audiobookshelf.enable = true;
       bazarr.enable = true;
+      fail2ban.enable = true;
       homeassistant.enable = true;
       homepage.enable = true;
       immich.enable = false;
@@ -65,6 +67,7 @@ in
       keycloak = {
         enable = true;
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
+        url = "friend.${domain}";
       };
       kvm.enable = true;
       lidarr.enable = true;
