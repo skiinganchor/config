@@ -67,8 +67,7 @@
             modules = [
               (import "${self}/machines/nixos")
               (import "${self}/modules/gui")
-              # temporary problem with 1.82.5
-              # (import "${self}/modules/tailscale")
+              (import "${self}/modules/tailscale")
               (import "${self}/modules/virtualbox")
               (import "${self}/src/libvirt.nix")
             ]
