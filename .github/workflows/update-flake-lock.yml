@@ -8,6 +8,8 @@ name: Update flake.lock
 jobs:
   update-flake-lock:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     environment: production
     steps:
       - name: Access private repository
