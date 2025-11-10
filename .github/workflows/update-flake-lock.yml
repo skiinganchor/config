@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v12
       - id: update
-        uses: DeterminateSystems/update-flake-lock@v23
+        uses: DeterminateSystems/update-flake-lock@v27
         with:
           commit-msg: "chore(flake.lock): update"
           pr-title: "chore(flake.lock): update"
