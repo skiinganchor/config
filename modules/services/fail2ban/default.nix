@@ -20,9 +20,14 @@ in
       # increase default bantime of 10min
       bantime = "2h";
 
+      ignoreIP = [
+        "192.168.31.8"
+      ];
+
       # The jail file defines how to handle the failed authentication attempts found by the Nextcloud filter
       # Ref: https://docs.nextcloud.com/server/latest/admin_manual/installation/harden_server.html#setup-a-filter-and-a-jail-for-nextcloud
       jails = {
+
         nextcloud.settings = {
           # START modification to work with syslog instead of logile
           backend = "systemd";
