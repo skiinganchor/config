@@ -9,6 +9,7 @@ in
   ];
 
   sops.secrets."acme/environment-file" = {
+    owner = "acme";
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
 

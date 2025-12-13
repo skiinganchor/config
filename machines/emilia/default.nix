@@ -13,6 +13,7 @@ in
   sops.defaultSopsFile = "${secretsPath}/secrets/emilia.yaml";
   sops.age.keyFile = "/home/wookie/.config/sops/age/keys.txt";
   sops.secrets."acme/environment-file" = {
+    owner = "acme";
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
 
