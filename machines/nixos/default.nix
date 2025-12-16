@@ -9,7 +9,6 @@ in
   ];
 
   sops.secrets."acme/environment-file" = {
-    owner = "acme";
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
 
@@ -48,6 +47,9 @@ in
       dnsPropagationCheck = true;
       group = config.services.nginx.group;
       environmentFile = config.sops.secrets."acme/environment-file".path;
+      # Disable ARI checks to prevent potential lego crashes
+      # See: https://github.com/nixos/nixpkgs/issues/448921
+      extraLegoRenewFlags = [ "--ari-disable" ];
     };
   };
 }
