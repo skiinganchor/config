@@ -222,6 +222,7 @@ in {
   config = { };
 
   imports = [
+    ./git.nix
     ./nfs_client
     ./services
     ./tmux.nix
