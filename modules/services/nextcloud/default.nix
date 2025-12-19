@@ -129,28 +129,28 @@ in
         drawio = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/jgraph/drawio-nextcloud/releases/download/v3.1.0/drawio-v3.1.0.tar.gz";
-          sha256 = "8f19b4ed7fb98bb49bc5f303ac638b3241789927862e661ea5202f44e76f2701";
+            "https://github.com/jgraph/drawio-nextcloud/releases/download/v3.1.2/drawio-v3.1.2.tar.gz";
+          sha512 = "a177deba645449f130cec1a22723ebbc1145479e797d90b7aff86d30ed6d24be6e8beebdc6ef6d3d1d174ae6570c35a0ca9a14d47e87672842f1d07d19b49691";
         };
 
         phonetrack = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
             "https://github.com/julien-nc/phonetrack/releases/download/v0.9.1/phonetrack-0.9.1.tar.gz";
-          sha256 = "2dedf2bdec1e8bcbedcbc7ebcfae97ee28f61fd8eeda1e0959d18d7f8e8bf4c6";
+          sha512 = "67111cbc58b8624ec4a40949982acda82f4aac4d8d76e05156b35d198fa4c7a39572bb7caf59a3fe0be81daa0e79afcbb1c8fec64a3db87bafd23c842ff94d7f";
         };
 
         twofactor_admin = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
             "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.9.0/twofactor_admin.tar.gz";
-          sha256 = "9b16e3278cbdf1130aeb7059771cbc4ad1a6c723cb285122a03bc30799800dbf";
+          sha512 = "de1539830e9e9d1971605eb513c5c8aa32d058f30c8b0863e11405030dbdb4259be3ea12dfe524db7b5b29d28642f494ea41df47dcfe789737b6923e55349239";
         };
 
         user_oidc = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
-          url = "https://github.com/nextcloud-releases/user_oidc/releases/download/v8.0.0/user_oidc-v8.0.0.tar.gz";
-          sha256 = "17dd96fa388af0e27ba3f438b55b1b01fc4e487dee87192f8e89a6d599136573";
+          url = "https://github.com/nextcloud-releases/user_oidc/releases/download/v8.2.2/user_oidc-v8.2.2.tar.gz";
+          sha512 = "c56973bf164b4309b49bb34ea58ba3cfaa7167e05c7583a230c6332eae6ebecd67506100016b5bbe5965c035780563251ee66d7b08e6ca5671b426858a60e70b";
         };
       };
       extraAppsEnable = true;
