@@ -143,8 +143,8 @@ in
         twofactor_admin = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.8.0/twofactor_admin.tar.gz";
-          sha256 = "cd9bc7ef17d2a282811b808abd2b9ff03ffa2a7284ba72daf8344b024586a28c";
+            "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.9.0/twofactor_admin.tar.gz";
+          sha256 = "9b16e3278cbdf1130aeb7059771cbc4ad1a6c723cb285122a03bc30799800dbf";
         };
 
         user_oidc = pkgs.fetchNextcloudApp {
