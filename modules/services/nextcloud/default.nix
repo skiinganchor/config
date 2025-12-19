@@ -113,7 +113,7 @@ in
 
     services.${service} = {
       enable = true;
-      package = pkgs.nextcloud31;
+      package = pkgs.nextcloud32;
       hostName = cfg.url;
       https = true;
 
@@ -165,7 +165,7 @@ in
 
       settings = {
         datadirectory = "/mnt/nextcloud/ndata";
-        default_phone_region = "BE";
+        default_phone_region = "NL";
         overwriteprotocol = "https";
         "overwrite.cli.url" = "https://${cfg.url}";
         mail_sendmailmode = "pipe";
