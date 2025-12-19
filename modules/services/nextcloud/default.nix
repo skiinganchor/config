@@ -164,6 +164,7 @@ in
       secretFile = cfg.secretsJsonFile;
 
       settings = {
+        "app_api.enabled" = false;
         datadirectory = "/mnt/nextcloud/ndata";
         default_phone_region = "NL";
         overwriteprotocol = "https";
