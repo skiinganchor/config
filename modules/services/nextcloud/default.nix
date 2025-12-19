@@ -122,8 +122,8 @@ in
         cospend = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/julien-nc/cospend-nc/releases/download/v3.1.3/cospend-3.1.3.tar.gz";
-          sha256 = "db493f66827b3930ca5bc445d0dbffd700d53bb1ad5f6959939114bf5ef71ee3";
+            "https://github.com/julien-nc/cospend-nc/releases/download/v3.1.6/cospend-3.1.6.tar.gz";
+          sha512 = "52064b5cd5cefc250bd745042100e996bf5266ff701d84c6096b4076e9f5bfe141e2fced79073a5f34e34342a77fbff3edf201bc265b9a386aa3288c6207e0b5";
         };
 
         drawio = pkgs.fetchNextcloudApp {
