@@ -68,7 +68,6 @@
               (import "${self}/machines/nixos")
               (import "${self}/modules/gui")
               (import "${self}/modules/tailscale")
-              (import "${self}/modules/virtualbox")
               (import "${self}/src/libvirt.nix")
             ]
             ++ defaultModules
