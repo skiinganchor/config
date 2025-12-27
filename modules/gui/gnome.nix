@@ -1,8 +1,5 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, ... }:
 
-let
-  homelab = config.homelab;
-in
 {
   # Configure graphical interfaces
   services = {
@@ -49,11 +46,5 @@ in
       nerd-fonts.noto
     ];
     enableDefaultPackages = true;
-  };
-
-  # Add variables for C-Cedilha if on homelab
-  environment.variables = lib.mkIf homelab.keyboardCCedilla {
-    GTK_IM_MODULE = "cedilla";
-    QT_IM_MODULE = "cedilla";
   };
 }
