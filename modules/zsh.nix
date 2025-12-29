@@ -37,10 +37,15 @@
       gsta = "git stash";
       gstaa = "git stash apply";
       gstl = "git stash list";
+      ipp = "curl ipinfo.io/ip";
       la = "ls --color -lha";
       ls = "ls --color=auto";
       nfu = "nix flake update";
       nixup = "sudo nix flake update --flake /etc/nixos && sudo nixos-rebuild switch";
+      yh = "yt-dlp --continue --no-check-certificate --format=bestvideo+bestaudio --exec='ffmpeg -i {} -c:a copy -c:v copy {}.mkv && rm {}'";
+      # usage yd <video-id> or ya <video-id> (just audio)
+      yd = "yt-dlp --continue --no-check-certificate --format=bestvideo+bestaudio --exec='ffmpeg -i {} -c:v prores_ks -profile:v 1 -vf fps=25/1 -pix_fmt yuv422p -c:a pcm_s16le {}.mov && rm {}'";
+      ya = "yt-dlp --continue --no-check-certificate --format=bestaudio -x --audio-format wav";
     };
   };
 }
