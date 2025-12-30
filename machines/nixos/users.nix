@@ -1,4 +1,4 @@
-{ self, config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   homelab = config.homelab;
@@ -15,15 +15,6 @@ in
       "podman"
     ];
     packages = config.homelab.mainUser.pkgs;
-  };
-
-  home-manager = {
-    backupFileExtension = "bak";
-    sharedModules = [ (import "${self}/src/home.nix") ];
-    extraSpecialArgs = {
-      inherit (self) stateVersion;
-      inherit homelab;
-    };
   };
 
   home-manager.users = {
