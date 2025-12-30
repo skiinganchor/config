@@ -20,6 +20,16 @@ in
       packages = homelab.mainUser.pkgs;
     };
 
+    home-manager.users = {
+      "${user}" = { ... }:
+      {
+        home = {
+          username = user;
+          homeDirectory = "/home/${user}";
+        };
+      };
+    };
+
     # homelab media services user
     users.users."${homelab.mainUser.name}" = {
       isSystemUser = true;
