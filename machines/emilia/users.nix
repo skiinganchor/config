@@ -25,9 +25,5 @@ in
       isSystemUser = true;
       group = homelab.mainUser.group;
     };
-
-    system.activationScripts.silencezsh.text = ''
-      [ ! -e "/home/${user}/.zshrc" ] && echo "# dummy file" > /home/${user}/.zshrc
-    '';
   };
 }
