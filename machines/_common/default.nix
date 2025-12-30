@@ -1,0 +1,4 @@
+{ ... }:
+{
+  homelab.motd.enable = true;
+}

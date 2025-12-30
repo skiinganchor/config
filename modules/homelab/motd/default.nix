@@ -20,11 +20,6 @@ let
     )
   );
 
-  networkInterface =
-    if lib.attrsets.hasAttrByPath [ config.networking.hostName ] config.homelab.networks.external then
-      config.homelab.networks.external.${config.networking.hostName}.interface
-    else
-      "";
   motd = pkgs.writeShellScriptBin "motd" ''
     #! /usr/bin/env bash
     source /etc/os-release
@@ -108,7 +103,7 @@ in
     networkInterfaces = lib.mkOption {
       description = "Network interfaces to monitor";
       type = lib.types.listOf lib.types.str;
-      default = [ networkInterface ];
+      default = [ "" ];
     };
   };
   config = lib.mkIf config.homelab.motd.enable {

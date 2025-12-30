@@ -35,6 +35,7 @@
         nixvim.nixosModules.nixvim
         (import "${self}/pkgs")
         (import "${self}/pkgs/overlays.nix" inputs)
+        (import "${self}/machines/_common")
         (import "${self}/modules")
         (import "${self}/src")
         (import "${self}/src/base.nix")

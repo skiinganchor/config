@@ -223,9 +223,9 @@ in {
 
   imports = [
     ./git.nix
-    ./motd
+    ./homelab/motd
+    ./homelab/services
     ./nfs_client
-    ./services
     ./tmux.nix
   ];
 }
