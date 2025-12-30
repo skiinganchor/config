@@ -1,10 +1,9 @@
-{ pkgs, stateVersion, ... }@attrs:
+{ stateVersion, ... }:
 
 # here we have system-wide configuration - for user configurations see: src/users.nix
 {
   imports = [
     (import ../dots/zsh/default.nix)
-    (import ./terminal.nix attrs)
   ];
 
   home = {

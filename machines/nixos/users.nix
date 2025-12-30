@@ -60,5 +60,6 @@ in
   home-manager.sharedModules = [
     (import "${self}/src/home.nix")
     (import "${self}/modules/gui/dconf.nix")
+    (import "${self}/modules/gui/gnome-terminal.nix")
   ];
 }
