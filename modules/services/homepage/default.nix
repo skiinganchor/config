@@ -13,6 +13,12 @@ in
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
     };
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        service
+      ];
+    };
     misc = lib.mkOption {
       default = [ ];
       type = lib.types.listOf (

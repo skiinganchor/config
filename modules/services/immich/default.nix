@@ -20,6 +20,13 @@ in
         Group to run the Immich container as
       '';
     };
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "immich-server"
+        "immich-machine-learning"
+      ];
+    };
     mediaDir = lib.mkOption {
       type = lib.types.path;
       default = "${config.homelab.mounts.fast}/Photos/Immich";

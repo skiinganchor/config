@@ -1,14 +1,10 @@
-{ self, config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 let
   homelab = config.homelab;
   user = "wookie";
 in
 {
-  imports = [
-    ../../modules/zsh.nix
-  ];
-
   config = {
     sops.secrets."admin-user-password" = { neededForUsers = true; };
 

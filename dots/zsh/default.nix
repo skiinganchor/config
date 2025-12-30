@@ -2,8 +2,28 @@
 {
   programs.zsh = {
     enable = true;
-    enableCompletion = true;
-    autosuggestions.enable = true;
+    enableCompletion = false;
+    zplug = {
+      enable = true;
+      plugins = [
+        { name = "zsh-users/zsh-autosuggestions"; }
+        { name = "zsh-users/zsh-syntax-highlighting"; }
+        { name = "zsh-users/zsh-completions"; }
+        { name = "zsh-users/zsh-history-substring-search"; }
+        { name = "unixorn/warhol.plugin.zsh"; }
+      ];
+    };
+    initContent = ''
+      # Cycle back in the suggestions menu using Shift+Tab
+      bindkey '^[[Z' reverse-menu-complete
+
+      export EDITOR=nvim || export EDITOR=vim
+      if command -v motd &> /dev/null
+      then
+        motd
+      fi
+      bindkey -e
+    '';
     syntaxHighlighting.enable = true;
     shellAliases = {
       clip = "wl-copy";

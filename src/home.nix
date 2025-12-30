@@ -3,6 +3,7 @@
 # here we have system-wide configuration - for user configurations see: src/users.nix
 {
   imports = [
+    (import ../dots/zsh/default.nix)
     (import ./dconf.nix attrs)
     (import ./terminal.nix attrs)
   ];

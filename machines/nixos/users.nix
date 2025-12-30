@@ -4,24 +4,21 @@ let
   homelab = config.homelab;
 in
 {
-  imports = [
-    ../../modules/zsh.nix
-  ];
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."${homelab.mainUser.name}" = {
     isNormalUser = true;
     shell = pkgs.zsh;
     extraGroups = [
-      "docker" # Run docker without ‘sudo’
       "wheel" # Enable ‘sudo’ for the user.
       "render" # For video transcoding
       "video" # For video transcoding
+      "podman"
     ];
     packages = config.homelab.mainUser.pkgs;
   };
 
   home-manager = {
+    backupFileExtension = "bak";
     sharedModules = [ (import "${self}/src/home.nix") ];
     extraSpecialArgs = {
       inherit (self) stateVersion;

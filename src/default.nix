@@ -24,6 +24,8 @@
     };
   };
 
+  programs.zsh.enable = true;
+
   system = {
     stateVersion = self.stateVersion;
   };

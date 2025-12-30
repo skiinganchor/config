@@ -223,6 +223,7 @@ in {
 
   imports = [
     ./git.nix
+    ./motd
     ./nfs_client
     ./services
     ./tmux.nix

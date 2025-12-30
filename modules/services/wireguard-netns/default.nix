@@ -18,6 +18,12 @@ in
       description = "Network namespace to be created";
       default = "wg_client";
     };
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        cfg.namespace
+      ];
+    };
     configFile = lib.mkOption {
       type = lib.types.path;
       description = "Path to a file with Wireguard config (not a wg-quick one!)";
