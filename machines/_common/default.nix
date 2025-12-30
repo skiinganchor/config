@@ -7,7 +7,6 @@ in
 
   home-manager = {
     backupFileExtension = "bak";
-    sharedModules = [ (import "${self}/src/home.nix") ];
     extraSpecialArgs = {
       inherit (self) stateVersion;
       inherit homelab;

@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, ... }:
 
 let
   homelab = config.homelab;
@@ -57,4 +57,8 @@ in
       );
     };
   };
+  home-manager.sharedModules = [
+    (import "${self}/src/home.nix")
+    (import "${self}/modules/gui/dconf.nix")
+  ];
 }

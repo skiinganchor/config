@@ -4,7 +4,6 @@
 {
   imports = [
     (import ../dots/zsh/default.nix)
-    (import ./dconf.nix attrs)
     (import ./terminal.nix attrs)
   ];
 

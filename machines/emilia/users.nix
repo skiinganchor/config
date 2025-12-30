@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ self, config, pkgs, ... }:
 
 let
   homelab = config.homelab;
@@ -29,6 +29,7 @@ in
         };
       };
     };
+    home-manager.sharedModules = [ (import "${self}/src/home.nix") ];
 
     # homelab media services user
     users.users."${homelab.mainUser.name}" = {
