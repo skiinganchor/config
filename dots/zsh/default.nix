@@ -19,6 +19,14 @@
 
       export EDITOR=nvim || export EDITOR=vim
       export LC_CTYPE=en_US.UTF-8
+      export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+
+      # Colorizing plugin
+      source $ZPLUG_HOME/repos/unixorn/warhol.plugin.zsh/warhol.plugin.zsh
+      # History-substring search options
+      bindkey '^[[A' history-substring-search-up
+      bindkey '^[[B' history-substring-search-down
+
       if command -v motd &> /dev/null
       then
         motd
