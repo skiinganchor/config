@@ -17,6 +17,9 @@
       # Cycle back in the suggestions menu using Shift+Tab
       bindkey '^[[Z' reverse-menu-complete
 
+      # Control+B with toggle zsh-autosuggestions
+      bindkey '^B' autosuggest-toggle
+
       export EDITOR=nvim || export EDITOR=vim
       export LC_CTYPE=en_US.UTF-8
       export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES

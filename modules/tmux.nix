@@ -4,12 +4,15 @@
     enable = true;
     shortcut = "a";
     keyMode = "vi";
-    terminal = "screen-256color";
     baseIndex = 1;
     escapeTime = 0;
     clock24 = true;
     historyLimit = 100000;
     extraConfig = ''
+      set -g default-terminal "xterm-256color"
+      set -ag terminal-overrides ",xterm-256color:RGB"
+      set-option -g default-shell ${pkgs.zsh}/bin/zsh
+
       bind r source-file /etc/tmux.conf
       bind -  split-window -v  -c '#{pane_current_path}'
       bind \\ split-window -h  -c '#{pane_current_path}'
@@ -34,8 +37,6 @@
       set -g default-command "''${SHELL}"
       set -s set-clipboard external
       set -g copy-command "${pkgs.wl-clipboard}/bin/wl-copy"
-      set -ga terminal-overrides ",*256col*:Tc"
-      set -ga terminal-overrides '*:Ss=\E[%p1%d q:Se=\E[ q'
       set -g status-interval 60
       set -g status-bg black
       set -g status-fg green
