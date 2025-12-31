@@ -18,6 +18,7 @@
       bindkey '^[[Z' reverse-menu-complete
 
       export EDITOR=nvim || export EDITOR=vim
+      export LC_CTYPE=en_US.UTF-8
       if command -v motd &> /dev/null
       then
         motd
