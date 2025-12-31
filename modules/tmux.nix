@@ -3,7 +3,6 @@
   programs.tmux = {
     enable = true;
     shortcut = "a";
-    keyMode = "vi";
     baseIndex = 1;
     escapeTime = 0;
     clock24 = true;
@@ -12,7 +11,9 @@
       set -g default-terminal "xterm-256color"
       set -ag terminal-overrides ",xterm-256color:RGB"
       set-option -g default-shell ${pkgs.zsh}/bin/zsh
+      set -g status-keys vi
 
+      set-window-option -g mode-keys vi
       bind r source-file /etc/tmux.conf
       bind -  split-window -v  -c '#{pane_current_path}'
       bind \\ split-window -h  -c '#{pane_current_path}'
@@ -26,7 +27,6 @@
       bind -r j select-pane -D
       bind -r h select-pane -L
       bind -r l select-pane -R
-
 
       bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe
       bind -T copy-mode-vi Enter send-keys -X copy-pipe
