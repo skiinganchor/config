@@ -226,6 +226,5 @@ in {
     ./homelab/motd
     ./homelab/services
     ./nfs_client
-    ./tmux.nix
   ];
 }
