@@ -20,11 +20,11 @@
         ];
       };
       initContent = ''
-        # Cycle back in the suggestions menu using Shift+Tab
-        bindkey '^[[Z' reverse-menu-complete
+        # Cycle back in the suggestions menu
+        bindkey '^[[Z' reverse-menu-complete # Shift+Tab
 
-        # Control+B with toggle zsh-autosuggestions
-        bindkey '^B' autosuggest-toggle
+        # Toggle zsh-autosuggestions
+        bindkey '^B' autosuggest-toggle # Control+B
 
         # Make Ctrl+W remove one path segment instead of the whole path
         WORDCHARS=''${WORDCHARS/\/}
@@ -41,8 +41,8 @@
         # Colorizing plugin
         source $ZPLUG_HOME/repos/unixorn/warhol.plugin.zsh/warhol.plugin.zsh
         # History-substring search options
-        bindkey '^[[A' history-substring-search-up
-        bindkey '^[[B' history-substring-search-down
+        bindkey '^[[A' history-substring-search-up # Up
+        bindkey '^[[B' history-substring-search-down # Down
 
         if command -v motd &> /dev/null
         then
@@ -50,6 +50,12 @@
         fi
         # Use emacs keymap
         bindkey -e
+        # Map the specific sequences you found via cat -v
+        bindkey '^[[1~' beginning-of-line       # Home
+        bindkey '^[[4~' end-of-line             # End
+        bindkey '^[[3~' delete-char             # Delete
+        bindkey '^[[5~' beginning-of-history    # PageUp
+        bindkey '^[[6~' end-of-history          # PageDown
       '';
       syntaxHighlighting.enable = true;
       shellAliases = {
