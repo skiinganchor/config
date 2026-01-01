@@ -20,10 +20,6 @@
 
   networking.networkmanager.enable = true;
 
-  hardware = {
-    graphics.enable = true;
-  };
-
   environment.gnome.excludePackages = with pkgs; [
     epiphany    # web browser
   ];

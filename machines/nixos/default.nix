@@ -21,6 +21,14 @@ in
   # Define on which hard drive you want to install Grub.
   boot.loader.grub.device = "nodev"; # or "nodev" for efi only
 
+  # Nvidia configs
+  hardware.graphics.enable = true;
+  # only accepted from Turing architecture
+  hardware.nvidia.open = false;
+  services.xserver.videoDrivers = [ "nvidia" ];
+  # wayland requirement
+  hardware.nvidia.modesetting.enable = true;
+
   networking = {
     hostName = "nixos";
     # Open ports in the firewall.
