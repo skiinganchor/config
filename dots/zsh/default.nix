@@ -100,7 +100,7 @@
         yd = "yt-dlp --continue --no-check-certificate --format=bestvideo+bestaudio --exec='ffmpeg -i {} -c:v prores_ks -profile:v 1 -vf fps=25/1 -pix_fmt yuv422p -c:a pcm_s16le {}.mov && rm {}'";
         ya = "yt-dlp --continue --no-check-certificate --format=bestaudio -x --audio-format wav";
         # temporary fix for yh - see docs for YT-DLP
-        ytd = "yt-dlp --write-subs --continue --format=bestvideo+bestaudio --merge mkv";
+        ytd = "yt-dlp --write-subs --continue --format=bestvideo+bestaudio";
       };
     };
   };
