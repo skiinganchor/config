@@ -60,5 +60,8 @@
       setw -g pane-base-index 1
       set -g pane-border-format " #P: #{pane_current_command} "
     '';
+    plugins = with pkgs.tmuxPlugins; [
+      yank
+    ];
   };
 }
