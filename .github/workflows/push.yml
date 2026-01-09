@@ -38,7 +38,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@v13
       - run: mkdir newreadme
       - run: (grep -B 99999 "BEGIN SERVICE LIST" README.md && nix eval --offline --raw --file bin/generateServicesTable.nix && grep -A 99999 "END SERVICE LIST" README.md) > newreadme/README.md
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: new-readme
           path: newreadme
