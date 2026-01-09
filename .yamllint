@@ -3,7 +3,7 @@ extends: default
 
 rules:
   line-length:
-    max: 180
+    max: 192
     level: warning
   document-start:
     level: error
