@@ -48,10 +48,8 @@
           )
         );
       forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
-      machineConfigs = import ./machines { inherit lib self; };
     in
     {
-      nixosConfigurations = machineConfigs.flake.nixosConfigurations {};
       stateVersion = "25.11";
       systemArch = {
         amd = "x86_64-linux";
