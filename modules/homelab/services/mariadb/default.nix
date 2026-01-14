@@ -18,6 +18,12 @@ in
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
     };
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "mysql"
+      ];
+    };
   };
 
   config = lib.mkIf cfg.enable {
