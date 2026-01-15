@@ -128,8 +128,8 @@ in
         cospend = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/julien-nc/cospend-nc/releases/download/v3.1.6/cospend-3.1.6.tar.gz";
-          sha512 = "52064b5cd5cefc250bd745042100e996bf5266ff701d84c6096b4076e9f5bfe141e2fced79073a5f34e34342a77fbff3edf201bc265b9a386aa3288c6207e0b5";
+            "https://github.com/julien-nc/cospend-nc/releases/download/v3.2.0/cospend-3.2.0.tar.gz";
+          sha256 = "sha256:99c95c643366be9617ff6abb6b3ca24cb48289362f93b20b7aab5bffcfb40034";
         };
 
         drawio = pkgs.fetchNextcloudApp {
@@ -155,8 +155,8 @@ in
 
         user_oidc = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
-          url = "https://github.com/nextcloud-releases/user_oidc/releases/download/v8.2.2/user_oidc-v8.2.2.tar.gz";
-          sha512 = "c56973bf164b4309b49bb34ea58ba3cfaa7167e05c7583a230c6332eae6ebecd67506100016b5bbe5965c035780563251ee66d7b08e6ca5671b426858a60e70b";
+          url = "https://github.com/nextcloud-releases/user_oidc/releases/download/v8.3.0/user_oidc-v8.3.0.tar.gz";
+          sha256 = "sha256:6fcf2b4388ed4d2cab913fa59e8af1b66534a9d66f0e33572f90ea1c68546da7";
         };
       };
       extraAppsEnable = true;
