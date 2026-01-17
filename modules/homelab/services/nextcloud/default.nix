@@ -43,7 +43,8 @@ in
           {
             "passwordsalt": "REPLACE_WITH_RANDOM_64HEX",
             "secret":       "REPLACE_WITH_RANDOM_64HEX",
-            "instanceid":   "REPLACE_WITH_RANDOM_12HEX"
+            "instanceid":   "REPLACE_WITH_RANDOM_12HEX",
+            "oidc_login_client_secret": "REPLACE_WITH_YOUR-KEYCLOAK-SECRET"
           }
         '''
       '';
@@ -153,10 +154,10 @@ in
           sha512 = "de1539830e9e9d1971605eb513c5c8aa32d058f30c8b0863e11405030dbdb4259be3ea12dfe524db7b5b29d28642f494ea41df47dcfe789737b6923e55349239";
         };
 
-        user_oidc = pkgs.fetchNextcloudApp {
+        nextcloud_oidc_login = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
-          url = "https://github.com/nextcloud-releases/user_oidc/releases/download/v8.3.0/user_oidc-v8.3.0.tar.gz";
-          sha256 = "sha256:6fcf2b4388ed4d2cab913fa59e8af1b66534a9d66f0e33572f90ea1c68546da7";
+          url = "https://github.com/pulsejet/nextcloud-oidc-login/releases/download/v3.2.2/oidc_login.tar.gz";
+          sha256 = "sha256:8ae2548555373d815475d733ca8248d639f1edc5ab8323755fb76c41a932ae5f";
         };
       };
       extraAppsEnable = true;
@@ -179,9 +180,41 @@ in
         mail_smtpmode = "sendmail";
         # execute maintenance jobs between 01:00am UTC and 05:00am UTC
         maintenance_window_start = 1;
+        # authentication related
         user_oidc = {
           allow_multiple_user_backends = 0;
         };
+        allow_user_to_change_display_name = false;
+        lost_password_link = "disabled";
+        oidc_login_provider_url = "https://${homelab.services.keycloak.url}";
+        oidc_login_client_id = "nextcloud";
+        oidc_login_auto_redirect = false;
+        oidc_login_end_session_redirect = false;
+        oidc_login_button_text = "Login with SSO";
+        oidc_login_hide_password_form = false;
+        oidc_login_use_id_token = true;
+        oidc_login_attributes = [
+            "id => preferred_username"
+            "name => name"
+            "email => email"
+            "groups => groups"
+        ];
+        oidc_login_default_group = "oidc";
+        oidc_login_use_external_storage = false;
+        oidc_login_scope = "openid profile email groups";
+        oidc_login_proxy_ldap = false;
+        oidc_login_disable_registration = true;
+        oidc_login_redir_fallback = false;
+        oidc_login_alt_login_page = "assets/login.php";
+        oidc_login_tls_verify = true;
+        oidc_create_groups = false;
+        oidc_login_webdav_enabled = false;
+        oidc_login_password_authentication = false;
+        oidc_login_public_key_caching_time = 86400;
+        oidc_login_min_time_between_jwks_requests = 10;
+        oidc_login_well_known_caching_time = 86400;
+        oidc_login_update_avatar = false;
+
         forwarded_for_headers = [
           "HTTP_CF_CONNECTING_IP"
         ];
