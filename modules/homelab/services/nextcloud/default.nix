@@ -154,10 +154,10 @@ in
           sha512 = "de1539830e9e9d1971605eb513c5c8aa32d058f30c8b0863e11405030dbdb4259be3ea12dfe524db7b5b29d28642f494ea41df47dcfe789737b6923e55349239";
         };
 
-        nextcloud_oidc_login = pkgs.fetchNextcloudApp {
+        oidc_login = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
-          url = "https://github.com/pulsejet/nextcloud-oidc-login/releases/download/v3.2.2/oidc_login.tar.gz";
-          sha256 = "sha256:8ae2548555373d815475d733ca8248d639f1edc5ab8323755fb76c41a932ae5f";
+          url = "https://github.com/pulsejet/nextcloud-oidc-login/releases/download/v3.2.4/oidc_login.tar.gz";
+          sha256 = "sha256:b6cfb255141731bcf021ed6608130808b84c52570d2d491c1aeda101014e4a6c";
         };
       };
       extraAppsEnable = true;
