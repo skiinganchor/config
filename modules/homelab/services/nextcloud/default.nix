@@ -186,7 +186,7 @@ in
         };
         allow_user_to_change_display_name = false;
         lost_password_link = "disabled";
-        oidc_login_provider_url = "https://${homelab.services.keycloak.url}";
+        oidc_login_provider_url = "https://${homelab.services.keycloak.url}/realms/sacred";
         oidc_login_client_id = "nextcloud";
         oidc_login_auto_redirect = false;
         oidc_login_end_session_redirect = false;
