@@ -201,7 +201,9 @@ in
         };
         oidc_login_default_group = "oidc";
         oidc_login_use_external_storage = false;
-        oidc_login_scope = "openid profile email groups";
+        # temporarily remove 'openid' from scope since there is a duplication issue
+        # see: https://github.com/jumbojett/OpenID-Connect-PHP/pull/467
+        oidc_login_scope = "openid profile email";
         oidc_login_proxy_ldap = false;
         oidc_login_disable_registration = true;
         oidc_login_redir_fallback = false;
