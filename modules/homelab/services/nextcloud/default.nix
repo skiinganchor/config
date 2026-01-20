@@ -216,6 +216,7 @@ in
         oidc_login_min_time_between_jwks_requests = 10;
         oidc_login_well_known_caching_time = 86400;
         oidc_login_update_avatar = false;
+        oidc_login_code_challenge_method = "S256";
 
         forwarded_for_headers = [
           "HTTP_CF_CONNECTING_IP"
