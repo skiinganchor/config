@@ -193,12 +193,12 @@ in
         oidc_login_button_text = "Login with SSO";
         oidc_login_hide_password_form = false;
         oidc_login_use_id_token = true;
-        oidc_login_attributes = [
-            "id => preferred_username"
-            "name => name"
-            "email => email"
-            "groups => groups"
-        ];
+        oidc_login_attributes = lib.mkForce {
+          "id" = "preferred_username";
+          "name" = "name";
+          "email" = "email";
+          "groups" = "groups";
+        };
         oidc_login_default_group = "oidc";
         oidc_login_use_external_storage = false;
         oidc_login_scope = "openid profile email groups";
