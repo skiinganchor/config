@@ -194,7 +194,7 @@ in
         oidc_login_hide_password_form = false;
         oidc_login_use_id_token = true;
         oidc_login_attributes = lib.mkForce {
-          "id" = "preferred_username";
+          "id" = "sub";
           "name" = "name";
           "email" = "email";
           "groups" = "groups";
