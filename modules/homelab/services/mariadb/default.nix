@@ -33,5 +33,10 @@ in
       ensureDatabases = ensureDatabases;
       settings.mysqld.init_file = "/var/lib/mysql/init.sql";
     };
+    networking.nftables = {
+      ruleset = lib.mkAfter ''
+        add rule inet filter input ip saddr 192.168.31.7 tcp dport 3306 accept
+      '';
+    };
   };
 }

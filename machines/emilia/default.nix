@@ -27,21 +27,35 @@ in
   };
 
   networking = {
-    firewall = {
+    firewall.enable = false;
+    nftables = {
       enable = true;
-      allowedTCPPorts = [
-        443 # Nginx
-        # 3000 # Netboot.xyz
-        5055 # Jellyseerrr
-        # 6767 # Bazarr
-        7878 # Radarr
-        # 8080 # Sabnzbd
-        # 8113 # AudioBookShelf
-        8686 # Lidarr
-        8989 # Sonarr
-        # 9696 # Prowlarr
-      ];
-      # allowedUDPPorts = [ 69 ]; # TFTP
+      ruleset = ''
+        table inet filter {
+          chain input {
+            type filter hook input priority 0;
+            policy drop;
+
+            ct state established,related accept
+            iifname "lo" accept
+
+            ip protocol icmp accept
+            ip6 nexthdr icmpv6 accept
+
+            tcp dport { 22, 443, 5055, 7878, 8686, 8989 } accept comment "22 SSH, 443 Nginx, 5055 Jellyseerrr, 7878 Radarr, 8686 Lidarr, 8989 Sonarr"
+          }
+
+          chain forward {
+            type filter hook forward priority 0;
+            policy drop;
+          }
+
+          chain output {
+            type filter hook output priority 0;
+            policy accept;
+          }
+        }
+      '';
     };
     useDHCP = false;
     hostName = "emilia";
