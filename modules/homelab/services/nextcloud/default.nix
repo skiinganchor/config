@@ -198,6 +198,7 @@ in
           "name" = "name";
           "mail" = "email";
           "groups" = "groups";
+          "quota" = "nextcloud_quota";
         };
         oidc_login_default_group = "oidc";
         oidc_login_use_external_storage = false;
