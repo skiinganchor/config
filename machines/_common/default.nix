@@ -6,6 +6,7 @@ in
   homelab.motd.enable = true;
 
   home-manager = {
+    useGlobalPkgs = true;
     backupFileExtension = "bak";
     extraSpecialArgs = {
       inherit (self) stateVersion;

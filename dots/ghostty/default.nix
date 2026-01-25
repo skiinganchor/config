@@ -1,10 +1,8 @@
-# note: currently do no support Linux, only Darwin
-# watch: https://github.com/ghostty-org/ghostty/issues/9606
 { pkgs, ... }:
 {
   programs.ghostty = {
     enable = true;
-    package = pkgs.ghostty-bin;
+    package = pkgs.pkgs-unstable.ghostty-bin;
     settings = {
       theme = "nord";
       font-size = 16;
