@@ -58,7 +58,8 @@ in
     };
   };
   home-manager.sharedModules = [
-    (import "${self}/dots/ghostty/default.nix")
+    # Ghostty still with build issues on v1.2.3 for x86_64-linux
+    # (import "${self}/dots/ghostty/default.nix")
     (import "${self}/dots/vscodium/default.nix")
     (import "${self}/src/home.nix")
     (import "${self}/modules/gui/dconf.nix")
