@@ -197,7 +197,7 @@ in
           "id" = "preferred_username";
           "name" = "name";
           "mail" = "email";
-          "groups" = "groups";
+          "groups" = "nextcloud_groups";
           "quota" = "nextcloud_quota";
         };
         oidc_login_default_group = "oidc";
