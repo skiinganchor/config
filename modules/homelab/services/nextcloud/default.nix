@@ -189,8 +189,8 @@ in
         oidc_login_provider_url = "https://${homelab.services.keycloak.url}/realms/sacred";
         oidc_login_client_id = "nextcloud";
         oidc_login_auto_redirect = true;
-        oidc_login_end_session_redirect = false;
-        oidc_login_button_text = "Login with SSO";
+        oidc_login_end_session_redirect = true;
+        oidc_login_logout_url = "https://${homelab.services.nextcloud.url}/apps/oidc_login/oidc";
         oidc_login_hide_password_form = false;
         oidc_login_use_id_token = true;
         oidc_login_attributes = lib.mkForce {
