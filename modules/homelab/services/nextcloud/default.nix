@@ -156,8 +156,8 @@ in
 
         oidc_login = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
-          url = "https://github.com/pulsejet/nextcloud-oidc-login/releases/download/v3.2.5/oidc_login.tar.gz";
-          sha256 = "sha256:42da9cc353aca531e0d1044880333136bbba6462fccb95e127981d82a9fafd67";
+          url = "https://github.com/pulsejet/nextcloud-oidc-login/releases/download/v3.3.0/oidc_login.tar.gz";
+          sha256 = "sha256:014f77f1db97688eb6e5c86a8279ea9ef381d1b32044cdd94158a5b2d6f8c912";
         };
       };
       extraAppsEnable = true;
