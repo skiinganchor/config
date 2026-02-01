@@ -196,6 +196,7 @@ in
         oidc_login_attributes = lib.mkForce {
           "id" = "preferred_username";
           "name" = "name";
+          "birthdate" = "birthdate";
           "mail" = "email";
           "groups" = "nextcloud_groups";
           "quota" = "nextcloud_quota";
