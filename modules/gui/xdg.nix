@@ -110,7 +110,7 @@
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = office;     # .xlsx
           "application/vnd.ms-excel" = office;                                              # .xls
           "application/vnd.oasis.opendocument.spreadsheet" = office;                        # .ods
-          "text/csv" = office;                                                              # .csv
+          "text/csv" = text;                                                                # .csv
 
           # Presentations
           "application/vnd.openxmlformats-officedocument.presentationml.presentation" = office; # .pptx
