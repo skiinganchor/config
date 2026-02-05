@@ -44,7 +44,6 @@ let
         TIME="evening"
     fi
 
-
     uptime=`cat /proc/uptime | cut -f1 -d.`
     upDays=$((uptime/60/60/24))
     upHours=$((uptime/60/60%24))

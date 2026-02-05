@@ -29,6 +29,7 @@ in
     ./paperless-ngx
     ./sabnzbd
     ./tftpd
+    ./uptime-kuma
     ./vaultwarden
     ./wireguard-netns
   ];
