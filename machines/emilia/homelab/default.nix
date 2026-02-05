@@ -59,10 +59,7 @@ in
       audiobookshelf.enable = true;
       bazarr.enable = true;
       fail2ban.enable = true;
-      homeassistant = {
-        enable = true;
-        url = "192.168.31.8:8123";
-      };
+      homeassistant = true;
       homepage.enable = true;
       immich.enable = false;
       jellyfin.enable = false;
