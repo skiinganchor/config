@@ -11,6 +11,10 @@
       adjust-cell-height = "50%";
       font-thicken = true;
       font-thicken-strength = 120;
+      # quare terminal keybinding (TODO: test)
+      keybind = [
+        "global:cmd+shift+space=toggle_quick_terminal"
+      ];
     };
   };
 }
