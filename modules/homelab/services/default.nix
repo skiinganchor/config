@@ -15,7 +15,6 @@ in
     ./audiobookshelf
     ./backup
     ./fail2ban
-    ./homeassistant
     ./homepage
     ./immich
     ./jellyfin
@@ -28,6 +27,7 @@ in
     ./nginx
     ./paperless-ngx
     ./sabnzbd
+    ./smarthome/homeassistant
     ./tftpd
     ./uptime-kuma
     ./vaultwarden
