@@ -118,6 +118,7 @@ in
             "Media"
             "Downloads"
             "Services"
+            "Observability"
             "Smart Home"
           ];
           hl = config.homelab.services;

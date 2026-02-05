@@ -31,7 +31,7 @@ in
     };
     homepage.category = lib.mkOption {
       type = lib.types.str;
-      default = "Services";
+      default = "Observability";
     };
   };
   config = lib.mkIf cfg.enable {
