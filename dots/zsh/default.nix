@@ -61,12 +61,10 @@
       shellAliases = {
         clip = "wl-copy";
         cplocal = "viewlocal|clip";
-        df = "df -hT";
         editflake = "sudo nvim /etc/nixos/flake.nix";
         editlocal = "sudo nvim /etc/nixos/local.nix";
         viewflake = "cat /etc/nixos/flake.nix";
         viewlocal = "cat /etc/nixos/local.nix";
-        mkdir = "mkdir -p";
         ngc = "nix store gc";
         # git aliases inspired on https://kapeli.com/cheat_sheets/Oh-My-Zsh_Git.docset/Contents/Resources/Documents/index
         ga = "git add";
