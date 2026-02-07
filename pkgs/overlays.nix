@@ -1,7 +1,13 @@
-{ nixpkgs, nixpkgs-unstable, ... }:
+{ nixpkgs, nixpkgs-master, nixpkgs-unstable, ... }:
 let
   overlayConfig = {
     config.allowUnfree = true;
+  };
+  pkgs-master = _: prev: {
+    pkgs-master = import nixpkgs-master {
+      inherit (prev.stdenv) system;
+      inherit (overlayConfig) config;
+    };
   };
   pkgs-unstable = _: prev: {
     pkgs-unstable = import nixpkgs-unstable {
@@ -15,6 +21,7 @@ in
   nixpkgs = {
     inherit (overlayConfig) config;
     overlays = [
+      pkgs-master
       pkgs-unstable
     ];
   };
