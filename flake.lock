@@ -143,13 +143,29 @@
         "type": "github"
       }
     },
+    "nixpkgs-abs": {
+      "locked": {
+        "lastModified": 1770485647,
+        "narHash": "sha256-NdW5OCdrPm2iRAV73EkxYLBn7gRH0BZEuQ5uDRq6jlk=",
+        "owner": "staticdev",
+        "repo": "nixpkgs",
+        "rev": "56fb62c2f99d1f1d14c0c4795c6ff261ddf3298c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "staticdev",
+        "ref": "master",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1770456952,
-        "narHash": "sha256-5UbvaWfnnDnIPjFY2cy1t5NmOiBVR/lvwbDJQtFh96E=",
+        "lastModified": 1770486252,
+        "narHash": "sha256-oFsPMdVPcuc82CTxUtauBlnxWyEJTe6Efbw7YbKSy7I=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "693e12715a077118dc107e170db05034b239b243",
+        "rev": "a2fee0c9ae0faf2619c630147d31faae3e46a209",
         "type": "github"
       },
       "original": {
@@ -228,6 +244,7 @@
         "home-manager": "home-manager",
         "my-secrets": "my-secrets",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-abs": "nixpkgs-abs",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nixvim": "nixvim",
