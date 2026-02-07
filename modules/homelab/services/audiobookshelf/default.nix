@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   service = "audiobookshelf";
   cfg = config.homelab.services.${service};
@@ -36,6 +36,7 @@ in
   };
   config = lib.mkIf cfg.enable {
     services.${service} = {
+      package = pkgs.pkgs-abs.audiobookshelf;
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
