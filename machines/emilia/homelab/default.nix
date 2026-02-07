@@ -59,7 +59,7 @@ in
       audiobookshelf.enable = true;
       bazarr.enable = true;
       fail2ban.enable = true;
-      homeassistant = true;
+      homeassistant.enable = true;
       homepage.enable = true;
       immich.enable = false;
       jellyfin.enable = false;
