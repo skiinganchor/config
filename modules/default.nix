@@ -177,12 +177,6 @@ in {
       description = "Git configuration including user info and optional workspace-specific overrides.";
     };
 
-    keyboardCCedilla = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Whether to enable cedilla support via GTK/QT IM modules.";
-    };
-
     mainUser = mkOption {
       type = with types; attrsOf (oneOf [str (listOf package)]);
       default = {
