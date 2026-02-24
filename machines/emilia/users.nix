@@ -22,12 +22,12 @@ in
 
     home-manager.users = {
       "${user}" = { ... }:
-      {
-        home = {
-          username = user;
-          homeDirectory = "/home/${user}";
+        {
+          home = {
+            username = user;
+            homeDirectory = "/home/${user}";
+          };
         };
-      };
     };
     home-manager.sharedModules = [ (import "${self}/src/home.nix") ];
 

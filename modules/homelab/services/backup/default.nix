@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   cfg = config.homelab.services.backup;
@@ -68,9 +67,11 @@ in
   config =
     let
       enabledServices = (
-        lib.attrsets.filterAttrs (
-          _name: value: value ? configDir && value ? enable && value.enable
-        ) homelab.services
+        lib.attrsets.filterAttrs
+          (
+            _name: value: value ? configDir && value ? enable && value.enable
+          )
+          homelab.services
       );
       stateDirs = lib.strings.concatMapStrings (x: x + " ") (
         lib.lists.forEach (lib.attrsets.mapAttrsToList (name: _value: name) enabledServices) (
@@ -78,7 +79,9 @@ in
           lib.attrsets.attrByPath [
             x
             "configDir"
-          ] false enabledServices
+          ]
+            false
+            enabledServices
         )
       );
     in
@@ -108,35 +111,36 @@ in
           ];
         };
         backups =
-          lib.attrsets.optionalAttrs cfg.local.enable {
-            appdata-local = {
-              timerConfig = {
-                OnCalendar = "Mon..Sat *-*-* 05:00:00";
-                Persistent = true;
+          lib.attrsets.optionalAttrs cfg.local.enable
+            {
+              appdata-local = {
+                timerConfig = {
+                  OnCalendar = "Mon..Sat *-*-* 05:00:00";
+                  Persistent = true;
+                };
+                repository = "rest:http://localhost:8000/appdata-local-${config.networking.hostName}";
+                initialize = true;
+                passwordFile = cfg.passwordFile;
+                pruneOpts = [
+                  "--keep-last 5"
+                ];
+                exclude = [
+                ];
+                paths = [
+                  "/tmp/appdata-local-${config.networking.hostName}.tar"
+                ];
+                backupPrepareCommand =
+                  let
+                    restic = "${pkgs.restic}/bin/restic -r '${config.services.restic.backups.appdata-local.repository}' -p ${cfg.passwordFile}";
+                  in
+                  ''
+                    ${restic} stats || ${restic} init
+                    ${pkgs.restic}/bin/restic forget --prune --no-cache --keep-last 5
+                    ${pkgs.gnutar}/bin/tar -cf /tmp/appdata-local-${config.networking.hostName}.tar ${stateDirs}
+                    ${restic} unlock
+                  '';
               };
-              repository = "rest:http://localhost:8000/appdata-local-${config.networking.hostName}";
-              initialize = true;
-              passwordFile = cfg.passwordFile;
-              pruneOpts = [
-                "--keep-last 5"
-              ];
-              exclude = [
-              ];
-              paths = [
-                "/tmp/appdata-local-${config.networking.hostName}.tar"
-              ];
-              backupPrepareCommand =
-                let
-                  restic = "${pkgs.restic}/bin/restic -r '${config.services.restic.backups.appdata-local.repository}' -p ${cfg.passwordFile}";
-                in
-                ''
-                  ${restic} stats || ${restic} init
-                  ${pkgs.restic}/bin/restic forget --prune --no-cache --keep-last 5
-                  ${pkgs.gnutar}/bin/tar -cf /tmp/appdata-local-${config.networking.hostName}.tar ${stateDirs}
-                  ${restic} unlock
-                '';
-            };
-          }
+            }
           // lib.attrsets.optionalAttrs cfg.s3.enable {
             appdata-s3 =
               let

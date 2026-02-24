@@ -101,25 +101,25 @@
         };
         defaultApplications = {
           # Word processing
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = office;  # .docx
-          "application/msword" = office;                                                    # .doc
-          "application/vnd.oasis.opendocument.text" = office;                               # .odt
-          "application/rtf" = office;                                                       # .rtf
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = office; # .docx
+          "application/msword" = office; # .doc
+          "application/vnd.oasis.opendocument.text" = office; # .odt
+          "application/rtf" = office; # .rtf
 
           # Spreadsheets
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = office;     # .xlsx
-          "application/vnd.ms-excel" = office;                                              # .xls
-          "application/vnd.oasis.opendocument.spreadsheet" = office;                        # .ods
-          "text/csv" = text;                                                                # .csv
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" = office; # .xlsx
+          "application/vnd.ms-excel" = office; # .xls
+          "application/vnd.oasis.opendocument.spreadsheet" = office; # .ods
+          "text/csv" = text; # .csv
 
           # Presentations
           "application/vnd.openxmlformats-officedocument.presentationml.presentation" = office; # .pptx
-          "application/vnd.ms-powerpoint" = office;                                             # .ppt
-          "application/vnd.oasis.opendocument.presentation" = office;                          # .odp
+          "application/vnd.ms-powerpoint" = office; # .ppt
+          "application/vnd.oasis.opendocument.presentation" = office; # .odp
 
           # Templates & misc
           "application/vnd.ms-word.document.macroEnabled.12" = office; # .docm
-          "application/vnd.ms-excel.sheet.macroEnabled.12" = office;   # .xlsm
+          "application/vnd.ms-excel.sheet.macroEnabled.12" = office; # .xlsm
           "application/vnd.ms-powerpoint.presentation.macroEnabled.12" = office; # .pptm
 
           # Generic text
@@ -133,7 +133,7 @@
           "text/x-ini" = text;
 
           # Shell & scripting
-          "text/x-shellscript" = text;  # .sh, .bash
+          "text/x-shellscript" = text; # .sh, .bash
           "application/x-shellscript" = text;
           "application/x-sh" = text;
           "text/x-python" = text;
@@ -145,7 +145,7 @@
           "text/html" = text;
           "application/xml" = text;
           "text/xml" = text;
-          "text/markdown" = text;      # .md
+          "text/markdown" = text; # .md
           "text/x-readme" = text;
 
           # Programming source files
@@ -173,12 +173,12 @@
           "text/x-tex" = text;
 
           # Docker and DevOps
-          "text/x-dockerfile-config" = text;  # some systems
+          "text/x-dockerfile-config" = text; # some systems
           "text/x-makefile" = text;
 
           # Misc dev
-          "application/x-nix" = text;         # .nix files
-          "application/x-patch" = text;       # .diff, .patch
+          "application/x-nix" = text; # .nix files
+          "application/x-patch" = text; # .diff, .patch
 
           "inode/directory" = [ inode ];
           "x-scheme-handler/http" = [ web ];

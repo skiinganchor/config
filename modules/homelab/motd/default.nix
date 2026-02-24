@@ -1,14 +1,15 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   enabledNixosServices = lib.attrsets.mapAttrsToList (name: _value: name) (
-    lib.attrsets.filterAttrs (
-      name: value: value != "enable" && name != "backup" && value ? enable && value.enable
-    ) config.homelab.services
+    lib.attrsets.filterAttrs
+      (
+        name: value: value != "enable" && name != "backup" && value ? enable && value.enable
+      )
+      config.homelab.services
   );
   monitoredServices = lib.lists.flatten (
     lib.lists.forEach enabledNixosServices (

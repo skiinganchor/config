@@ -10,14 +10,14 @@ in
       description = "Enable ${service}";
     };
     configFile = lib.mkOption {
-        type = lib.types.path;
-        default = "/var/lib/sabnzbd/sabnzbd.ini";
-        description = "Path to config file.";
+      type = lib.types.path;
+      default = "/var/lib/sabnzbd/sabnzbd.ini";
+      description = "Path to config file.";
     };
     host = lib.mkOption {
-        type = lib.types.str;
-        default = "127.0.0.1";
-        description = "Defined the host for connection binding.";
+      type = lib.types.str;
+      default = "127.0.0.1";
+      description = "Defined the host for connection binding.";
     };
     url = lib.mkOption {
       type = lib.types.str;

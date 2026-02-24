@@ -1,7 +1,6 @@
-{
-  config,
-  lib,
-  ...
+{ config
+, lib
+, ...
 }:
 let
   service = "homepage-dashboard";
@@ -124,23 +123,26 @@ in
           hl = config.homelab.services;
           homepageServices =
             x:
-            (lib.attrsets.filterAttrs (
-              _name: value: value ? homepage && value.homepage.category == x
-            ) homelab.services);
+            (lib.attrsets.filterAttrs
+              (
+                _name: value: value ? homepage && value.homepage.category == x
+              )
+              homelab.services);
         in
-        lib.lists.forEach homepageCategories (cat: {
-          "${cat}" =
-            lib.lists.forEach (lib.attrsets.mapAttrsToList (name: _value: name) (homepageServices "${cat}"))
-              (x: {
-                "${hl.${x}.homepage.name}" = {
-                  icon = hl.${x}.homepage.icon;
-                  description = hl.${x}.homepage.description;
-                  href = "https://${hl.${x}.url}";
-                  siteMonitor = "https://${hl.${x}.url}";
-                };
-              });
-        })
-        ++ [ { Misc = cfg.misc; } ]
+        lib.lists.forEach homepageCategories
+          (cat: {
+            "${cat}" =
+              lib.lists.forEach (lib.attrsets.mapAttrsToList (name: _value: name) (homepageServices "${cat}"))
+                (x: {
+                  "${hl.${x}.homepage.name}" = {
+                    icon = hl.${x}.homepage.icon;
+                    description = hl.${x}.homepage.description;
+                    href = "https://${hl.${x}.url}";
+                    siteMonitor = "https://${hl.${x}.url}";
+                  };
+                });
+          })
+        ++ [{ Misc = cfg.misc; }]
         ++ [
           {
             Glances =

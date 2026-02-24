@@ -22,49 +22,53 @@ in
 
   home-manager.users = {
     "${homelab.mainUser.name}" = { ... }:
-    {
-      home = {
-        username = homelab.mainUser.name;
-        homeDirectory = "/home/${homelab.mainUser.name}";
-      };
-
-      # User-scoped ~/.config/containers/registries.conf
-      xdg.configFile."containers/registries.conf".text = ''
-        [registries.search]
-        registries = ['docker.io']
-      '';
-
-      programs.git = {
-        settings.user = {
-          name = config.homelab.git.userName;
-          email = config.homelab.git.email;
+      {
+        home = {
+          username = homelab.mainUser.name;
+          homeDirectory = "/home/${homelab.mainUser.name}";
         };
-        includes = lib.optionals homelab.git.createWorkspaces (
-          map (ws: {
-            condition = "gitdir:~/${ws.folderName}/";
-            path = "~/${ws.folderName}/.gitconfig";
-          }) homelab.git.workspaces
+
+        # User-scoped ~/.config/containers/registries.conf
+        xdg.configFile."containers/registries.conf".text = ''
+          [registries.search]
+          registries = ['docker.io']
+        '';
+
+        programs.git = {
+          settings.user = {
+            name = config.homelab.git.userName;
+            email = config.homelab.git.email;
+          };
+          includes = lib.optionals homelab.git.createWorkspaces (
+            map
+              (ws: {
+                condition = "gitdir:~/${ws.folderName}/";
+                path = "~/${ws.folderName}/.gitconfig";
+              })
+              homelab.git.workspaces
+          );
+        };
+
+        home.file = lib.mkIf homelab.git.createWorkspaces (
+          lib.listToAttrs (map
+            (ws:
+              {
+                name = "${ws.folderName}/.gitconfig";
+                value = {
+                  text = ''
+                    [user]
+                      email = ${ws.email}
+                      name = ${ws.userName}
+                    ${lib.optionalString (ws.sshKeyFile != null) ''
+                    [core]
+                      sshCommand = "ssh -i ${ws.sshKeyFile} -o IdentitiesOnly=yes"
+                    ''}
+                  '';
+                };
+              })
+            homelab.git.workspaces)
         );
       };
-
-      home.file = lib.mkIf homelab.git.createWorkspaces (
-        lib.listToAttrs (map (ws:
-          {
-            name = "${ws.folderName}/.gitconfig";
-            value = {
-              text = ''
-                [user]
-                  email = ${ws.email}
-                  name = ${ws.userName}
-                ${lib.optionalString (ws.sshKeyFile != null) ''
-                [core]
-                  sshCommand = "ssh -i ${ws.sshKeyFile} -o IdentitiesOnly=yes"
-                ''}
-              '';
-            };
-          }) homelab.git.workspaces)
-      );
-    };
   };
   home-manager.sharedModules = [
     # Ghostty still with build issues on v1.2.3 for x86_64-linux

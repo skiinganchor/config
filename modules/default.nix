@@ -2,7 +2,8 @@
 
 let
   inherit (lib) mkOption types;
-in {
+in
+{
   options.homelab = {
     enable = lib.mkEnableOption "The homelab services and configuration variables";
 
@@ -25,7 +26,7 @@ in {
           };
           gnomeExtensions = mkOption {
             type = listOf package;
-            default = [];
+            default = [ ];
             description = "List of Gnome extensions.";
           };
           guakeHotkey = mkOption {
@@ -56,7 +57,7 @@ in {
                 };
               };
             });
-            default = [];
+            default = [ ];
             description = "List of keyboard layout and optional variant tuples.";
             example = [
               { layout = "us"; variant = "intl"; }
@@ -80,7 +81,7 @@ in {
           };
         };
       };
-      default = {};
+      default = { };
       example = {
         favoriteApps = [ "brave-browser.desktop" "org.gnome.Nautilus.desktop" "org.gnome.Terminal.desktop" ];
         gnomeExtensions = with pkgs.gnomeExtensions; [
@@ -155,7 +156,7 @@ in {
           };
         };
       };
-      default = {};
+      default = { };
       example = {
         userName = "Rick Sanchez";
         email = "Rick.Sanchez@Wabalaba.dubdub";
@@ -178,7 +179,7 @@ in {
     };
 
     mainUser = mkOption {
-      type = with types; attrsOf (oneOf [str (listOf package)]);
+      type = with types; attrsOf (oneOf [ str (listOf package) ]);
       default = {
         name = "rick";
         group = "rick";
@@ -199,11 +200,11 @@ in {
     };
 
     systemWidePkgs = mkOption {
-        type = types.listOf types.package;
-        default = with pkgs; [
-            openssl
-        ];
-        description = "The system packages";
+      type = types.listOf types.package;
+      default = with pkgs; [
+        openssl
+      ];
+      description = "The system packages";
     };
 
     timeZone = mkOption {

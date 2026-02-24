@@ -38,7 +38,7 @@ in
     enable = lib.mkEnableOption "Settings and services for the homelab";
   };
 
-  config = lib.mkIf (config.homelab.services.enable && homelab.baseDomain != "" ) {
+  config = lib.mkIf (config.homelab.services.enable && homelab.baseDomain != "") {
     services.nginx = {
       enable = true;
     };

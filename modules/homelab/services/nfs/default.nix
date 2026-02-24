@@ -46,13 +46,15 @@ in
     # Ensure required export directories exist
     systemd.tmpfiles.rules =
       lib.flatten (
-        lib.mapAttrsToList (_: export:
-          let
-            ownerUid = if export.uid == null then "root" else toString export.uid;
-            ownerGid = if export.gid == null then "root" else toString export.gid;
-          in
-          [ "d ${export.path} 0755 ${ownerUid} ${ownerGid} -" ]
-        ) cfg.exports
+        lib.mapAttrsToList
+          (_: export:
+            let
+              ownerUid = if export.uid == null then "root" else toString export.uid;
+              ownerGid = if export.gid == null then "root" else toString export.gid;
+            in
+            [ "d ${export.path} 0755 ${ownerUid} ${ownerGid} -" ]
+          )
+          cfg.exports
       );
 
     services.${service} = {
@@ -60,9 +62,11 @@ in
         enable = true;
         # Convert your custom export structure to the format expected by the NixOS module
         exports = lib.concatStringsSep "\n" (
-          lib.mapAttrsToList (_: export:
-            lib.concatMapStringsSep "\n" (client: "${export.path} ${client}") export.clients
-          ) cfg.exports
+          lib.mapAttrsToList
+            (_: export:
+              lib.concatMapStringsSep "\n" (client: "${export.path} ${client}") export.clients
+            )
+            cfg.exports
         );
       };
       # Disables old versions of NFS

@@ -74,13 +74,15 @@ in
       (lib.attrValues cfg.mounts);
 
     # Mount NFS shares via fileSystems
-    fileSystems = lib.mapAttrs' (name: m: {
-      name = m.localPath;
-      value = {
-        device = "${m.remoteHost}:${m.remotePath}";
-        fsType = m.fsType;
-        options = m.options;
-      };
-    }) cfg.mounts;
+    fileSystems = lib.mapAttrs'
+      (name: m: {
+        name = m.localPath;
+        value = {
+          device = "${m.remoteHost}:${m.remotePath}";
+          fsType = m.fsType;
+          options = m.options;
+        };
+      })
+      cfg.mounts;
   };
 }

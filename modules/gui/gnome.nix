@@ -21,7 +21,7 @@
   networking.networkmanager.enable = true;
 
   environment.gnome.excludePackages = with pkgs; [
-    epiphany    # web browser
+    epiphany # web browser
   ];
 
   # Enable sound.

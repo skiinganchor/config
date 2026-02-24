@@ -28,84 +28,84 @@
 
   outputs =
     { self, ... }@inputs:
-    with inputs;
-    let
-      # Modules
-      defaultModules = [
-        sops-nix.nixosModules.sops
-        home-manager.nixosModules.home-manager
-        nixvim.nixosModules.nixvim
-        (import "${self}/pkgs")
-        (import "${self}/pkgs/overlays.nix" inputs)
-        (import "${self}/machines/_common")
-        (import "${self}/modules")
-        (import "${self}/src")
-        (import "${self}/src/base.nix")
-      ];
-      optionalLocalModules =
-        nix_paths:
-        builtins.concatLists (
-          inputs.nixpkgs.lib.lists.forEach nix_paths (
-            path: inputs.nixpkgs.lib.optional (builtins.pathExists path) (import path)
-          )
+      with inputs;
+      let
+        # Modules
+        defaultModules = [
+          sops-nix.nixosModules.sops
+          home-manager.nixosModules.home-manager
+          nixvim.nixosModules.nixvim
+          (import "${self}/pkgs")
+          (import "${self}/pkgs/overlays.nix" inputs)
+          (import "${self}/machines/_common")
+          (import "${self}/modules")
+          (import "${self}/src")
+          (import "${self}/src/base.nix")
+        ];
+        optionalLocalModules =
+          nix_paths:
+          builtins.concatLists (
+            inputs.nixpkgs.lib.lists.forEach nix_paths (
+              path: inputs.nixpkgs.lib.optional (builtins.pathExists path) (import path)
+            )
+          );
+        forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
+      in
+      {
+        stateVersion = "25.11";
+        systemArch = {
+          amd = "x86_64-linux";
+        };
+        systemTypes = {
+          x86_64 =
+            attrs:
+            nixpkgs.lib.nixosSystem {
+              system = self.systemArch.amd;
+              specialArgs = {
+                inherit self;
+                inherit stateVersion;
+                my-secrets = inputs.my-secrets;
+                sops-nix = inputs.sops-nix;
+              };
+              modules = [
+                (import "${self}/machines/nixos")
+                (import "${self}/modules/gui")
+                (import "${self}/modules/tailscale")
+                (import "${self}/src/libvirt.nix")
+              ]
+              ++ defaultModules
+              ++ optionalLocalModules attrs.modules;
+            };
+          emilia =
+            attrs:
+            nixpkgs.lib.nixosSystem {
+              system = self.systemArch.amd;
+              specialArgs = {
+                inherit self;
+                inherit stateVersion;
+                my-secrets = inputs.my-secrets;
+                sops-nix = inputs.sops-nix;
+              };
+              modules = [
+                disko.nixosModules.disko
+                (import "${self}/machines/emilia")
+              ]
+              ++ defaultModules;
+            };
+        };
+        devShells = forAllSystems (
+          system:
+          let
+            pkgs = (import nixpkgs { inherit system; });
+            defaultShells = (import "${self}/shells/default.nix" { inherit pkgs; });
+            pythonShells = (import "${self}/shells/python.nix" { inherit pkgs; });
+            goShells = (import "${self}/shells/go.nix" { inherit pkgs; });
+          in
+          {
+            default = defaultShells.shell;
+            python = pythonShells.shell;
+            go = goShells.shell;
+          }
         );
-      forAllSystems = nixpkgs.lib.genAttrs nixpkgs.lib.systems.flakeExposed;
-    in
-    {
-      stateVersion = "25.11";
-      systemArch = {
-        amd = "x86_64-linux";
       };
-      systemTypes = {
-        x86_64 =
-          attrs:
-          nixpkgs.lib.nixosSystem {
-            system = self.systemArch.amd;
-            specialArgs = {
-              inherit self;
-              inherit stateVersion;
-              my-secrets = inputs.my-secrets;
-              sops-nix = inputs.sops-nix;
-            };
-            modules = [
-              (import "${self}/machines/nixos")
-              (import "${self}/modules/gui")
-              (import "${self}/modules/tailscale")
-              (import "${self}/src/libvirt.nix")
-            ]
-            ++ defaultModules
-            ++ optionalLocalModules attrs.modules;
-          };
-        emilia =
-          attrs:
-          nixpkgs.lib.nixosSystem {
-            system = self.systemArch.amd;
-            specialArgs = {
-              inherit self;
-              inherit stateVersion;
-              my-secrets = inputs.my-secrets;
-              sops-nix = inputs.sops-nix;
-            };
-            modules = [
-              disko.nixosModules.disko
-              (import "${self}/machines/emilia")
-            ]
-            ++ defaultModules;
-          };
-      };
-      devShells = forAllSystems (
-        system:
-        let
-          pkgs = (import nixpkgs { inherit system; });
-          defaultShells = (import "${self}/shells/default.nix" { inherit pkgs; });
-          pythonShells = (import "${self}/shells/python.nix" { inherit pkgs; });
-          goShells = (import "${self}/shells/go.nix" { inherit pkgs; });
-        in
-        {
-          default = defaultShells.shell;
-          python = pythonShells.shell;
-          go = goShells.shell;
-        }
-      );
-    };
 }

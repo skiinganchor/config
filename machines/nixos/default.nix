@@ -1,4 +1,4 @@
-{ config, my-secrets, sops-nix, ...}:
+{ config, my-secrets, sops-nix, ... }:
 let
   secretsPath = builtins.toString my-secrets;
 in

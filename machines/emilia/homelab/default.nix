@@ -9,7 +9,7 @@ in
     sops-nix.nixosModules.sops
   ];
 
-  sops.secrets."db-password" = {};
+  sops.secrets."db-password" = { };
   sops.secrets."keycloak/db-password" = {
     key = "keycloak-db-password";
   };
@@ -19,15 +19,15 @@ in
     group = "nextcloud";
     mode = "0440";
   };
-  sops.secrets."nextcloud/admin-password" = {};
-  sops.secrets."nextcloud/secrets" = {};
+  sops.secrets."nextcloud/admin-password" = { };
+  sops.secrets."nextcloud/secrets" = { };
 
   homelab = {
     baseDomain = domain;
     mainUser = {
       name = mainUserName;
       group = mainUserGroup;
-      pkgs = [];
+      pkgs = [ ];
     };
     nfs_client = {
       enable = true;
@@ -39,7 +39,7 @@ in
           remotePath = "/media";
           localPath = "/mnt/media";
           fsType = "nfs";
-          options = [ "rw" "hard" "intr" "vers=4.1"];
+          options = [ "rw" "hard" "intr" "vers=4.1" ];
           owner = mainUserName;
           group = mainUserGroup;
         };
@@ -48,7 +48,7 @@ in
           remotePath = "/ndata";
           localPath = "/mnt/nextcloud";
           fsType = "nfs";
-          options = [ "rw" "hard" "intr" "vers=4.1"];
+          options = [ "rw" "hard" "intr" "vers=4.1" ];
           owner = "nextcloud";
           group = "nextcloud";
         };

@@ -19,7 +19,7 @@ in
         ports = [ "0.0.0.0:8080:80" "0.0.0.0:3000:3000" "0.0.0.0:69:69/udp" ];
         # avoids needing to create a range of ports for UDP transfer
         environment = {
-            TFTPD_OPTS = "--tftp-single-port";
+          TFTPD_OPTS = "--tftp-single-port";
         };
       };
     };

@@ -36,11 +36,14 @@
     # Keyboard layout
     {
       "org/gnome/desktop/input-sources".sources =
-        map (k:
-        lib.hm.gvariant.mkTuple [
-          "xkb" (k.layout + (if k.variant != null then "+" + k.variant else ""))
-          ]
-        ) homelab.dconf.keyboardLayout;
+        map
+          (k:
+            lib.hm.gvariant.mkTuple [
+              "xkb"
+              (k.layout + (if k.variant != null then "+" + k.variant else ""))
+            ]
+          )
+          homelab.dconf.keyboardLayout;
     }
     # Show lock-screen notifications
     {
