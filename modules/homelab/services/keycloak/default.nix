@@ -15,7 +15,7 @@ in
     };
     url = lib.mkOption {
       type = lib.types.str;
-      default = "login.${homelab.baseDomain}";
+      default = "friend.${homelab.baseDomain}";
     };
     homepage.name = lib.mkOption {
       type = lib.types.str;

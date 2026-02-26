@@ -67,7 +67,6 @@ in
       keycloak = {
         enable = true;
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
-        url = "friend.${domain}";
       };
       kvm.enable = true;
       lidarr.enable = true;
