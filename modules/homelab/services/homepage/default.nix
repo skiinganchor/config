@@ -47,7 +47,7 @@ in
     services.glances.enable = true;
     services.${service} = {
       enable = true;
-      environmentFile = builtins.toFile "homepage.env" "HOMEPAGE_ALLOWED_HOSTS=${homelab.baseDomain}";
+      environmentFile = builtins.toFile "homepage.env" "HOMEPAGE_ALLOWED_HOSTS=homepage.${homelab.baseDomain}";
       customCSS = ''
         body, html {
           font-family: SF Pro Display, Helvetica, Arial, sans-serif !important;
@@ -200,7 +200,7 @@ in
     };
 
     services.nginx = {
-      virtualHosts."${homelab.baseDomain}" = {
+      virtualHosts."homepage.${homelab.baseDomain}" = {
         forceSSL = true;
         # uses security.acme instead
         enableACME = false;
