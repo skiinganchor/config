@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   service = "uptime-kuma";
   cfg = config.homelab.services.${service};
@@ -37,6 +37,7 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
+      package = pkgs.pkgs-unstable.uptime-kuma;
     };
     services.nginx = {
       virtualHosts."${cfg.url}" = {
