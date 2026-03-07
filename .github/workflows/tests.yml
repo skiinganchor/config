@@ -20,6 +20,8 @@ jobs:
       - uses: cachix/install-nix-action@v31
       - name: Install devenv.sh
         run: nix profile add nixpkgs#devenv
+      - name: Output devenv version
+        run: devenv version
       - name: Build the devenv shell and run any git hooks
         run: devenv test
 
