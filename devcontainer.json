@@ -1,8 +1,7 @@
 {
-      "name": "Config Dev Container",
-        "build": {
-            "dockerfile": "Containerfile",
-                "context": "."
-                  }
-                  }
+  "name": "devenv",
+  "build": {
+    "dockerfile": "Containerfile"
+  },
+  "remoteUser": "vscode"
 }
