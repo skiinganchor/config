@@ -43,7 +43,7 @@
   # https://devenv.sh/tests/
   enterTest = ''
     echo "Running tests"
-    pre-commit run --all-files
+    prek run --all-files
   '';
 
   # https://devenv.sh/git-hooks/
