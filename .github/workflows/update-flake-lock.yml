@@ -24,7 +24,7 @@ jobs:
           pr-labels: auto-merge
           token: "${{ secrets.GH_TOKEN_FOR_UPDATES }}"
       - name: Merge
-        run: gh pr merge --auto "${{ steps.update.outputs.pull-request-number }}" --rebase
+        run: gh pr merge --admin "${{ steps.update.outputs.pull-request-number }}" --rebase
         env:
           GITHUB_TOKEN: ${{secrets.GH_TOKEN_FOR_UPDATES}}
         if: ${{ steps.update.outputs.pull-request-number != '' }}
