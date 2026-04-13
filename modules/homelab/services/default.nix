@@ -14,6 +14,7 @@ in
     ./arr/sonarr
     ./audiobookshelf
     ./backup
+    ./deluge
     ./fail2ban
     ./homepage
     ./immich
