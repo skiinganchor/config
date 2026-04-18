@@ -1,8 +1,10 @@
-{ config, sops-nix, ... }:
+{ config, lib, sops-nix, ... }:
 let
   domain = "tapirus.cc";
   mainUserName = "share";
   mainUserGroup = "users";
+  wg = config.homelab.networks.local.wireguard-ext;
+  wgBase = lib.strings.removeSuffix ".1" wg.cidr.v4;
 in
 {
   imports = [
@@ -93,6 +95,12 @@ in
       sonarr.enable = true;
       uptime-kuma.enable = true;
       vaultwarden.enable = false;
+      wireguard-netns = {
+        enable = true;
+        configFile = config.sops.secrets.wireguard-config.path;
+        privateIP = "${wgBase}.2";
+        dnsIP = wg.cidr.v4;
+      };
     };
     timeZone = "Europe/Amsterdam";
   };
