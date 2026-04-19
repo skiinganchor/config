@@ -20,6 +20,10 @@ in
       type = lib.types.str;
       default = "someonepowerful";
     };
+    dataDir = lib.mkOption {
+      type = lib.types.str;
+      default = "/mnt/nextcloud/ndata";
+    };
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/${service}";
@@ -171,7 +175,7 @@ in
 
       settings = {
         "app_api.enabled" = false;
-        datadirectory = "/mnt/nextcloud/ndata";
+        datadirectory = "${homelab.services.nextcloud.dataDir}";
         default_phone_region = "NL";
         overwriteprotocol = "https";
         "overwrite.cli.url" = "https://${cfg.url}";

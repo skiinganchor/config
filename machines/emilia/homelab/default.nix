@@ -1,10 +1,8 @@
-{ config, lib, sops-nix, ... }:
+{ config, sops-nix, ... }:
 let
   domain = "tapirus.cc";
   mainUserName = "share";
   mainUserGroup = "users";
-  wg = config.homelab.networks.local.wireguard-ext;
-  wgBase = lib.strings.removeSuffix ".1" wg.cidr.v4;
 in
 {
   imports = [
@@ -14,6 +12,9 @@ in
   sops.secrets."db-password" = { };
   sops.secrets."keycloak/db-password" = {
     key = "keycloak-db-password";
+  };
+  sops.secrets."navidrome/env" = {
+    key = "navidrome-env";
   };
   sops.secrets."nextcloud/db-password" = {
     key = "db-password";
@@ -74,6 +75,10 @@ in
       kvm.enable = true;
       lidarr.enable = true;
       mariadb.enable = true;
+      navidrome = {
+        enable = true;
+        environmentFile = config.sops.secrets."navidrome/env".path;
+      };
       netboot-xyz.enable = false;
       nextcloud = {
         enable = true;
@@ -96,10 +101,7 @@ in
       uptime-kuma.enable = true;
       vaultwarden.enable = false;
       wireguard-netns = {
-        enable = true;
-        configFile = config.sops.secrets.wireguard-config.path;
-        privateIP = "${wgBase}.2";
-        dnsIP = wg.cidr.v4;
+        enable = false;
       };
     };
     timeZone = "Europe/Amsterdam";
