@@ -57,68 +57,46 @@ in
       default = "client";
     };
   };
-  config =
-    let
-      mkIfElse =
-        p: yes: no:
-        lib.mkMerge [
-          (lib.mkIf p yes)
-          (lib.mkIf (!p) no)
-        ];
-    in
-    mkIfElse (cfg.role == "client")
-      (lib.mkIf cfg.enable {
-        systemd.tmpfiles.rules = [
-          "d ${cfg.musicDir} 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -"
-        ];
-        systemd.services.navidrome.serviceConfig.EnvironmentFile = lib.mkIf
-          (
-            cfg.environmentFile != null
-          )
-          cfg.environmentFile;
-        services.${service} = {
-          enable = true;
-          user = homelab.mainUser.name;
-          group = homelab.mainUser.group;
-          settings = {
-            MusicFolder = "${cfg.musicDir}";
-            DefaultDownsamplingFormat = "aac";
-          };
-        };
-        # services.frp.settings.proxies = [
-        #   {
-        #     name = service;
-        #     type = "tcp";
-        #     localIP = config.services.${service}.settings.Address;
-        #     localPort = config.services.${service}.settings.Port;
-        #     remotePort = config.services.${service}.settings.Port;
-        #   }
-        # ];
-      })
-      # server
-      {
-        services.nginx = {
-          virtualHosts."${cfg.url}" = {
-            forceSSL = true;
-            # uses security.acme instead
-            enableACME = false;
-            extraConfig = ''
-              # Add HSTS header to force HTTPS
-              add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-              # Add X-XSS-Protection header for additional XSS protection
-              add_header X-XSS-Protection "1; mode=block" always;
-            '';
-            locations."/" = {
-              proxyPass = ''
-                http://127.0.0.1:${
-                  toString config.services.${service}.settings.Port
-                }
-              '';
-            };
-            sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
-            sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
-          };
-        };
+  config = lib.mkIf cfg.enable {
+    systemd.tmpfiles.rules = [
+      "d ${cfg.musicDir} 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -"
+    ];
+    systemd.services.navidrome.serviceConfig.EnvironmentFile = lib.mkIf
+      (
+        cfg.environmentFile != null
+      )
+      cfg.environmentFile;
+    services.${service} = {
+      enable = true;
+      user = homelab.mainUser.name;
+      group = homelab.mainUser.group;
+      settings = {
+        MusicFolder = "${cfg.musicDir}";
+        DefaultDownsamplingFormat = "aac";
       };
+    };
+    services.nginx = {
+      virtualHosts."${cfg.url}" = {
+        forceSSL = true;
+        # uses security.acme instead
+        enableACME = false;
+        extraConfig = ''
+          # Add HSTS header to force HTTPS
+          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+          # Add X-XSS-Protection header for additional XSS protection
+          add_header X-XSS-Protection "1; mode=block" always;
+        '';
+        locations."/" = {
+          proxyPass = ''
+            http://127.0.0.1:${
+              toString config.services.${service}.settings.Port
+            }
+          '';
+        };
+        sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
+      };
+    };
+  };
 }
