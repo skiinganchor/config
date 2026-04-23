@@ -55,7 +55,7 @@ This repo uses declarative validation through `nix flake check` and linting via 
 - Variables: `camelCase` (e.g., `homelab`, `defaultModules`)
 - Attributes: `kebab-case` (e.g., `base-domain`, `lock-screen-notifications`)
 - Functions: `camelCase` (e.g., `forAllSystems`, `optionalLocalModules`)
-- Module files: `kebab-case.nix` (e.g., `nfs-client.nix`, `tailscale.nix`)
+- Module files: `kebab-case.nix` (e.g., `nfs-client.nix`)
 
 **Comments**
 - Use `#` for inline comments
