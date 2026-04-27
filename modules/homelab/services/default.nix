@@ -29,6 +29,7 @@ in
     ./nginx
     ./paperless-ngx
     ./sabnzbd
+    ./slskd
     ./smarthome/homeassistant
     ./tftpd
     ./uptime-kuma
