@@ -35,6 +35,17 @@ in
       group = mainUserGroup;
       pkgs = [ ];
     };
+    networks.local.wireguard-ext = {
+      id = 15;
+      cidr = {
+        v4 = "10.68.0.1";
+        v6 = null;
+      };
+      dhcp = {
+        v4 = false;
+        v6 = false;
+      };
+    };
     nfs_client = {
       enable = true;
       mounts = {
@@ -104,7 +115,7 @@ in
       uptime-kuma.enable = true;
       vaultwarden.enable = false;
       wireguard-netns = {
-        enable = true;
+        enable = false;
         configFile = config.sops.secrets."wireguard-config".path;
         privateIP = "${wgBase}.2";
         dnsIP = wg.cidr.v4;
