@@ -3,6 +3,8 @@ let
   domain = "tapirus.cc";
   mainUserName = "share";
   mainUserGroup = "users";
+  wg = config.homelab.networks.local.wireguard-ext;
+  wgBase = lib.strings.removeSuffix ".1" wg.cidr.v4;
 in
 {
   imports = [
@@ -24,6 +26,7 @@ in
   };
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
+  sops.secrets."wireguard-config" = { };
 
   homelab = {
     baseDomain = domain;
@@ -101,7 +104,10 @@ in
       uptime-kuma.enable = true;
       vaultwarden.enable = false;
       wireguard-netns = {
-        enable = false;
+        enable = true;
+        configFile = config.sops.secrets."wireguard-config".path;
+        privateIP = "${wgBase}.2";
+        dnsIP = wg.cidr.v4;
       };
     };
     timeZone = "Europe/Amsterdam";

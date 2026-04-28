@@ -218,8 +218,7 @@ in
 
   imports = [
     ./git.nix
-    ./homelab/motd
-    ./homelab/services
+    ./homelab
     ./nfs_client
   ];
 }
