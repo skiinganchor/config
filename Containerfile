@@ -22,6 +22,3 @@ RUN echo '. "$HOME/.nix-profile/etc/profile.d/nix.sh"' >> ~/.bashrc
 RUN . "$HOME/.nix-profile/etc/profile.d/nix.sh" && \
     nix profile install github:cachix/devenv/${DEVENV_VERSION} --accept-flake-config && \
     nix profile install nixpkgs#direnv nixpkgs#cachix
-
-# enable direnv
-RUN echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
