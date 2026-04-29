@@ -33,8 +33,20 @@ in
       type = lib.types.str;
       default = "Observability";
     };
+    resolveReverseProxyLocally = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Resolve this host's nginx virtual hosts through loopback so local
+        Uptime Kuma checks do not depend on the router DNS path.
+      '';
+    };
   };
   config = lib.mkIf cfg.enable {
+    networking.hosts."127.0.0.1" = lib.optionals cfg.resolveReverseProxyLocally (
+      builtins.attrNames config.services.nginx.virtualHosts
+    );
+
     services.${service} = {
       enable = true;
       package = pkgs.pkgs-unstable.uptime-kuma;
