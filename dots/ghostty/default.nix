@@ -2,7 +2,7 @@
 {
   programs.ghostty = {
     enable = true;
-    package = pkgs.pkgs-unstable.ghostty-bin;
+    package = pkgs.ghostty-bin;
     settings = {
       theme = "nord";
       font-size = 16;

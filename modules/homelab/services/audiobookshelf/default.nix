@@ -36,7 +36,7 @@ in
   };
   config = lib.mkIf cfg.enable {
     services.${service} = {
-      package = pkgs.pkgs-abs.audiobookshelf;
+      package = pkgs.audiobookshelf;
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;

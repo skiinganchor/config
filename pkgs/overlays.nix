@@ -1,4 +1,4 @@
-{ nixpkgs, nixpkgs-master, nixpkgs-unstable, nixpkgs-abs, ... }:
+{ nixpkgs, nixpkgs-master, nixpkgs-unstable, ... }:
 let
   overlayConfig = {
     config.allowUnfree = true;
@@ -15,12 +15,6 @@ let
       inherit (overlayConfig) config;
     };
   };
-  pkgs-abs = _: prev: {
-    pkgs-abs = import nixpkgs-abs {
-      inherit (prev.stdenv) system;
-      inherit (overlayConfig) config;
-    };
-  };
 in
 {
   nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
@@ -29,7 +23,6 @@ in
     overlays = [
       pkgs-master
       pkgs-unstable
-      pkgs-abs
     ];
   };
 }
