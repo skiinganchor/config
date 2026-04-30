@@ -36,7 +36,7 @@
           nixvim.nixosModules.nixvim
           (import "${self}/pkgs")
           (import "${self}/pkgs/overlays.nix" inputs)
-          (import "${self}/machines/_common")
+          (import "${self}/modules/machines/_common")
           (import "${self}/modules")
           (import "${self}/src")
           (import "${self}/src/base.nix")
@@ -67,7 +67,7 @@
                 sops-nix = inputs.sops-nix;
               };
               modules = [
-                (import "${self}/machines/nixos")
+                (import "${self}/modules/machines/nixos")
                 (import "${self}/modules/gui")
                 (import "${self}/src/libvirt.nix")
               ]
@@ -86,7 +86,7 @@
               };
               modules = [
                 disko.nixosModules.disko
-                (import "${self}/machines/emilia")
+                (import "${self}/modules/machines/emilia")
               ]
               ++ defaultModules;
             };

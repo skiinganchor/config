@@ -31,7 +31,7 @@ pre-commit run --all-files   # run hooks manually
 flake.nix          # entry point, defines systems
 devenv.nix        # dev shell & hooks config
 modules/          # reusable modules (git, homelab, nfs_client, gui)
-machines/         # host-specific: nixos/, emilia/, _common/
+modules/machines/ # host-specific: nixos/, emilia/, _common/
 src/              # base config: base.nix, default.nix, home.nix, containers.nix, libvirt.nix
 shells/           # dev shells: default.nix, python.nix, go.nix
 pkgs/             # package overlays
