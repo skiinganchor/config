@@ -21,15 +21,15 @@ in
     };
     musicDir = lib.mkOption {
       type = lib.types.str;
-      default = "${homelab.mounts.fast}/Media/Music/Library";
+      default = "/mnt/media/music/library";
     };
     downloadDir = lib.mkOption {
       type = lib.types.str;
-      default = "${homelab.mounts.fast}/Media/Music/Import";
+      default = "/mnt/media/music/import";
     };
     incompleteDownloadDir = lib.mkOption {
       type = lib.types.str;
-      default = "${homelab.mounts.fast}/Media/Music/Import.tmp";
+      default = "/mnt/media/music/import.tmp";
     };
     url = lib.mkOption {
       type = lib.types.str;

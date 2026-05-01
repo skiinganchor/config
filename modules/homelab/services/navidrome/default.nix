@@ -18,7 +18,7 @@ in
     };
     musicDir = lib.mkOption {
       type = lib.types.str;
-      default = "/mnt/media/music";
+      default = "/mnt/media/music/library";
     };
     url = lib.mkOption {
       type = lib.types.str;
