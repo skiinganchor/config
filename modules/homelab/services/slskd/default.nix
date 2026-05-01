@@ -123,6 +123,11 @@ in
     };
     systemd.services = {
       slskd = {
+        # Fix for namespace error with NFS mount forcefully disable the conflicting upstream sandboxing potentially added.
+        serviceConfig.PrivateMounts = lib.mkForce false;
+        serviceConfig.ProtectHome = lib.mkForce false;
+        serviceConfig.ProtectSystem = lib.mkForce "no";
+
         serviceConfig.ReadWritePaths = [
           cfg.musicDir
         ];
