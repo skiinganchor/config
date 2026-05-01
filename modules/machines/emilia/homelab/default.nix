@@ -118,7 +118,7 @@ in
       uptime-kuma.enable = true;
       vaultwarden.enable = false;
       wireguard-netns = {
-        enable = false;
+        enable = true;
         configFile = config.sops.secrets."wireguard-netns/config".path;
         privateIP = "${wgBase}.2";
         dnsIP = wg.cidr.v4;
