@@ -129,12 +129,4 @@ in
     };
     timeZone = "Europe/Amsterdam";
   };
-
-  # Navidrome's upstream sandbox bind-mounts the music library into a private
-  # root. That mount namespacing fails against this NFS-backed path on Emilia,
-  # so disable only that confinement here and leave the shared module intact.
-  systemd.services.navidrome.serviceConfig = {
-    RootDirectory = lib.mkForce "";
-    BindReadOnlyPaths = lib.mkForce [ ];
-  };
 }
