@@ -75,7 +75,7 @@ in
       enable = true;
       audiobookshelf.enable = true;
       bazarr.enable = true;
-      deluge.enable = true;
+      deluge.enable = false;
       fail2ban.enable = true;
       homeassistant.enable = true;
       homepage.enable = true;
