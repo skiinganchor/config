@@ -67,7 +67,7 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    systemd.tmpfiles.rules = map (x: "d ${x} 0775 ${homelab.user} ${homelab.group} - -") [
+    systemd.tmpfiles.rules = map (x: "d ${x} 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -") [
       cfg.musicDir
       "${cfg.musicDir}/.beets"
       cfg.downloadDir
@@ -76,8 +76,8 @@ in
     ];
     services.${service} = {
       enable = true;
-      user = homelab.user;
-      group = homelab.group;
+      user = homelab.mainUser.name;
+      group = homelab.mainUser.group;
       environmentFile = cfg.environmentFile;
       domain = null;
       settings = {
@@ -179,7 +179,7 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString config.services.${service}.listenPort}";
+          proxyPass = "http://127.0.0.1:${toString config.services.${service}.settings.web.port}";
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
