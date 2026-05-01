@@ -1,8 +1,9 @@
-{ config, lib, sops-nix, ... }:
+{ config, lib, my-secrets, sops-nix, ... }:
 let
   domain = "tapirus.cc";
   mainUserName = "share";
   mainUserGroup = "users";
+  secretsPath = builtins.toString my-secrets;
   wg = config.homelab.networks.local.wireguard-ext;
   wgBase = lib.strings.removeSuffix ".1" wg.cidr.v4;
 in
@@ -26,7 +27,9 @@ in
   };
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
-  sops.secrets."wireguard-config" = { };
+  sops.secrets."wireguard-netns/config" = {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+  };
 
   homelab = {
     baseDomain = domain;
@@ -116,7 +119,7 @@ in
       vaultwarden.enable = false;
       wireguard-netns = {
         enable = false;
-        configFile = config.sops.secrets."wireguard-config".path;
+        configFile = config.sops.secrets."wireguard-netns/config".path;
         privateIP = "${wgBase}.2";
         dnsIP = wg.cidr.v4;
       };
