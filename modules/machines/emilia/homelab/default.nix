@@ -16,9 +16,7 @@ in
   sops.secrets."keycloak/db-password" = {
     key = "keycloak-db-password";
   };
-  sops.secrets."navidrome/env" = {
-    key = "navidrome-env";
-  };
+  sops.secrets."navidrome/env-file" = { };
   sops.secrets."nextcloud/db-password" = {
     key = "db-password";
     owner = "nextcloud";
@@ -27,6 +25,7 @@ in
   };
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
+  sops.secrets."slskd/env-file" = { };
   sops.secrets."wireguard-netns/config" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
@@ -93,8 +92,8 @@ in
       lidarr.enable = true;
       mariadb.enable = true;
       navidrome = {
-        enable = true;
-        environmentFile = config.sops.secrets."navidrome/env".path;
+        enable = false;
+        environmentFile = config.sops.secrets."navidrome/env-file".path;
       };
       netboot-xyz.enable = false;
       nextcloud = {
@@ -113,6 +112,10 @@ in
       sabnzbd = {
         enable = true;
         host = "0.0.0.0";
+      };
+      slskd = {
+        enable = true;
+        environmentFile = config.sops.secrets."slskd/env-file".path;
       };
       sonarr.enable = true;
       uptime-kuma.enable = true;
