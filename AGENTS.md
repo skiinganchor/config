@@ -28,14 +28,14 @@ pre-commit run --all-files   # run hooks manually
 ## Repo Structure
 
 ```
-flake.nix          # entry point, defines systems
+flake.nix         # entry point, defines systems
 devenv.nix        # dev shell & hooks config
 modules/          # reusable modules (git, homelab, nfs_client, gui)
+modules/dots/     # dotfiles: zsh, tmux, vscodium, ghostty
 modules/machines/ # host-specific: nixos/, emilia/, _common/
 src/              # base config: base.nix, default.nix, home.nix, containers.nix, libvirt.nix
 shells/           # dev shells: default.nix, python.nix, go.nix
 pkgs/             # package overlays
-dots/             # dotfiles: zsh, tmux, vscodium, ghostty
 ```
 
 ## Flake Systems
