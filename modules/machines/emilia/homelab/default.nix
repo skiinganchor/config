@@ -92,7 +92,7 @@ in
       lidarr.enable = true;
       mariadb.enable = true;
       navidrome = {
-        enable = false;
+        enable = true;
         environmentFile = config.sops.secrets."navidrome/env-file".path;
       };
       netboot-xyz.enable = false;

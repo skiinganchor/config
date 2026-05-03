@@ -66,6 +66,11 @@ in
         cfg.environmentFile != null
       )
       cfg.environmentFile;
+    # Fix for namespace error with NFS mount forcefully disable the conflicting upstream sandboxing potentially added.
+    systemd.services.navidrome.serviceConfig = {
+      RootDirectory = lib.mkForce "";
+      BindReadOnlyPaths = lib.mkForce [ ];
+    };
     services.${service} = {
       enable = true;
       user = homelab.mainUser.name;
