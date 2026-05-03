@@ -17,6 +17,7 @@ let
 
     plugins = [
       "duplicates"
+      "lyrics"
     ];
 
     terminal_encoding = "utf-8";
@@ -82,6 +83,15 @@ let
     lastgenre = {
       auto = true;
       source = "album";
+    };
+
+    lyrics = {
+      auto = true;
+      sources = [
+        "lrclib"
+        "genius"
+        "tekstowo"
+      ];
     };
   };
 in
