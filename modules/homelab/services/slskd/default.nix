@@ -43,6 +43,9 @@ in
       type = lib.types.path;
       example = lib.literalExpression ''
         pkgs.writeText "slskd-env" '''
+          SLSKD_SLSK_USERNAME=generate
+          SLSKD_SLSK_PASSWORD=generate
+          # web-ui credentials
           SLSKD_PASSWORD=slskd
           SLSKD_USERNAME=slskd
           SLSKD_JWT=secret
