@@ -127,10 +127,8 @@ in
         serviceConfig.PrivateMounts = lib.mkForce false;
         serviceConfig.ProtectHome = lib.mkForce false;
         serviceConfig.ProtectSystem = lib.mkForce "no";
+        serviceConfig.ReadWritePaths = lib.mkForce [ ];
 
-        serviceConfig.ReadWritePaths = [
-          cfg.musicDir
-        ];
         serviceConfig.ReadOnlyPaths = lib.mkForce [ ];
         serviceConfig.NetworkNamespacePath = lib.attrsets.optionalAttrs homelab.services.wireguard-netns.enable [
           "/var/run/netns/${ns}"
