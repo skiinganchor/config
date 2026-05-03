@@ -9,7 +9,7 @@ let
   cfg = homelab.services.${service};
   settingsFormat = pkgs.formats.yaml { };
   beet-wrapped = pkgs.writeScriptBin "beet-wrapped" ''
-    sudo -u share BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
+    sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
   '';
   beetsConfig = {
     directory = "${config.homelab.services.slskd.musicDir}";
@@ -88,6 +88,11 @@ in
 {
   config = lib.mkIf cfg.enable {
     homelab.services.slskd.beetsConfigFile = settingsFormat.generate "beets.yaml" beetsConfig;
+    # this was added for manually being able to use beet-wrapped commands
+    systemd.tmpfiles.rules = [
+      "d /var/lib/slskd-import-files 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -"
+    ];
+
     environment.systemPackages = [ beet-wrapped ];
   };
 }
