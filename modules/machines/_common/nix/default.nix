@@ -1,5 +1,4 @@
-{ self, ... }:
-
+{ ... }:
 {
   nix = {
     gc = {
@@ -23,11 +22,5 @@
       tarball-ttl = 0;
       trusted-users = [ "@wheel" ];
     };
-  };
-
-  programs.zsh.enable = true;
-
-  system = {
-    stateVersion = self.stateVersion;
   };
 }

@@ -33,7 +33,7 @@ devenv.nix        # dev shell & hooks config
 modules/          # reusable modules (git, homelab, nfs_client, gui)
 modules/dots/     # dotfiles: zsh, tmux, vscodium, ghostty
 modules/machines/ # host-specific: nixos/, emilia/, _common/
-src/              # base config: base.nix, default.nix, home.nix, containers.nix, libvirt.nix
+src/              # base config: base.nix, home.nix, containers.nix, libvirt.nix
 shells/           # dev shells: default.nix, python.nix, go.nix
 pkgs/             # package overlays
 ```

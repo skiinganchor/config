@@ -3,7 +3,9 @@ let
   homelab = config.homelab;
 in
 {
-  homelab.motd.enable = true;
+  system = {
+    stateVersion = self.stateVersion;
+  };
 
   home-manager = {
     useGlobalPkgs = true;
@@ -13,4 +15,12 @@ in
       inherit homelab;
     };
   };
+
+  imports = [
+    ./nix
+  ];
+
+  programs.zsh.enable = true;
+
+  homelab.motd.enable = true;
 }

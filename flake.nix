@@ -38,7 +38,6 @@
           (import "${self}/pkgs/overlays.nix" inputs)
           (import "${self}/modules/machines/_common")
           (import "${self}/modules")
-          (import "${self}/src")
           (import "${self}/src/base.nix")
         ];
         optionalLocalModules =
