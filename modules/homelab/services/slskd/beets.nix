@@ -92,6 +92,7 @@ let
         "genius"
         "tekstowo"
       ];
+      synced = true;
     };
   };
 in
