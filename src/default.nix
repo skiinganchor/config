@@ -13,14 +13,15 @@
       dates = [ "daily" ];
     };
     settings = {
-      flake-registry = "";
       auto-optimise-store = true;
-      tarball-ttl = 0;
-      trusted-users = [ "@wheel" ];
+      download-buffer-size = 268435456; # 256MB (default is 64MB)
       experimental-features = [
         "nix-command"
         "flakes"
       ];
+      flake-registry = "";
+      tarball-ttl = 0;
+      trusted-users = [ "@wheel" ];
     };
   };
 
