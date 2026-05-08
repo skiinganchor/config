@@ -7,6 +7,7 @@ in
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users."${homelab.mainUser.name}" = {
     isNormalUser = true;
+    uid = 1001; # needed for NFS moves
     shell = pkgs.zsh;
     extraGroups = [
       "wheel" # Enable ‘sudo’ for the user.
