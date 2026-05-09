@@ -4,7 +4,7 @@
 }:
 let
   service = "navidrome";
-  homelab = config.homelab;
+  inherit (config) homelab;
   cfg = homelab.services.${service};
 in
 {
@@ -78,6 +78,7 @@ in
       settings = {
         MusicFolder = "${cfg.musicDir}";
         DefaultDownsamplingFormat = "aac";
+        LyricsPriority = ".lrc,embedded,.txt";
       };
     };
     services.nginx = {

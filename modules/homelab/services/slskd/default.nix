@@ -5,7 +5,7 @@
 }:
 let
   service = "slskd";
-  homelab = config.homelab;
+  inherit (config) homelab;
   cfg = homelab.services.${service};
   ns = homelab.services.wireguard-netns.namespace;
 in
@@ -37,6 +37,9 @@ in
     };
     beetsConfigFile = lib.mkOption {
       type = lib.types.path;
+    };
+    beetsExportLyricsCommand = lib.mkOption {
+      type = lib.types.str;
     };
     environmentFile = lib.mkOption {
       description = "File with slskd credentials";
@@ -95,6 +98,13 @@ in
                 #!${lib.getExe pkgs.bash}
                 cd ${cfg.musicDir}/.beets
                 HOME=${cfg.musicDir}/.beets ${lib.getExe pkgs.beets} -c ${cfg.beetsConfigFile} import -m -A -q ${cfg.downloadDir}
+                import_status=$?
+                ${cfg.beetsExportLyricsCommand}
+                export_status=$?
+                if [ "$import_status" -ne 0 ]; then
+                  exit "$import_status"
+                fi
+                exit "$export_status"
               '';
             in
             {
