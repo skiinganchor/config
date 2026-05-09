@@ -5,6 +5,7 @@ in
 {
   imports = [
     sops-nix.nixosModules.sops
+    (import ./boot.nix)
     (import ./disko-config.nix)
     (import ./users.nix)
     ./homelab
@@ -14,16 +15,6 @@ in
   sops.age.keyFile = "/home/wookie/.config/sops/age/keys.txt";
   sops.secrets."acme/environment-file" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
-  };
-
-  boot.loader = {
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
-  };
-  boot.initrd = {
-    systemd.enable = true;
-    # kernel modules for virtualized disks
-    availableKernelModules = [ "virtio_scsi" "virtio_pci" "sr_mod" ];
   };
 
   networking = {
