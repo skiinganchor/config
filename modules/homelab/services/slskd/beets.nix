@@ -8,9 +8,6 @@ let
   inherit (config) homelab;
   cfg = homelab.services.${service};
   settingsFormat = pkgs.formats.yaml { };
-  beet-wrapped = pkgs.writeScriptBin "beet-wrapped" ''
-    sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
-  '';
   beets-export-lyrics-py = pkgs.writeText "beets-export-lyrics.py" ''
     import os
     import re
@@ -36,30 +33,60 @@ let
         sys.exit(1)
 
     written = 0
+    skipped = 0
+    errors = 0
     for row in rows:
         track_path = decode_path(row["path"])
-        lyrics = row["lyrics"].replace("\r\n", "\n").replace("\r", "\n").strip()
-        extension = ".lrc" if timestamp.search(lyrics) else ".txt"
-        lyrics_path = os.path.splitext(track_path)[0] + extension
-        lyrics = lyrics + "\n"
+        if not os.path.isfile(track_path):
+            skipped += 1
+            continue
 
         try:
-            with open(lyrics_path, "r", encoding="utf-8") as existing:
-                if existing.read() == lyrics:
-                    continue
-        except FileNotFoundError:
-            pass
+            lyrics = row["lyrics"].replace("\r\n", "\n").replace("\r", "\n").strip()
+            lyrics = re.split(r"\n\nSource: ", lyrics, maxsplit=1)[0].strip()
+            extension = ".lrc" if timestamp.search(lyrics) else ".txt"
+            lyrics_path = os.path.splitext(track_path)[0] + extension
+            lyrics = lyrics + "\n"
 
-        tmp_path = lyrics_path + ".tmp"
-        with open(tmp_path, "w", encoding="utf-8") as output:
-            output.write(lyrics)
-        os.replace(tmp_path, lyrics_path)
-        written += 1
+            try:
+                with open(lyrics_path, "r", encoding="utf-8") as existing:
+                    if existing.read() == lyrics:
+                        continue
+            except FileNotFoundError:
+                pass
 
-    print(f"Exported lyrics for {written} track(s)")
+            tmp_path = lyrics_path + ".tmp"
+            with open(tmp_path, "w", encoding="utf-8") as output:
+                output.write(lyrics)
+            os.replace(tmp_path, lyrics_path)
+            written += 1
+        except OSError as error:
+            errors += 1
+            print(f"Failed to export lyrics for {track_path}: {error}", file=sys.stderr)
+
+    print(f"Exported lyrics for {written} track(s), skipped {skipped}, errors {errors}")
+    if errors:
+        sys.exit(1)
   '';
   beets-export-lyrics = pkgs.writeShellScriptBin "beets-export-lyrics" ''
     ${lib.getExe pkgs.python3} ${beets-export-lyrics-py}
+  '';
+  beet-wrapped = pkgs.writeShellScriptBin "beet-wrapped" ''
+    sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
+    beet_status=$?
+    case "$1" in
+      import|lyrics|modify|write)
+        sudo -u ${homelab.mainUser.name} ${lib.getExe beets-export-lyrics}
+        export_status=$?
+        ;;
+      *)
+        export_status=0
+        ;;
+    esac
+    if [ "$beet_status" -ne 0 ]; then
+      exit "$beet_status"
+    fi
+    exit "$export_status"
   '';
   beetsConfig = {
     directory = "${config.homelab.services.slskd.musicDir}";
