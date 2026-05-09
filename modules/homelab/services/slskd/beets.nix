@@ -72,10 +72,36 @@ let
     ${lib.getExe pkgs.python3} ${beets-export-lyrics-py}
   '';
   beet-wrapped = pkgs.writeShellScriptBin "beet-wrapped" ''
+    find_beet_command() {
+      local expect_value=0
+      for arg in "$@"; do
+        if [ "$expect_value" -eq 1 ]; then
+          expect_value=0
+          continue
+        fi
+
+        case "$arg" in
+          -c|-d|-l|--config|--directory|--library)
+            expect_value=1
+            ;;
+          --|--config=*|--directory=*|--library=*|-v|--verbose|-h|--help|--version)
+            ;;
+          -*)
+            ;;
+          *)
+            printf '%s\n' "$arg"
+            return
+            ;;
+        esac
+      done
+    }
+
+    beet_command="$(find_beet_command "$@")"
     sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
     beet_status=$?
-    case "$1" in
+    case "$beet_command" in
       import|lyrics|modify|write)
+        echo "Exporting beets lyrics sidecars after '$beet_command'..." >&2
         sudo -u ${homelab.mainUser.name} ${lib.getExe beets-export-lyrics}
         export_status=$?
         ;;
