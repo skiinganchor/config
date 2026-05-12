@@ -10,7 +10,8 @@ in
     uid = 1001; # needed for NFS moves
     shell = pkgs.zsh;
     extraGroups = [
-      "wheel" # Enable ‘sudo’ for the user.
+      "dialout" # Enable for WebSerial writing firmware to microcontrollers like ESP32
+      "wheel" # Enable ‘sudo’ for the user
       "render" # For video transcoding
       "video" # For video transcoding
       "podman"
