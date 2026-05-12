@@ -2,6 +2,7 @@
 {
   environment.systemPackages = with pkgs; [
     eog
+    flameshot # screenshot tool for gnome, for deley use -d, eg 'flameshot gui -d 1000'
     nautilus
     onlyoffice-desktopeditors
     papers

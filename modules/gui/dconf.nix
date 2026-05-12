@@ -17,6 +17,14 @@
         })
       ];
     }
+    # Flameshot keybinding
+    {
+      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+        name = "flameshot";
+        binding = "Print";
+        command = "script --command ' flameshot gui ' /dev/null";
+      };
+    }
     # Guake keybinding
     (lib.mkIf (homelab.dconf.guakeHotkey != null) {
       "org/gnome/settings-daemon/plugins/media-keys" = {
