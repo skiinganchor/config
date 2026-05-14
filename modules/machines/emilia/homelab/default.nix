@@ -89,7 +89,7 @@ in
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
       };
       kvm.enable = true;
-      lidarr.enable = true;
+      lidarr.enable = false;
       mariadb.enable = true;
       navidrome = {
         enable = true;
