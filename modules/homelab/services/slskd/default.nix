@@ -97,7 +97,7 @@ in
               slskd-import-files = pkgs.writeScriptBin "slskd-import-files" ''
                 #!${lib.getExe pkgs.bash}
                 cd ${cfg.musicDir}/.beets
-                HOME=${cfg.musicDir}/.beets ${lib.getExe pkgs.beets} -c ${cfg.beetsConfigFile} import -m -A -q ${cfg.downloadDir}
+                HOME=${cfg.musicDir}/.beets ${lib.getExe pkgs.pkgs-unstable.beets} -c ${cfg.beetsConfigFile} import -m -A -q ${cfg.downloadDir}
                 import_status=$?
                 ${cfg.beetsExportLyricsCommand}
                 export_status=$?
