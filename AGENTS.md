@@ -10,7 +10,7 @@
 nix flake check          # validate flake structure
 nixpkgs-fmt .          # format code (auto-fix)
 statix check           # lint (reports errors)
-pre-commit run --all-files   # run hooks manually
+prek run --all-files   # run hooks manually
 ```
 
 ## Code Style
