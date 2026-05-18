@@ -132,14 +132,15 @@ let
     };
 
     import = {
-      write = true;
-      copy = true;
-      move = false;
       autotag = true;
       bell = true;
+      copy = true;
+      duplicate_action = "merge";
       log = "/dev/null";
+      move = false;
       quiet = true;
       quiet_fallback = "asis";
+      write = true;
     };
 
     original_date = true;
