@@ -74,6 +74,11 @@ in
             proxyPass = "http://127.0.0.1:4192";
             extraConfig = ''
               proxy_set_header X-Auth-Request-Redirect $request_uri;
+              # Increase size of nginx buffer size to send more roles
+              # TODO: find a more efficient solution for checking roles
+              proxy_buffer_size 16k;
+              proxy_buffers 4 32k;
+              proxy_busy_buffers_size 32k;
             '';
           };
           "= /oauth2/auth" = {
