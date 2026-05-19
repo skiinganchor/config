@@ -118,6 +118,7 @@ in
         environmentFile = config.sops.secrets."slskd/env-file".path;
       };
       sonarr.enable = true;
+      stirling-pdf.enable = true;
       uptime-kuma.enable = true;
       vaultwarden.enable = false;
       wireguard-netns = {

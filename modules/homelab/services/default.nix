@@ -31,6 +31,7 @@ in
     ./sabnzbd
     ./slskd
     ./smarthome/homeassistant
+    ./stirling-pdf
     ./tftpd
     ./uptime-kuma
     ./vaultwarden

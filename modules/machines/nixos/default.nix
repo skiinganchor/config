@@ -6,6 +6,7 @@ in
   imports = [
     sops-nix.nixosModules.sops
     ./boot.nix
+    ./homelab
     ./users.nix
   ];
 
