@@ -36,8 +36,42 @@ in
     dbPasswordFile = lib.mkOption {
       type = lib.types.path;
     };
+    oauth2ProxyEnvFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      example = lib.literalExpression ''
+        pkgs.writeText "oauth2proxy-envfile" '''
+          OAUTH2_PROXY_CLIENT_SECRET=foobar
+          OAUTH2_PROXY_COOKIE_SECRET=barfoo
+        '''
+      '';
+    };
   };
   config = lib.mkIf cfg.enable {
+    services.oauth2-proxy = lib.mkIf (cfg.oauth2ProxyEnvFile != null) {
+      enable = true;
+      keyFile = cfg.oauth2ProxyEnvFile;
+      reverseProxy = true;
+      provider = "keycloak-oidc";
+      oidcIssuerUrl = "https://${cfg.url}/realms/sacred";
+      cookie = {
+        expire = "672h";
+        refresh = "1h";
+        secure = true;
+        httpOnly = true;
+        domain = lib.strings.removePrefix "friend" cfg.url;
+      };
+      httpAddress = "127.0.0.1:4192";
+      clientID = "oauth2-proxy";
+      upstream = [ "http://[::]:0/" ];
+      scope = "openid profile email";
+      email.domains = [ "*" ];
+      extraConfig = {
+        skip-provider-button = true;
+        whitelist-domain = [ ("*" + (lib.strings.removePrefix "friend" cfg.url)) ];
+      };
+    };
+
     environment.systemPackages = [
       pkgs.keycloak
       pkgs.custom_keycloak_themes.custom

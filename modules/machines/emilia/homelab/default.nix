@@ -13,9 +13,8 @@ in
   ];
 
   sops.secrets."db-password" = { };
-  sops.secrets."keycloak/db-password" = {
-    key = "keycloak-db-password";
-  };
+  sops.secrets."keycloak/db-password" = { };
+  sops.secrets."keycloak/oauth2-proxy-env-file" = { };
   sops.secrets."navidrome/env-file" = { };
   sops.secrets."nextcloud/db-password" = {
     key = "db-password";
@@ -87,6 +86,7 @@ in
       keycloak = {
         enable = true;
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
+        oauth2ProxyEnvFile = config.sops.secrets."keycloak/oauth2-proxy-env-file".path;
       };
       kvm.enable = true;
       lidarr.enable = false;
