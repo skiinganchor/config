@@ -69,6 +69,7 @@ in
       extraConfig = {
         skip-provider-button = true;
         whitelist-domain = [ ("*" + (lib.strings.removePrefix "friend" cfg.url)) ];
+        code-challenge-method = "S256";
       };
     };
 
