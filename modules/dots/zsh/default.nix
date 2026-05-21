@@ -56,6 +56,8 @@
         bindkey '^[[3~' delete-char             # Delete
         bindkey '^[[5~' beginning-of-history    # PageUp
         bindkey '^[[6~' end-of-history          # PageDown
+
+        eval "$(devenv hook zsh)"
       '';
       syntaxHighlighting.enable = true;
       shellAliases = {
