@@ -6,7 +6,7 @@
 
 ## Verify Changes
 
-```bash
+```zsh
 nix flake check          # validate flake structure
 nixpkgs-fmt .          # format code (auto-fix)
 statix check           # lint (reports errors)

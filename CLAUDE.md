@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-```bash
+```zsh
 # Enter dev shell (provides nixpkgs-fmt, nil, statix, nix-tree)
 devenv shell
 
