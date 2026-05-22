@@ -79,6 +79,13 @@ in
         MusicFolder = "${cfg.musicDir}";
         DefaultDownsamplingFormat = "aac";
         LyricsPriority = ".lrc,embedded,.txt";
+        ExtAuth = {
+          # Trust X-User header only from nginx on localhost; without this
+          # navidrome ignores the header entirely, and anyone could spoof it.
+          TrustedSources = "127.0.0.1/32";
+          # Match what the nginx auth_request block sets via proxy_set_header.
+          UserHeader = "X-User";
+        };
       };
     };
     services.nginx = {
@@ -89,16 +96,60 @@ in
         extraConfig = ''
           # Add HSTS header to force HTTPS
           add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-          # Add X-XSS-Protection header for additional XSS protection
-          add_header X-XSS-Protection "1; mode=block" always;
         '';
-        locations."/" = {
-          proxyPass = ''
-            http://127.0.0.1:${
-              toString config.services.${service}.settings.Port
-            }
-          '';
+        locations = {
+          "/" = {
+            extraConfig = ''
+              auth_request /oauth2/auth;
+              error_page 401 = /oauth2/sign_in;
+              auth_request_set $user  $upstream_http_x_auth_request_user;
+              auth_request_set $email $upstream_http_x_auth_request_email;
+              proxy_set_header X-User  $user;
+              proxy_set_header X-Email $email;
+              auth_request_set $auth_cookie $upstream_http_set_cookie;
+              add_header Set-Cookie $auth_cookie;
+              add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+              proxy_pass http://127.0.0.1:${toString config.services.${service}.settings.Port};
+            '';
+          };
+          # Subsonic-compatible API used by mobile clients — bypasses oauth2-proxy
+          # because these clients use their own token-based auth and cannot follow
+          # an OIDC redirect flow. Clear X-User/X-Email so a client can't forge
+          # identity on this unauthenticated path; empty header => Navidrome falls
+          # back to standard Subsonic auth.
+          "/rest/" = {
+            proxyPass = "http://127.0.0.1:${toString config.services.${service}.settings.Port}";
+            extraConfig = ''
+              proxy_set_header X-User "";
+              proxy_set_header X-Email "";
+            '';
+          };
+          # Public share links must remain accessible without a session cookie.
+          # Same anti-spoofing as /rest/ clear applies.
+          "/share/" = {
+            proxyPass = "http://127.0.0.1:${toString config.services.${service}.settings.Port}";
+            extraConfig = ''
+              proxy_set_header X-User "";
+              proxy_set_header X-Email "";
+            '';
+          };
+          "/oauth2/" = {
+            proxyPass = "http://127.0.0.1:4192";
+            extraConfig = ''
+              proxy_set_header X-Auth-Request-Redirect $request_uri;
+              proxy_buffer_size 16k;
+              proxy_buffers 4 32k;
+              proxy_busy_buffers_size 32k;
+            '';
+          };
+          "= /oauth2/auth" = {
+            proxyPass = "http://127.0.0.1:4192";
+            extraConfig = ''
+              proxy_set_header Content-Length "";
+              proxy_pass_request_body off;
+            '';
+          };
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
