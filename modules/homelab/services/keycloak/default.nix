@@ -74,11 +74,6 @@ in
         skip-provider-button = true;
         whitelist-domain = [ ("*" + (lib.strings.removePrefix "friend" cfg.url)) ];
         code-challenge-method = "S256";
-        # Use the Keycloak username (preferred_username claim) as the
-        # X-Auth-Request-User value, instead of the default `sub` UUID.
-        # The flag is marked deprecated in oauth2-proxy help but is still
-        # the only way to decouple user identifier from email.
-        user-id-claim = "preferred_username";
       };
     };
 
