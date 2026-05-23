@@ -44,6 +44,9 @@ in
         # uses security.acme instead
         enableACME = false;
         extraConfig = ''
+          # Extra upload limit for large PDFs
+          client_max_body_size 250m;
+
           # Add HSTS header to force HTTPS
           add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
