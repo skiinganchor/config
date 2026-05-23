@@ -76,9 +76,7 @@ in
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
       settings = {
-        MusicFolder = "${cfg.musicDir}";
         DefaultDownsamplingFormat = "aac";
-        LyricsPriority = ".lrc,embedded,.txt";
         ExtAuth = {
           # Trust X-User header only from nginx on localhost; without this
           # navidrome ignores the header entirely, and anyone could spoof it.
@@ -86,6 +84,9 @@ in
           # Match what the nginx auth_request block sets via proxy_set_header.
           UserHeader = "X-User";
         };
+        LogLevel = "debug";
+        LyricsPriority = ".lrc,embedded,.txt";
+        MusicFolder = "${cfg.musicDir}";
       };
     };
     services.nginx = {
