@@ -66,6 +66,10 @@ in
       upstream = [ "http://[::]:0/" ];
       scope = "openid profile email";
       email.domains = [ "*" ];
+      # Emit X-Auth-Request-User/Email on /oauth2/auth so the nginx
+      # auth_request_set picks them up and forwards as X-User/X-Email
+      # to backends like Navidrome that do reverse-proxy auth.
+      setXauthrequest = true;
       extraConfig = {
         skip-provider-button = true;
         whitelist-domain = [ ("*" + (lib.strings.removePrefix "friend" cfg.url)) ];
