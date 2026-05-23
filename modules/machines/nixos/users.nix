@@ -80,9 +80,7 @@ in
     (import "${self}/modules/gui/dconf.nix")
     (import "${self}/modules/gui/gnome-terminal.nix")
     (import "${self}/modules/opencode")
-  ];
-
-  imports = [
-    (import ../../modules/dots/zsh/default.nix)
+    (import "${self}/modules/dots/zsh/default.nix")
+    { programs.zsh.initContent = lib.mkAfter ''eval "$(devenv hook zsh)"''; }
   ];
 }

@@ -1,5 +1,4 @@
 { self, config, pkgs, ... }:
-
 let
   homelab = config.homelab;
   user = "wookie";
@@ -29,7 +28,10 @@ in
           };
         };
     };
-    home-manager.sharedModules = [ (import "${self}/src/home.nix") ];
+    home-manager.sharedModules = [
+      (import "${self}/src/home.nix")
+      (import "${self}/modules/dots/zsh/default.nix")
+    ];
 
     # homelab media services user
     users.users."${homelab.mainUser.name}" = {
