@@ -1,10 +1,9 @@
 { stateVersion, ... }:
 
-# here we have system-wide configuration - for user configurations see: src/users.nix
+# here we have system-wide configuration - for user configurations see: machines/<machine-name>/users.nix
 {
   imports = [
     (import ../modules/dots/tmux/default.nix)
-    (import ../modules/dots/zsh/default.nix)
   ];
 
   home = {

@@ -81,4 +81,8 @@ in
     (import "${self}/modules/gui/gnome-terminal.nix")
     (import "${self}/modules/opencode")
   ];
+
+  imports = [
+    (import ../../modules/dots/zsh/default.nix)
+  ];
 }
