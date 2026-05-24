@@ -42,16 +42,16 @@ in
       type = lib.types.str;
     };
     environmentFile = lib.mkOption {
-      description = "File with slskd credentials";
+      description = ''
+        File with slskd credentials. Only Soulseek-network credentials are
+        required — the web UI is fronted by oauth2-proxy + Keycloak and
+        slskd's built-in auth is disabled.
+      '';
       type = lib.types.path;
       example = lib.literalExpression ''
         pkgs.writeText "slskd-env" '''
           SLSKD_SLSK_USERNAME=generate
           SLSKD_SLSK_PASSWORD=generate
-          # web-ui credentials
-          SLSKD_PASSWORD=slskd
-          SLSKD_USERNAME=slskd
-          SLSKD_JWT=secret
         '''
       '';
     };
@@ -87,6 +87,11 @@ in
       environmentFile = cfg.environmentFile;
       domain = null;
       settings = {
+        # Browser auth is handled by oauth2-proxy + Keycloak at the nginx
+        # layer; slskd's built-in login is disabled to avoid a second prompt.
+        # Loopback API access (beets, monitoring) stays open because the
+        # systemd-socket-proxyd / netns plumbing keeps the listener on 127.0.0.1.
+        web.authentication.disabled = true;
         integration.scripts.slskd-import-files = {
           on = [
             "DownloadDirectoryComplete"
@@ -194,8 +199,35 @@ in
           # Add X-XSS-Protection header for additional XSS protection
           add_header X-XSS-Protection "1; mode=block" always;
         '';
-        locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString config.services.${service}.settings.web.port}";
+        locations = {
+          "/" = {
+            extraConfig = ''
+              auth_request /oauth2/auth;
+              error_page 401 = /oauth2/sign_in;
+              auth_request_set $auth_cookie $upstream_http_set_cookie;
+              add_header Set-Cookie $auth_cookie;
+              add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+
+              proxy_pass http://127.0.0.1:${toString config.services.${service}.settings.web.port};
+            '';
+          };
+          "/oauth2/" = {
+            proxyPass = "http://127.0.0.1:4192";
+            extraConfig = ''
+              proxy_set_header X-Auth-Request-Redirect $request_uri;
+              proxy_buffer_size 16k;
+              proxy_buffers 4 32k;
+              proxy_busy_buffers_size 32k;
+            '';
+          };
+          "= /oauth2/auth" = {
+            proxyPass = "http://127.0.0.1:4192";
+            extraConfig = ''
+              proxy_set_header Content-Length "";
+              proxy_pass_request_body off;
+            '';
+          };
         };
         sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
