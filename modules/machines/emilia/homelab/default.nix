@@ -82,7 +82,7 @@ in
       homepage.enable = true;
       immich.enable = false;
       jellyfin.enable = false;
-      jellyseerr.enable = true;
+      seerr.enable = true;
       keycloak = {
         enable = true;
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;

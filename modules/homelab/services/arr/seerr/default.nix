@@ -1,6 +1,6 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
-  service = "jellyseerr";
+  service = "seerr";
   cfg = config.homelab.services.${service};
   homelab = config.homelab;
 in
@@ -19,7 +19,7 @@ in
     };
     homepage.name = lib.mkOption {
       type = lib.types.str;
-      default = "Jellyseerr";
+      default = "Seerr";
     };
     homepage.description = lib.mkOption {
       type = lib.types.str;
@@ -27,7 +27,7 @@ in
     };
     homepage.icon = lib.mkOption {
       type = lib.types.str;
-      default = "jellyseerr.svg";
+      default = "seerr.svg";
     };
     homepage.category = lib.mkOption {
       type = lib.types.str;
@@ -35,8 +35,11 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    services.${service} = {
+    # temporary until 26.05 migration
+    services.jellyseerr = {
       enable = true;
+      # temporary until 26.05 migration
+      package = pkgs.pkgs-unstable.seerr;
       port = cfg.port;
     };
 

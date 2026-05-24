@@ -7,7 +7,7 @@ in
   imports = [
     sops-nix.nixosModules.sops
     ./arr/bazarr
-    ./arr/jellyseerr
+    ./arr/seerr
     ./arr/lidarr
     ./arr/prowlarr
     ./arr/radarr

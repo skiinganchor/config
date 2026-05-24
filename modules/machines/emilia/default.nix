@@ -33,7 +33,7 @@ in
             ip protocol icmp accept
             ip6 nexthdr icmpv6 accept
 
-            tcp dport { 22, 443, 5055, 7878, 8686, 8989 } accept comment "22 SSH, 443 Nginx, 5055 Jellyseerrr, 7878 Radarr, 8686 Lidarr, 8989 Sonarr"
+            tcp dport { 22, 443, 5055, 7878, 8686, 8989 } accept comment "22 SSH, 443 Nginx, 5055 Seerrr, 7878 Radarr, 8686 Lidarr, 8989 Sonarr"
           }
 
           chain forward {

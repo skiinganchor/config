@@ -11,7 +11,7 @@ in
       deluge.enable = false;
       fail2ban.enable = true;
       jellyfin.enable = true;
-      jellyseerr.enable = false;
+      seerr.enable = false;
       netboot-xyz.enable = false;
       nextcloud.enable = false;
       nginx.enable = true;
