@@ -73,6 +73,11 @@ in
 
               # Add X-XSS-Protection header for additional XSS protection
               add_header X-XSS-Protection "1; mode=block" always;
+
+              # Large PDFs can take minutes to process server-side
+              proxy_connect_timeout 600s;
+              proxy_send_timeout    600s;
+              proxy_read_timeout    600s;
             '';
           };
           "/oauth2/" = {
