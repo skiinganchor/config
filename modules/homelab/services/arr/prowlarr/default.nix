@@ -53,6 +53,10 @@ in
         '';
         locations = {
           "/" = {
+            # proxyPass attribute (not inline proxy_pass) so NixOS auto-includes
+            # recommendedProxyConfig — otherwise the proxy_set_header below would
+            # suppress the inherited Host/X-Forwarded-* headers.
+            proxyPass = "http://127.0.0.1:9696";
             extraConfig = ''
               auth_request /oauth2/auth;
               error_page 401 = /oauth2/sign_in;
@@ -64,8 +68,6 @@ in
               add_header Set-Cookie $auth_cookie;
               add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
               add_header X-XSS-Protection "1; mode=block" always;
-
-              proxy_pass http://127.0.0.1:9696;
             '';
           };
           "/oauth2/" = {

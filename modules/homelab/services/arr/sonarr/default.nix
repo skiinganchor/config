@@ -55,6 +55,13 @@ in
         '';
         locations = {
           "/" = {
+            # proxy_pass MUST be set via this attribute (not inline in
+            # extraConfig) so NixOS auto-includes recommendedProxyConfig,
+            # which sets Host/X-Forwarded-*. Otherwise the proxy_set_header
+            # directives below would suppress the headers inherited from the
+            # http context, and Sonarr would generate redirects against
+            # 127.0.0.1:8989 instead of the public hostname.
+            proxyPass = "http://127.0.0.1:8989";
             extraConfig = ''
               auth_request /oauth2/auth;
               error_page 401 = /oauth2/sign_in;
@@ -66,8 +73,6 @@ in
               add_header Set-Cookie $auth_cookie;
               add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
               add_header X-XSS-Protection "1; mode=block" always;
-
-              proxy_pass http://127.0.0.1:8989;
             '';
           };
           "/oauth2/" = {

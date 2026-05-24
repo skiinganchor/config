@@ -100,6 +100,10 @@ in
         '';
         locations = {
           "/" = {
+            # proxyPass attribute (not inline proxy_pass) so NixOS auto-includes
+            # recommendedProxyConfig — otherwise the proxy_set_header below would
+            # suppress the inherited Host/X-Forwarded-* headers.
+            proxyPass = "http://127.0.0.1:${toString config.services.${service}.settings.Port}";
             extraConfig = ''
               auth_request /oauth2/auth;
               error_page 401 = /oauth2/sign_in;
@@ -110,8 +114,6 @@ in
               auth_request_set $auth_cookie $upstream_http_set_cookie;
               add_header Set-Cookie $auth_cookie;
               add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-              proxy_pass http://127.0.0.1:${toString config.services.${service}.settings.Port};
             '';
           };
           # Subsonic-compatible API used by mobile clients — bypasses oauth2-proxy
