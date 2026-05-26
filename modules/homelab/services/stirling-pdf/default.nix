@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   service = "stirling-pdf";
   cfg = config.homelab.services.${service};
@@ -33,6 +33,8 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
+      # temporary upgrade to unstable 2.8 while 26.05 is not upgraded. current 25.11 is using version 1.5
+      package = pkgs.pkgs-unstable.stirling-pdf;
       environment = {
         SERVER_PORT = 8888;
       };
