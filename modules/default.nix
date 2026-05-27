@@ -185,7 +185,7 @@ in
         group = "rick";
         pkgs = with pkgs; [
           git
-          thefuck
+          pay-respects
           tmux
           vscodium
           wl-clipboard
