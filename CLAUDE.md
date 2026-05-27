@@ -50,7 +50,7 @@ just update
 Both systems share `defaultModules` which layers: sops-nix, home-manager, nixvim, package overlays, `_common`, top-level modules, and `src/base.nix`.
 
 **Key directories**:
-- `src/` — base configs applied to all systems: `base.nix`, `home.nix`, `containers.nix`, `libvirt.nix`
+- `src/` — base configs applied to all systems: `base.nix`, `home.nix`, `libvirt.nix`
 - `modules/` — top-level options (`homelab.*`) defined in `modules/default.nix`; submodules for git, homelab services, NFS client, GUI, dotfiles
 - `modules/machines/_common/` — shared machine config (stateVersion, home-manager defaults, zsh, motd)
 - `modules/machines/nixos/` and `modules/machines/emilia/` — host-specific hardware/users/boot

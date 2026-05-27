@@ -19,9 +19,6 @@ in
     packages = config.homelab.mainUser.pkgs;
   };
 
-  # Global /etc/containers/registries.conf for podman (via NixOS containers module)
-  virtualisation.containers.registries.search = [ "docker.io" ];
-
   home-manager.users = {
     "${homelab.mainUser.name}" = { ... }:
       {

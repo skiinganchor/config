@@ -1,4 +1,4 @@
-{ config, my-secrets, sops-nix, ... }:
+{ config, lib, my-secrets, sops-nix, ... }:
 let
   secretsPath = builtins.toString my-secrets;
 in
@@ -35,6 +35,27 @@ in
       checkReversePath = "loose"; # Fix VPN issue
     };
   };
+
+  virtualisation = {
+    containers = {
+      enable = true;
+      # Global /etc/containers/registries.conf for podman (via NixOS containers module)
+      registries.search = [ "docker.io" ];
+    };
+    podman = {
+      enable = true;
+      autoPrune.enable = true;
+      # Create a `docker` alias for podman, to use it as a drop-in replacement
+      dockerCompat = true;
+      dockerSocket.enable = true;
+      # Required for containers under podman-compose to be able to talk to each other.
+      defaultNetwork.settings.dns_enabled = true;
+    };
+  };
+
+  networking.firewall.interfaces.podman0.allowedUDPPorts =
+    lib.lists.optionals config.virtualisation.podman.enable
+      [ 53 ];
 
   security.acme = {
     acceptTerms = true;
