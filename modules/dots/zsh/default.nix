@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, pkgs, ... }:
 {
   programs = {
     zsh = {
@@ -84,6 +84,7 @@
         gstaa = "git stash apply";
         gstl = "git stash list";
         ipp = "curl ipinfo.io/ip";
+        k = "${lib.getExe pkgs.kubectl}";
         la = "ls --color -lha";
         ls = "ls --color=auto";
         nfu = "nix flake update";
