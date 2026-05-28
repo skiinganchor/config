@@ -37,6 +37,12 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
+      settings.auth = {
+        # Delegate authentication to the reverse proxy (oauth2-proxy + Keycloak).
+        method = "External";
+        # Allow inter-service localhost API calls to skip auth.
+        required = "DisabledForLocalAddresses";
+      };
     };
 
     services.nginx = {

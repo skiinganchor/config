@@ -39,6 +39,12 @@ in
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
+      settings.auth = {
+        # Delegate authentication to the reverse proxy (oauth2-proxy + Keycloak).
+        method = "External";
+        # Allow inter-service localhost API calls (e.g. from Prowlarr) to skip auth.
+        required = "DisabledForLocalAddresses";
+      };
     };
 
     services.nginx = {
