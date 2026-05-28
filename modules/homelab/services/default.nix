@@ -22,6 +22,7 @@ in
     ./keycloak
     ./kvm
     ./mariadb
+    ./matrix
     ./navidrome
     ./netboot-xyz
     ./nextcloud
