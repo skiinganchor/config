@@ -2,7 +2,8 @@
 {
   programs.ghostty = {
     enable = true;
-    package = pkgs.ghostty-bin;
+    # still 'ghostty-bin' are not supporting x86_64-linux
+    package = pkgs.ghostty;
     settings = {
       theme = "nord";
       font-size = 16;
