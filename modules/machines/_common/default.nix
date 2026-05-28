@@ -1,4 +1,4 @@
-{ config, self, ... }:
+{ config, pkgs, self, ... }:
 let
   homelab = config.homelab;
 in
@@ -29,4 +29,12 @@ in
   programs.zsh.enable = true;
 
   homelab.motd.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    iperf3
+    jq
+    ncdu
+    tmux
+    wget
+  ];
 }
