@@ -7,6 +7,12 @@ in
     stateVersion = self.stateVersion;
   };
 
+  services.ntp = {
+    enable = true;
+  };
+
+  nix.gc.automatic = true;
+
   home-manager = {
     useGlobalPkgs = true;
     backupFileExtension = "bak";
