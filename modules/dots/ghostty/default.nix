@@ -5,7 +5,7 @@
     # still 'ghostty-bin' are not supporting x86_64-linux
     package = pkgs.ghostty;
     settings = {
-      theme = "nord";
+      theme = "Nord";
       font-size = 16;
       font-family = "Comic Code Ligatures";
       command = "/run/current-system/sw/bin/tmux";
