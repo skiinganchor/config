@@ -34,7 +34,16 @@ in
     services.${service} = {
       enable = true;
       # temporary upgrade to unstable 2.10.1 while 26.05 is not upgraded. current 25.11 is using version 1.5
-      package = pkgs.pkgs-staticdev.stirling-pdf;
+      # The React Automate (pipeline) runner hard-codes a 300000ms axios
+      # timeout per step in frontend/src/core/constants/automation.ts; large
+      # PDFs blow past it on Compress. Not configurable via env var — the
+      # value is baked into the JS bundle, so bump it at build time.
+      package = pkgs.pkgs-staticdev.stirling-pdf.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace frontend/src/core/constants/automation.ts \
+            --replace-fail 'OPERATION_TIMEOUT: 300000,' 'OPERATION_TIMEOUT: 1800000,'
+        '';
+      });
       environment = {
         SERVER_PORT = 8888;
       };
