@@ -33,8 +33,8 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
-      # temporary upgrade to unstable 2.8 while 26.05 is not upgraded. current 25.11 is using version 1.5
-      package = pkgs.pkgs-unstable.stirling-pdf;
+      # temporary upgrade to unstable 2.10.1 while 26.05 is not upgraded. current 25.11 is using version 1.5
+      package = pkgs.pkgs-staticdev.stirling-pdf;
       environment = {
         SERVER_PORT = 8888;
       };
