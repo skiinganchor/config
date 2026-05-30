@@ -78,31 +78,15 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1780136417,
-        "narHash": "sha256-LDQg+CyzhJOhvu9PfiU3keIGxAbCdm9G19Z+NlHWlEc=",
+        "lastModified": 1780155044,
+        "narHash": "sha256-kzTxOfolU4bmTKNBxFoSAHx70xD9F6WrL1cWO0NbwVs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e27d8fbc9629c795c390cd2f4bb4a819552b29fd",
+        "rev": "0dc8058d4848e26f2307c14958f6c09e20448f85",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-staticdev": {
-      "locked": {
-        "lastModified": 1780006748,
-        "narHash": "sha256-m3BRyyEeDTKQZANLsR4rBhIAQzvVfYK7KfNG93A3axw=",
-        "owner": "staticdev",
-        "repo": "nixpkgs",
-        "rev": "8f218eef6a6b11f9a1830bbffc0d4a2b13123478",
-        "type": "github"
-      },
-      "original": {
-        "owner": "staticdev",
         "ref": "master",
         "repo": "nixpkgs",
         "type": "github"
@@ -131,7 +115,6 @@
         "my-secrets": "my-secrets",
         "nixpkgs": "nixpkgs",
         "nixpkgs-master": "nixpkgs-master",
-        "nixpkgs-staticdev": "nixpkgs-staticdev",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "sops-nix": "sops-nix"
       }

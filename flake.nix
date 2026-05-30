@@ -7,7 +7,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
-    nixpkgs-staticdev.url = "github:staticdev/nixpkgs/master";
     # Temporary comment nixvim for upgrade
     # nixvim = {
     #   url = "github:nix-community/nixvim/nixos-26.05";
