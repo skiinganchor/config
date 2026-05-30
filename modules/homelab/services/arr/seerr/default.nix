@@ -35,11 +35,9 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    # temporary until 26.05 migration
-    services.jellyseerr = {
+    services.seerr = {
       enable = true;
-      # temporary until 26.05 migration
-      package = pkgs.pkgs-unstable.seerr;
+      package = pkgs.seerr;
       port = cfg.port;
     };
 

@@ -39,7 +39,7 @@ in
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
-      package = pkgs.pkgs-unstable.lidarr;
+      package = pkgs.lidarr;
       settings.auth = {
         # Delegate authentication to the reverse proxy (oauth2-proxy + Keycloak).
         method = "External";

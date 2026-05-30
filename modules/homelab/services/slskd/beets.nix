@@ -97,7 +97,7 @@ let
     }
 
     beet_command="$(find_beet_command "$@")"
-    sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.pkgs-unstable.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
+    sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
     beet_status=$?
     case "$beet_command" in
       import|lyrics|modify|write)

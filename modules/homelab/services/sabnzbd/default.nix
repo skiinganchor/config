@@ -45,8 +45,7 @@ in
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
-      # temporary until 26.05 migration
-      package = pkgs.pkgs-unstable.sabnzbd;
+      package = pkgs.sabnzbd;
     };
 
     services.nginx = {

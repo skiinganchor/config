@@ -11,7 +11,6 @@
     displayManager.gdm = {
       enable = true;
       autoSuspend = false;
-      wayland = true;
     };
     displayManager = {
       defaultSession = "gnome";

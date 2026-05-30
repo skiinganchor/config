@@ -50,7 +50,7 @@ in
     services.${service} = {
       enable = true;
       # currently needed for version 2 (current stable is version 1) - remove on upgrade
-      package = pkgs.pkgs-unstable.uptime-kuma;
+      package = pkgs.uptime-kuma;
     };
     services.nginx = {
       virtualHosts."${cfg.url}" = {
