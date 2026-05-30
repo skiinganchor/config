@@ -8,10 +8,11 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
     nixpkgs-staticdev.url = "github:staticdev/nixpkgs/master";
-    nixvim = {
-      url = "github:nix-community/nixvim/nixos-26.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Temporary comment nixvim for upgrade
+    # nixvim = {
+    #   url = "github:nix-community/nixvim/nixos-26.05";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,7 +35,7 @@
         defaultModules = [
           sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager
-          nixvim.nixosModules.nixvim
+          # nixvim.nixosModules.nixvim
           (import "${self}/pkgs/overlays.nix" inputs)
           (import "${self}/modules/machines/_common")
           (import "${self}/modules")

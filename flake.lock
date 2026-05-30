@@ -21,27 +21,6 @@
         "type": "github"
       }
     },
-    "flake-parts": {
-      "inputs": {
-        "nixpkgs-lib": [
-          "nixvim",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1778716662,
-        "narHash": "sha256-m1Yf0wZ8j1OHjTc2UwHwyQRSnNeSgLJOd7q5Y45hzi4=",
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "rev": "f7c1a2d347e4c52d5fb8d10cb4d94b5884e546fb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -99,11 +78,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1780134708,
-        "narHash": "sha256-hfv7rdvRZ0FOKMsF5RUu/dbY3YunYfVZgqH4LQLl+Go=",
+        "lastModified": 1780136417,
+        "narHash": "sha256-LDQg+CyzhJOhvu9PfiU3keIGxAbCdm9G19Z+NlHWlEc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "1fbf9e733548087b4c1356bfcad0c0f146c30b3a",
+        "rev": "e27d8fbc9629c795c390cd2f4bb4a819552b29fd",
         "type": "github"
       },
       "original": {
@@ -145,29 +124,6 @@
         "type": "github"
       }
     },
-    "nixvim": {
-      "inputs": {
-        "flake-parts": "flake-parts",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1780080183,
-        "narHash": "sha256-zbYETlE9jmgdcL9YItLxjTUjs4Gj4iFBzo45OHuk9Eg=",
-        "owner": "nix-community",
-        "repo": "nixvim",
-        "rev": "d02dc1ae7902cac908fe1ab3246888118f661ddd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "ref": "nixos-26.05",
-        "repo": "nixvim",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "disko": "disko",
@@ -177,7 +133,6 @@
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-staticdev": "nixpkgs-staticdev",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "nixvim": "nixvim",
         "sops-nix": "sops-nix"
       }
     },
@@ -198,21 +153,6 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
-        "type": "github"
-      }
-    },
-    "systems": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
         "type": "github"
       }
     }
