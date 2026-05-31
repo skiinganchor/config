@@ -135,13 +135,17 @@ in
         '';
         sslCertificate = "/var/lib/acme/${hl.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${hl.baseDomain}/key.pem";
-        locations."/_matrix" = {
-          proxyPass = "http://[::1]:8008";
-        };
-        locations."/_synapse/client" = {
-          proxyPass = "http://[::1]:8008";
-        };
-        locations = lib.optionalAttrs cfg.calls.enable {
+        locations = {
+          "/_matrix" = {
+            proxyPass = "http://[::1]:8008";
+          };
+          "/_synapse/client" = {
+            proxyPass = "http://[::1]:8008";
+          };
+          "/" = {
+            extraConfig = "return 404;";
+          };
+        } // lib.optionalAttrs cfg.calls.enable {
           "~ ^/livekit/jwt/(sfu/get|healthz)$" = {
             extraConfig = ''
               rewrite ^/livekit/jwt/(.*) /$1 break;
@@ -162,9 +166,6 @@ in
               proxy_set_header X-Forwarded-Proto $scheme;
             '';
           };
-        };
-        locations."/" = {
-          extraConfig = "return 404;";
         };
       };
     };
