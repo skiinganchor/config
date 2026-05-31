@@ -75,6 +75,9 @@
       "org/gnome/settings-daemon/plugins/power" = {
         sleep-inactive-ac-type = if homelab.dconf.suspend then "suspend" else "nothing";
         sleep-inactive-battery-type = if homelab.dconf.suspend then "suspend" else "nothing";
+      } // lib.optionalAttrs (!homelab.dconf.suspend) {
+        sleep-inactive-ac-timeout = lib.hm.gvariant.mkUint32 0;
+        sleep-inactive-battery-timeout = lib.hm.gvariant.mkUint32 0;
       };
     }
   ];
