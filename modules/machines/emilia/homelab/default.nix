@@ -24,6 +24,12 @@ in
   };
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
+  sops.secrets."matrix/oidc-client-secret" = {
+    owner = "matrix-synapse";
+  };
+  sops.secrets."matrix/registration-secret" = {
+    owner = "matrix-synapse";
+  };
   sops.secrets."slskd/env-file" = { };
   sops.secrets."wireguard-netns/config" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
@@ -104,6 +110,12 @@ in
         dbPassFile = config.sops.secrets."db-password".path;
         ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
+      };
+      matrix = {
+        enable = true;
+        calls.enable = false;
+        registrationSecretFile = config.sops.secrets."matrix/registration-secret".path;
+        oidcClientSecretFile = config.sops.secrets."matrix/oidc-client-secret".path;
       };
       nginx.enable = true;
       paperless.enable = false;
