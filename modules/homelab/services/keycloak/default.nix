@@ -52,6 +52,7 @@ in
       enable = true;
       keyFile = cfg.oauth2ProxyEnvFile;
       reverseProxy = true;
+      trustedProxyIP = [ "127.0.0.1" ];
       provider = "keycloak-oidc";
       oidcIssuerUrl = "https://${cfg.url}/realms/sacred";
       cookie = {
