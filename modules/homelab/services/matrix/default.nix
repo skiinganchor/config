@@ -9,11 +9,28 @@ let
   cfg = config.homelab.services.${service};
   hl = config.homelab;
   keyFile = "/run/livekit.key";
+  serverConfig."m.server" = "${cfg.url}:443";
+  clientConfig = {
+    "m.identity_server".base_url = "https://vector.im";
+    "m.homeserver".base_url = "https://${cfg.url}";
+  } // lib.optionalAttrs cfg.calls.enable {
+    "org.matrix.msc4143.rtc_foci" = [
+      {
+        type = "livekit";
+        livekit_service_url = "https://${cfg.url}/livekit/jwt";
+      }
+    ];
+  };
 in
 {
   options.homelab.services.matrix = {
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
+    };
+    calls.enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Enable voice and video calls via LiveKit";
     };
     monitoredServices = lib.mkOption {
       type = lib.types.listOf lib.types.str;
@@ -26,12 +43,18 @@ in
       default = "chat.${hl.baseDomain}";
     };
     registrationSecretFile = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.nullOr lib.types.str;
+      default = null;
       example = lib.literalExpression ''
-        pkgs.writeText "matrix-registration-secret.txt" '''
-          foobar
+        pkgs.writeText "matrix-registration-secret.yaml" '''
+          registration_shared_secret: "foobar"
         '''
       '';
+    };
+    oidcClientSecretFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Path to a file containing the Keycloak OIDC client secret for Synapse. When set, enables SSO login via Keycloak.";
     };
   };
   config = lib.mkIf cfg.enable {
@@ -50,19 +73,19 @@ in
         LC_CTYPE = "C";
       '';
     };
-    services.livekit = {
+    services.livekit = lib.mkIf cfg.calls.enable {
       enable = true;
       openFirewall = true;
       settings.room.auto_create = false;
       inherit keyFile;
     };
-    services.lk-jwt-service = {
+    services.lk-jwt-service = lib.mkIf cfg.calls.enable {
       enable = true;
       livekitUrl = "wss://${cfg.url}/livekit/sfu";
       inherit keyFile;
       port = 8068;
     };
-    systemd.services.livekit-key = {
+    systemd.services.livekit-key = lib.mkIf cfg.calls.enable {
       before = [
         "lk-jwt-service.service"
         "livekit.service"
@@ -80,63 +103,74 @@ in
       serviceConfig.Type = "oneshot";
       unitConfig.ConditionPathExists = "!${keyFile}";
     };
-    systemd.services.lk-jwt-service.environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.url;
-    services.caddy = {
-      virtualHosts =
-        let
-          serverConfig."m.server" = "${cfg.url}:443";
-          clientConfig."m.identity_server".base_url = "https://vector.im";
-          clientConfig."org.matrix.msc4143.rtc_foci" = [
-            {
-              type = "livekit";
-              livekit_service_url = "https://${cfg.url}/livekit/jwt";
-            }
-          ];
-          clientConfig."m.homeserver".base_url = "https://${cfg.url}";
-        in
-        {
-          "${hl.baseDomain}".extraConfig = ''
-            respond /.well-known/matrix/server `${builtins.toJSON serverConfig}`
-            respond /.well-known/matrix/client `${builtins.toJSON clientConfig}`
-            header /.well-known/matrix/* Content-Type application/json
-            header /.well-known/matrix/* Access-Control-Allow-Origin *
+    systemd.services.lk-jwt-service = lib.mkIf cfg.calls.enable {
+      environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.url;
+    };
+    services.nginx = {
+      virtualHosts."${hl.baseDomain}" = {
+        forceSSL = true;
+        enableACME = false;
+        sslCertificate = "/var/lib/acme/${hl.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${hl.baseDomain}/key.pem";
+        locations."= /.well-known/matrix/server" = {
+          extraConfig = ''
+            default_type application/json;
+            add_header Access-Control-Allow-Origin * always;
+            return 200 '${builtins.toJSON serverConfig}';
           '';
-          "${cfg.url}" = {
-            useACMEHost = hl.baseDomain;
+        };
+        locations."= /.well-known/matrix/client" = {
+          extraConfig = ''
+            default_type application/json;
+            add_header Access-Control-Allow-Origin * always;
+            return 200 '${builtins.toJSON clientConfig}';
+          '';
+        };
+      };
+      virtualHosts."${cfg.url}" = {
+        forceSSL = true;
+        enableACME = false;
+        extraConfig = ''
+          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+        '';
+        sslCertificate = "/var/lib/acme/${hl.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${hl.baseDomain}/key.pem";
+        locations."/_matrix" = {
+          proxyPass = "http://[::1]:8008";
+        };
+        locations."/_synapse/client" = {
+          proxyPass = "http://[::1]:8008";
+        };
+        locations = lib.optionalAttrs cfg.calls.enable {
+          "~ ^/livekit/jwt/(sfu/get|healthz)$" = {
             extraConfig = ''
-              @matrix path /_matrix/* /_matrix /_synapse/client/* /_synapse/client
-              reverse_proxy @matrix http://[::1]:8008
-
-              @jwt_service path /livekit/jwt/sfu/get /livekit/jwt/healthz
-              handle @jwt_service {
-                uri strip_prefix /livekit/jwt
-                reverse_proxy http://[::1]:${toString config.services.lk-jwt-service.port} {
-                  header_up Host {host}
-                  header_up X-Forwarded-Server {host}
-                  header_up X-Real-IP {remote_host}
-                  header_up X-Forwarded-For {remote_host}
-                }
-              }
-
-              @livekit_service path /livekit/sfu*
-              handle @livekit_service {
-                uri strip_prefix /livekit/sfu
-                reverse_proxy http://[::1]:${toString config.services.livekit.settings.port} {
-                  header_up Host {host}
-                  header_up X-Forwarded-Server {host}
-                  header_up X-Real-IP {remote_host}
-                  header_up X-Forwarded-For {remote_host}
-                }
-              }
-
-              respond / 404
+              rewrite ^/livekit/jwt/(.*) /$1 break;
+              proxy_pass http://[::1]:${toString config.services.lk-jwt-service.port};
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+            '';
+          };
+          "/livekit/sfu" = {
+            extraConfig = ''
+              rewrite ^/livekit/sfu/?(.*)$ /$1 break;
+              proxy_pass http://[::1]:${toString config.services.livekit.settings.port};
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
             '';
           };
         };
+        locations."/" = {
+          extraConfig = "return 404;";
+        };
+      };
     };
     services.matrix-synapse = {
       enable = true;
-      extraConfigFiles = [
+      extraConfigFiles = lib.optionals (cfg.registrationSecretFile != null) [
         cfg.registrationSecretFile
       ];
       settings = {
@@ -148,12 +182,29 @@ in
           msc4140_enabled = true;
           msc4222_enabled = true;
           msc3266_enabled = true;
+        } // lib.optionalAttrs cfg.calls.enable {
+          msc4143_enabled = true;
         };
         max_event_delay_duration = "24h";
         oembed = {
           additional_providers = [ providers ];
           disable_default_providers = false;
         };
+        oidc_providers = lib.optionals (cfg.oidcClientSecretFile != null) [
+          {
+            idp_id = "keycloak";
+            idp_name = "Keycloak";
+            issuer = "https://${hl.services.keycloak.url}/realms/sacred";
+            client_id = "synapse";
+            client_secret_path = cfg.oidcClientSecretFile;
+            scopes = [ "openid" "profile" "email" ];
+            user_mapping_provider.config = {
+              localpart_template = "{{ user.preferred_username }}";
+              display_name_template = "{{ user.name }}";
+              email_template = "{{ user.email }}";
+            };
+          }
+        ];
         listeners = [
           {
             port = 8008;
