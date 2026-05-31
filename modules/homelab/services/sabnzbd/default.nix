@@ -9,10 +9,9 @@ in
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
     };
-    configFile = lib.mkOption {
-      type = lib.types.path;
-      default = "/var/lib/sabnzbd/sabnzbd.ini";
-      description = "Path to config file.";
+    configDir = lib.mkOption {
+      type = lib.types.str;
+      default = "/var/lib/${service}";
     };
     host = lib.mkOption {
       type = lib.types.str;
