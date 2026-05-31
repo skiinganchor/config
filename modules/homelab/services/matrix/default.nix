@@ -107,26 +107,6 @@ in
       environment.LIVEKIT_FULL_ACCESS_HOMESERVERS = cfg.url;
     };
     services.nginx = {
-      virtualHosts."${hl.baseDomain}" = {
-        forceSSL = true;
-        enableACME = false;
-        sslCertificate = "/var/lib/acme/${hl.baseDomain}/fullchain.pem";
-        sslCertificateKey = "/var/lib/acme/${hl.baseDomain}/key.pem";
-        locations."= /.well-known/matrix/server" = {
-          extraConfig = ''
-            default_type application/json;
-            add_header Access-Control-Allow-Origin * always;
-            return 200 '${builtins.toJSON serverConfig}';
-          '';
-        };
-        locations."= /.well-known/matrix/client" = {
-          extraConfig = ''
-            default_type application/json;
-            add_header Access-Control-Allow-Origin * always;
-            return 200 '${builtins.toJSON clientConfig}';
-          '';
-        };
-      };
       virtualHosts."${cfg.url}" = {
         forceSSL = true;
         enableACME = false;
@@ -136,6 +116,20 @@ in
         sslCertificate = "/var/lib/acme/${hl.baseDomain}/fullchain.pem";
         sslCertificateKey = "/var/lib/acme/${hl.baseDomain}/key.pem";
         locations = {
+          "= /.well-known/matrix/server" = {
+            extraConfig = ''
+              default_type application/json;
+              add_header Access-Control-Allow-Origin * always;
+              return 200 '${builtins.toJSON serverConfig}';
+            '';
+          };
+          "= /.well-known/matrix/client" = {
+            extraConfig = ''
+              default_type application/json;
+              add_header Access-Control-Allow-Origin * always;
+              return 200 '${builtins.toJSON clientConfig}';
+            '';
+          };
           "/_matrix" = {
             proxyPass = "http://[::1]:8008";
           };
@@ -175,7 +169,7 @@ in
         cfg.registrationSecretFile
       ];
       settings = {
-        server_name = hl.baseDomain;
+        server_name = cfg.url;
         public_baseurl = "https://${cfg.url}";
         enable_registration = false;
         allow_guest_access = false;
