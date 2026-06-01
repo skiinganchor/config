@@ -24,6 +24,7 @@ in
 
   imports = [
     ./nix
+    ../../dots/nvim
   ];
 
   programs.zsh.enable = true;
