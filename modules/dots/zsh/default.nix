@@ -35,6 +35,7 @@
         export LANG=en_US.UTF-8
         export LC_CTYPE=en_US.UTF-8
         export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+        export PATH="/run/wrappers/bin:$PATH"
 
         # Colorizing plugin
         source $ZPLUG_HOME/repos/unixorn/warhol.plugin.zsh/warhol.plugin.zsh
