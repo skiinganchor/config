@@ -24,10 +24,13 @@ in
   };
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
-  sops.secrets."matrix/oidc-client-secret" = {
+  sops.secrets."matrix/registration-secret" = {
     owner = "matrix-synapse";
   };
-  sops.secrets."matrix/registration-secret" = {
+  sops.secrets."matrix/mas-config" = {
+    owner = "matrix-authentication-service";
+  };
+  sops.secrets."matrix/mas-synapse-msc3861" = {
     owner = "matrix-synapse";
   };
   sops.secrets."slskd/env-file" = { };
@@ -115,7 +118,11 @@ in
         enable = true;
         calls.enable = false;
         registrationSecretFile = config.sops.secrets."matrix/registration-secret".path;
-        oidcClientSecretFile = config.sops.secrets."matrix/oidc-client-secret".path;
+        mas = {
+          enable = true;
+          configFile = config.sops.secrets."matrix/mas-config".path;
+          synapseExtraConfigFile = config.sops.secrets."matrix/mas-synapse-msc3861".path;
+        };
       };
       nginx.enable = true;
       paperless.enable = false;
