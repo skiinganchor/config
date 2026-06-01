@@ -14,13 +14,16 @@ in
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
 
-  # Nvidia configs
   hardware.graphics.enable = true;
   # only accepted from Turing architecture
-  hardware.nvidia.open = false;
+  # Nvidia configs
   services.xserver.videoDrivers = [ "nvidia" ];
-  # wayland requirement
-  hardware.nvidia.modesetting.enable = true;
+  hardware.nvidia = {
+    open = false;
+    modesetting.enable = true; # wayland requirement
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+  };
 
   networking = {
     hostName = "nixos";
