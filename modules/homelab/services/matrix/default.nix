@@ -20,9 +20,15 @@ let
         livekit_service_url = "https://${cfg.url}/livekit/jwt";
       }
     ];
+  } // lib.optionalAttrs cfg.mas.enable {
+    "org.matrix.msc2965.authentication" = {
+      issuer = "https://${cfg.mas.url}/";
+      account = "https://${cfg.mas.url}/account/";
+    };
   };
 in
 {
+  imports = [ ./mas.nix ];
   options.homelab.services.matrix = {
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
@@ -185,7 +191,7 @@ in
           additional_providers = [ providers ];
           disable_default_providers = false;
         };
-        oidc_providers = lib.optionals (cfg.oidcClientSecretFile != null) [
+        oidc_providers = lib.optionals (!cfg.mas.enable && cfg.oidcClientSecretFile != null) [
           {
             idp_id = "keycloak";
             idp_name = "Keycloak";
