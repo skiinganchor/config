@@ -2,6 +2,47 @@
 
 let
   inherit (lib) mkOption types;
+  userType = with types; submodule {
+    options = {
+      name = mkOption {
+        type = str;
+        description = "Username for the user.";
+      };
+      group = mkOption {
+        type = str;
+        description = "Primary group for the user.";
+      };
+      uid = mkOption {
+        type = nullOr int;
+        default = null;
+        description = ''
+          Optional stable numeric uid. Leave null to let NixOS allocate one;
+          set it explicitly when the id must be aligned across hosts
+          (e.g. NFS shares).
+        '';
+      };
+      hasSudo = mkOption {
+        type = bool;
+        default = false;
+        description = "Whether the user belongs to the wheel group (sudo access).";
+      };
+      gitUserName = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "Git user.name override. Falls back to homelab.git.userName when null.";
+      };
+      gitEmail = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "Git user.email override. Falls back to homelab.git.email when null.";
+      };
+      pkgs = mkOption {
+        type = listOf package;
+        default = [ ];
+        description = "Packages available to the user.";
+      };
+    };
+  };
 in
 {
   options.homelab = {
@@ -179,10 +220,12 @@ in
     };
 
     mainUser = mkOption {
-      type = with types; attrsOf (oneOf [ str (listOf package) ]);
+      type = userType;
       default = {
         name = "rick";
         group = "rick";
+        uid = 1001; # stable for NFS share alignment
+        hasSudo = true;
         pkgs = with pkgs; [
           git
           pay-respects
@@ -191,7 +234,24 @@ in
           wl-clipboard
         ];
       };
-      description = "The main user of the system: name and pkgs";
+      description = "The main user of the system.";
+    };
+
+    extraUsers = mkOption {
+      type = types.listOf userType;
+      default = [ ];
+      description = ''
+        Additional users sharing the same shape as mainUser. Each gets a
+        NixOS user account and a home-manager profile that inherits all
+        home-manager.sharedModules.
+      '';
+      example = [
+        {
+          name = "alice";
+          group = "alice";
+          pkgs = [ ];
+        }
+      ];
     };
 
     shell = mkOption {

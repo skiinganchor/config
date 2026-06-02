@@ -2,73 +2,76 @@
 
 let
   homelab = config.homelab;
+  allUsers = [ homelab.mainUser ] ++ homelab.extraUsers;
+
+  mkSystemUser = u: lib.nameValuePair u.name (
+    {
+      isNormalUser = true;
+      shell = pkgs.zsh;
+      extraGroups = [
+        "dialout" # Enable for WebSerial writing firmware to microcontrollers like ESP32
+        "render" # For video transcoding
+        "video" # For video transcoding
+        "podman"
+      ] ++ lib.optionals u.hasSudo [ "wheel" ];
+      packages = u.pkgs;
+    }
+    // lib.optionalAttrs (u.uid != null) { inherit (u) uid; }
+  );
+
+  mkHomeManagerUser = u: lib.nameValuePair u.name {
+    home = {
+      username = u.name;
+      homeDirectory = "/home/${u.name}";
+    };
+
+    # User-scoped ~/.config/containers/registries.conf
+    xdg.configFile."containers/registries.conf".text = ''
+      [registries.search]
+      registries = ['docker.io']
+    '';
+
+    programs.git = {
+      settings.user = {
+        name = if u.gitUserName != null then u.gitUserName else config.homelab.git.userName;
+        email = if u.gitEmail != null then u.gitEmail else config.homelab.git.email;
+      };
+      includes = lib.optionals homelab.git.createWorkspaces (
+        map
+          (ws: {
+            condition = "gitdir:~/${ws.folderName}/";
+            path = "~/${ws.folderName}/.gitconfig";
+          })
+          homelab.git.workspaces
+      );
+    };
+
+    home.file = lib.mkIf homelab.git.createWorkspaces (
+      lib.listToAttrs (map
+        (ws:
+          {
+            name = "${ws.folderName}/.gitconfig";
+            value = {
+              text = ''
+                [user]
+                  email = ${ws.email}
+                  name = ${ws.userName}
+                ${lib.optionalString (ws.sshKeyFile != null) ''
+                [core]
+                  sshCommand = "ssh -i ${ws.sshKeyFile} -o IdentitiesOnly=yes"
+                ''}
+              '';
+            };
+          })
+        homelab.git.workspaces)
+    );
+  };
 in
 {
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users."${homelab.mainUser.name}" = {
-    isNormalUser = true;
-    uid = 1001; # needed for NFS moves
-    shell = pkgs.zsh;
-    extraGroups = [
-      "dialout" # Enable for WebSerial writing firmware to microcontrollers like ESP32
-      "wheel" # Enable ‘sudo’ for the user
-      "render" # For video transcoding
-      "video" # For video transcoding
-      "podman"
-    ];
-    packages = config.homelab.mainUser.pkgs;
-  };
+  users.users = lib.listToAttrs (map mkSystemUser allUsers);
 
-  home-manager.users = {
-    "${homelab.mainUser.name}" = { ... }:
-      {
-        home = {
-          username = homelab.mainUser.name;
-          homeDirectory = "/home/${homelab.mainUser.name}";
-        };
+  home-manager.users = lib.listToAttrs (map mkHomeManagerUser allUsers);
 
-        # User-scoped ~/.config/containers/registries.conf
-        xdg.configFile."containers/registries.conf".text = ''
-          [registries.search]
-          registries = ['docker.io']
-        '';
-
-        programs.git = {
-          settings.user = {
-            name = config.homelab.git.userName;
-            email = config.homelab.git.email;
-          };
-          includes = lib.optionals homelab.git.createWorkspaces (
-            map
-              (ws: {
-                condition = "gitdir:~/${ws.folderName}/";
-                path = "~/${ws.folderName}/.gitconfig";
-              })
-              homelab.git.workspaces
-          );
-        };
-
-        home.file = lib.mkIf homelab.git.createWorkspaces (
-          lib.listToAttrs (map
-            (ws:
-              {
-                name = "${ws.folderName}/.gitconfig";
-                value = {
-                  text = ''
-                    [user]
-                      email = ${ws.email}
-                      name = ${ws.userName}
-                    ${lib.optionalString (ws.sshKeyFile != null) ''
-                    [core]
-                      sshCommand = "ssh -i ${ws.sshKeyFile} -o IdentitiesOnly=yes"
-                    ''}
-                  '';
-                };
-              })
-            homelab.git.workspaces)
-        );
-      };
-  };
   home-manager.sharedModules = [
     (import "${self}/src/home.nix")
     (import "${self}/modules/dots/ghostty/default.nix")
