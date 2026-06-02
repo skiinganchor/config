@@ -27,6 +27,12 @@ in
     ../../dots/nvim
   ];
 
+  # Preserve SSH agent socket across sudo so nixos-rebuild can fetch
+  # git+ssh:// flake inputs (e.g. my-secrets) without needing a separate key.
+  security.sudo.extraConfig = ''
+    Defaults env_keep += "SSH_AUTH_SOCK"
+  '';
+
   programs.zsh.enable = true;
 
   homelab.motd.enable = true;
