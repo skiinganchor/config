@@ -17,6 +17,9 @@ let
       packages = u.pkgs;
     }
     // lib.optionalAttrs (u.uid != null) { inherit (u) uid; }
+    // lib.optionalAttrs (u.passwordSecretName != null) {
+      hashedPasswordFile = config.sops.secrets.${u.passwordSecretName}.path;
+    }
   );
 
   mkHomeManagerUser = u: lib.nameValuePair u.name {
@@ -68,6 +71,13 @@ let
   };
 in
 {
+  sops.secrets = lib.listToAttrs (
+    lib.concatMap
+      (u: lib.optional (u.passwordSecretName != null)
+        (lib.nameValuePair u.passwordSecretName { neededForUsers = true; }))
+      allUsers
+  );
+
   users.users = lib.listToAttrs (map mkSystemUser allUsers);
 
   home-manager.users = lib.listToAttrs (map mkHomeManagerUser allUsers);

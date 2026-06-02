@@ -36,6 +36,17 @@ let
         default = null;
         description = "Git user.email override. Falls back to homelab.git.email when null.";
       };
+      passwordSecretName = mkOption {
+        type = nullOr str;
+        default = null;
+        example = "users/alice/password";
+        description = ''
+          sops secret key whose decrypted value is a hashed password
+          (output of mkpasswd -m yescrypt). When set, the secret is declared
+          with neededForUsers = true and linked to the user's hashedPasswordFile.
+          Leave null to leave the account locked (e.g. SSH-key-only users).
+        '';
+      };
       pkgs = mkOption {
         type = listOf package;
         default = [ ];
