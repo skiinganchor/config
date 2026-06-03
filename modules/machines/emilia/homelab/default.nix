@@ -83,7 +83,7 @@ in
     };
     services = {
       enable = true;
-      audiobookshelf.enable = true;
+      audiobookshelf.enable = false;
       bazarr.enable = true;
       deluge.enable = false;
       fail2ban.enable = true;
