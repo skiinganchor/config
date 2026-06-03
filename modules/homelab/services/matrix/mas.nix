@@ -17,6 +17,12 @@ in
         oidc_providers integration.
       '';
     };
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "matrix-authentication-service"
+      ];
+    };
     url = lib.mkOption {
       type = lib.types.str;
       default = "matrix-auth.${hl.baseDomain}";
@@ -24,7 +30,7 @@ in
     };
     port = lib.mkOption {
       type = lib.types.port;
-      default = 8080;
+      default = 8083; # 8080 is the default but is already in use
       description = "Local port MAS listens on (loopback only, nginx fronts TLS)";
     };
     configFile = lib.mkOption {
