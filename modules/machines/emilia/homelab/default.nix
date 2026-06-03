@@ -15,15 +15,6 @@ in
   sops.secrets."db-password" = { };
   sops.secrets."keycloak/db-password" = { };
   sops.secrets."keycloak/oauth2-proxy-env-file" = { };
-  sops.secrets."navidrome/env-file" = { };
-  sops.secrets."nextcloud/db-password" = {
-    key = "db-password";
-    owner = "nextcloud";
-    group = "nextcloud";
-    mode = "0440";
-  };
-  sops.secrets."nextcloud/admin-password" = { };
-  sops.secrets."nextcloud/secrets" = { };
   sops.secrets."matrix/registration-secret" = {
     owner = "matrix-synapse";
   };
@@ -33,6 +24,15 @@ in
   sops.secrets."matrix/mas-synapse-msc3861" = {
     owner = "matrix-synapse";
   };
+  sops.secrets."navidrome/env-file" = { };
+  sops.secrets."nextcloud/db-password" = {
+    key = "db-password";
+    owner = "nextcloud";
+    group = "nextcloud";
+    mode = "0440";
+  };
+  sops.secrets."nextcloud/admin-password" = { };
+  sops.secrets."nextcloud/secrets" = { };
   sops.secrets."slskd/env-file" = { };
   sops.secrets."wireguard-netns/config" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";

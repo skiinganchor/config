@@ -66,10 +66,10 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1780375734,
-        "narHash": "sha256-j7fQK5ZczVsbpbes+oTRg8oEpuOAzHEde9ShxMfzBaQ=",
+        "lastModified": 1780507587,
+        "narHash": "sha256-iaxqACWlwYOBKptAdJET8g4/MGZa+fefrqF+RhYnEBA=",
         "ref": "main",
-        "rev": "9f61505f1417a4ea7e50a394d2c98496d4e36f9a",
+        "rev": "53157c53f07efd1bf11862e32f3fbd018fd603ea",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/skiinganchor/config-private.git"
@@ -99,11 +99,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1780474169,
-        "narHash": "sha256-8uXt2YHPgU/CZuxX82pW9mHS+f05KpeSJxM0kiyG4Lk=",
+        "lastModified": 1780507315,
+        "narHash": "sha256-Rw55xcEgrSidfQhTvzDXx7DkRhVCf6WGs4tNwwh4hY4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c8a19e8b7a15f9c968aee31f5b4c43ec16f8c1cc",
+        "rev": "2ad84de57adfa30ba9c4b640308ab9746ef6ffde",
         "type": "github"
       },
       "original": {
