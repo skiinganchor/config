@@ -1,4 +1,4 @@
-{ config, lib, my-secrets, sops-nix, ... }:
+{ config, lib, my-secrets, pkgs, sops-nix, ... }:
 let
   secretsPath = builtins.toString my-secrets;
 in
@@ -77,4 +77,8 @@ in
       extraLegoRenewFlags = [ "--ari-disable" ];
     };
   };
+
+  environment.systemPackages = with pkgs; [
+    devenv
+  ];
 }

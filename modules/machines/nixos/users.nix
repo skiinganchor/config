@@ -71,6 +71,11 @@ let
   };
 in
 {
+  # mainUser should always have sudo regardless of what local.nix sets.
+  # mkDefault loses to any explicit assignment, but wins over the submodule
+  # field default of false — so a user can still override it if they want.
+  homelab.mainUser.hasSudo = lib.mkDefault true;
+
   sops.secrets = lib.listToAttrs (
     lib.concatMap
       (u: lib.optional (u.passwordSecretName != null)
