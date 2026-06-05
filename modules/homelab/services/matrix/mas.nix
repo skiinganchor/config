@@ -95,6 +95,7 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "postgresql.service" ];
       requires = [ "postgresql.service" ];
+      environment.RUST_LOG = "mas_oidc_client=trace,mas=debug,warn";
       serviceConfig = {
         User = masUser;
         Group = masUser;
@@ -126,6 +127,8 @@ in
         proxyPass = "http://127.0.0.1:${toString mas.port}";
       };
     };
+
+    homelab.services.matrix.monitoredServices = [ "matrix-synapse" "matrix-authentication-service" ];
 
     services.matrix-synapse.extraConfigFiles = [ mas.synapseExtraConfigFile ];
   };
