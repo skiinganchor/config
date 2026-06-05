@@ -95,7 +95,6 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "postgresql.service" ];
       requires = [ "postgresql.service" ];
-      environment.RUST_LOG = "mas_oidc_client=trace,mas=debug,warn";
       serviceConfig = {
         User = masUser;
         Group = masUser;
