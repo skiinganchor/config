@@ -28,6 +28,7 @@ in
     ./nextcloud
     ./nfs
     ./nginx
+    ./ntfy
     ./paperless-ngx
     ./sabnzbd
     ./slskd

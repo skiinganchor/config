@@ -125,6 +125,7 @@ in
         };
       };
       nginx.enable = true;
+      ntfy.enable = false;
       paperless.enable = false;
       prowlarr.enable = true;
       radarr.enable = true;
