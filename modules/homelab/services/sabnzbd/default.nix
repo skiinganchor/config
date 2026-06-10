@@ -42,6 +42,7 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
+      configFile = null;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
       package = pkgs.sabnzbd;
