@@ -37,7 +37,7 @@ in
       # timeout per step in frontend/src/core/constants/automation.ts; large
       # PDFs blow past it on Compress. Not configurable via env var — the
       # value is baked into the JS bundle, so bump it at build time.
-      package = pkgs.pkgs-master.stirling-pdf.overrideAttrs (old: {
+      package = pkgs.stirling-pdf.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace frontend/src/core/constants/automation.ts \
             --replace-fail 'OPERATION_TIMEOUT: 300000,' 'OPERATION_TIMEOUT: 1800000,'
