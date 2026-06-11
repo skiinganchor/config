@@ -98,8 +98,17 @@ in
         oauth2ProxyEnvFile = config.sops.secrets."keycloak/oauth2-proxy-env-file".path;
       };
       kvm.enable = true;
-      lidarr.enable = false;
       mariadb.enable = true;
+      matrix = {
+        enable = true;
+        calls.enable = false;
+        registrationSecretFile = config.sops.secrets."matrix/registration-secret".path;
+        mas = {
+          enable = true;
+          configFile = config.sops.secrets."matrix/mas-config".path;
+          synapseExtraConfigFile = config.sops.secrets."matrix/mas-synapse-msc3861".path;
+        };
+      };
       navidrome = {
         enable = true;
         environmentFile = config.sops.secrets."navidrome/env-file".path;
@@ -114,18 +123,8 @@ in
         ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
-      matrix = {
-        enable = true;
-        calls.enable = false;
-        registrationSecretFile = config.sops.secrets."matrix/registration-secret".path;
-        mas = {
-          enable = true;
-          configFile = config.sops.secrets."matrix/mas-config".path;
-          synapseExtraConfigFile = config.sops.secrets."matrix/mas-synapse-msc3861".path;
-        };
-      };
       nginx.enable = true;
-      ntfy.enable = false;
+      ntfy.enable = true;
       paperless.enable = false;
       prowlarr.enable = true;
       radarr.enable = true;
