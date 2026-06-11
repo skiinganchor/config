@@ -223,8 +223,12 @@ in
         oidc_login_update_avatar = false;
         oidc_login_code_challenge_method = "S256";
 
+        # Take the client IP that nginx computed (real_ip from Cloudflare
+        # ranges) rather than trusting a client-suppliable CF header, so
+        # fail2ban bans cannot be spoofed or evaded.
+        trusted_proxies = [ "127.0.0.1" ];
         forwarded_for_headers = [
-          "HTTP_CF_CONNECTING_IP"
+          "HTTP_X_FORWARDED_FOR"
         ];
         enabledPreviewProviders = [
           "OC\\Preview\\BMP"

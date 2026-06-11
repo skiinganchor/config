@@ -27,6 +27,11 @@ in
       # Ref: https://docs.nextcloud.com/server/latest/admin_manual/installation/harden_server.html#setup-a-filter-and-a-jail-for-nextcloud
       jails = {
 
+        sshd.settings = {
+          enabled = true;
+          backend = "systemd";
+        };
+
         nextcloud.settings = {
           # START modification to work with syslog instead of logile
           backend = "systemd";

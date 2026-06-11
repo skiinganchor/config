@@ -94,7 +94,6 @@ in
       enable = true;
       database.type = "mariadb";
       database.passwordFile = cfg.dbPasswordFile;
-      initialAdminPassword = "dont.trust123defaults";
       settings = {
         spi-theme-static-max-age = "-1";
         spi-theme-cache-themes = false;

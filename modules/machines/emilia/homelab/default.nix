@@ -25,6 +25,7 @@ in
     owner = "matrix-synapse";
   };
   sops.secrets."navidrome/env-file" = { };
+  sops.secrets."ntfy/env-file" = { };
   sops.secrets."nextcloud/db-password" = {
     key = "db-password";
     owner = "nextcloud";
@@ -124,7 +125,10 @@ in
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
       nginx.enable = true;
-      ntfy.enable = true;
+      ntfy = {
+        enable = true;
+        environmentFile = config.sops.secrets."ntfy/env-file".path;
+      };
       paperless.enable = false;
       prowlarr.enable = true;
       radarr.enable = true;
