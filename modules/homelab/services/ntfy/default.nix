@@ -40,6 +40,11 @@ in
       settings = {
         base-url = "https://${cfg.url}";
         listen-http = "127.0.0.1:${toString port}";
+        # Without this, every request appears to come from nginx
+        # (127.0.0.1) and all clients share a single visitor's rate
+        # limits (60-request burst, 30 subscriptions) — which starves
+        # Synapse's pushes and the phones' UnifiedPush streams.
+        behind-proxy = true;
         auth-file = "/var/lib/ntfy-sh/user.db";
         auth-default-access = "deny-all";
         # UnifiedPush topics (up*) are anonymously readable and writable:
