@@ -62,6 +62,19 @@ in
       default = null;
       description = "Path to a file containing the Keycloak OIDC client secret for Synapse. When set, enables SSO login via Keycloak.";
     };
+    ipRangeWhitelist = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "192.168.31.21" ];
+      description = ''
+        IPs/CIDRs to exempt from Synapse's default ip_range_blacklist (which
+        blocks private/loopback ranges to prevent SSRF). Needed when an
+        outbound target Synapse must reach — e.g. a UnifiedPush gateway
+        (ntfy) on the LAN — resolves to a private address; otherwise the
+        push fails with "no results for hostname lookup" after the address
+        is dropped by the blacklist.
+      '';
+    };
   };
   config = lib.mkIf cfg.enable {
     users.users.matrix-synapse = {
@@ -179,6 +192,7 @@ in
         public_baseurl = "https://${cfg.url}";
         enable_registration = false;
         allow_guest_access = false;
+        ip_range_whitelist = cfg.ipRangeWhitelist;
         experimental_features = {
           msc4140_enabled = true;
           msc4222_enabled = true;

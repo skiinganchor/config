@@ -104,6 +104,13 @@ in
         enable = true;
         calls.enable = false;
         registrationSecretFile = config.sops.secrets."matrix/registration-secret".path;
+        # ntfy (UnifiedPush gateway) is resolved via /etc/hosts (the
+        # uptime-kuma module maps every vhost to 127.0.0.1) before DNS is
+        # consulted, so Synapse reaches it on loopback — but its default
+        # ip_range_blacklist drops 127.0.0.0/8. Whitelist the loopback the
+        # push actually targets; the LAN IP covers the path if /etc/hosts
+        # ever stops shadowing it.
+        ipRangeWhitelist = [ "127.0.0.1" "192.168.31.21" ];
         mas = {
           enable = true;
           configFile = config.sops.secrets."matrix/mas-config".path;
