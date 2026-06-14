@@ -44,6 +44,18 @@ in
     dnsIP = lib.mkOption {
       type = lib.types.str;
     };
+    mtu = lib.mkOption {
+      type = lib.types.int;
+      default = 1280;
+      description = ''
+        MTU for the WireGuard interface. The kernel default (1420) assumes a
+        1500-byte underlying path; if the real path is smaller (PPPoE, nested
+        tunnels, a degraded uplink) large packets are silently blackholed —
+        small packets and TCP handshakes succeed but TLS/logins stall with
+        "unexpected eof". 1280 is the universally safe IPv6 minimum; raise
+        toward 1412-1420 if the path supports it for better throughput.
+      '';
+    };
   };
   config = lib.mkIf cfg.enable {
     systemd.services."netns@" = {
@@ -76,6 +88,7 @@ in
             ${iproute2}/bin/ip -n ${cfg.namespace} address add ${cfg.privateIP} dev wg0
             ${iproute2}/bin/ip netns exec ${cfg.namespace} \
             ${pkgs.wireguard-tools}/bin/wg setconf wg0 ${cfg.configFile}
+            ${iproute2}/bin/ip -n ${cfg.namespace} link set wg0 mtu ${toString cfg.mtu}
             ${iproute2}/bin/ip -n ${cfg.namespace} link set wg0 up
             ${iproute2}/bin/ip -n ${cfg.namespace} link set lo up
             ${iproute2}/bin/ip -n ${cfg.namespace} route add default dev wg0
