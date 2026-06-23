@@ -100,7 +100,7 @@ let
     sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
     beet_status=$?
     case "$beet_command" in
-      import|lyrics|modify|write)
+      import|lyrics|modify|write|move)
         echo "Exporting beets lyrics sidecars after '$beet_command'..." >&2
         sudo -u ${homelab.mainUser.name} ${lib.getExe beets-export-lyrics}
         export_status=$?
@@ -122,6 +122,16 @@ let
       "duplicates"
       "lyrics"
     ];
+
+    # This handles the cases where odd characters are replaced by '_'
+    replace = {
+      # 1. Directory Separators: Matches any forward slash (/) or backslash (\) such as AC/DC
+      "[\\\\/]" = "_";
+      # 2. Hidden Files: Matches a literal dot (.) if it appears at the very beginning of a name
+      "^\\." = "_";
+      # 3. Forbidden & Control Characters: Matches Windows-illegal characters and ASCII control codes
+      "[\\x00-\\x1f\\\\?*:\"<>|]" = "_";
+    };
 
     terminal_encoding = "utf-8";
 
