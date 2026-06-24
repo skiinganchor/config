@@ -163,7 +163,7 @@ let
     paths = {
       default = "$albumartist/($year) $album/$track $title";
       singleton = "$albumartist/($year) $album/$track $title";
-      comp = "Compilations/$album/$track $title";
+      comp = "Compilations/($year) $album/$track $title";
     };
 
     aunique = {
