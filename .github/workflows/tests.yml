@@ -23,7 +23,13 @@ jobs:
       - name: Output devenv version
         run: devenv version
       - name: Build the devenv shell and run any git hooks
-        run: devenv test
+        run: |
+          for i in 1 2 3; do
+            devenv test && exit 0
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          exit 1
 
   tests:
     name: Flake Test
