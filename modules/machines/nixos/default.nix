@@ -22,7 +22,7 @@ in
     open = false;
     modesetting.enable = true; # wayland requirement
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
   networking = {
