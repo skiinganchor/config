@@ -22,7 +22,7 @@ in
     open = false;
     modesetting.enable = true; # wayland requirement
     nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
   networking = {
@@ -44,6 +44,9 @@ in
       enable = true;
       # Global /etc/containers/registries.conf for podman (via NixOS containers module)
       registries.search = [ "docker.io" ];
+    };
+    libvirtd = {
+      enable = true;
     };
     podman = {
       enable = true;

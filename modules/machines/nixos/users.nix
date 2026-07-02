@@ -6,6 +6,7 @@ let
 
   mkSystemUser = u: lib.nameValuePair u.name (
     {
+      linger = true;
       isNormalUser = true;
       shell = pkgs.zsh;
       extraGroups = [
