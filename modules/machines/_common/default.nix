@@ -24,7 +24,7 @@ in
 
   imports = [
     ./nix
-    ../../dots/nvim
+    ../../dots/nixvim
   ];
 
   # Preserve SSH agent socket across sudo so nixos-rebuild can fetch
