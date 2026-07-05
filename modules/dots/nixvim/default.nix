@@ -50,6 +50,30 @@
         action = "<nop>";
       }
       {
+        mode = [ "n" "i" "v" ];
+        key = "<Up>";
+        action = "<nop>";
+        options.desc = "Disable arrow key";
+      }
+      {
+        mode = [ "n" "i" "v" ];
+        key = "<Down>";
+        action = "<nop>";
+        options.desc = "Disable arrow key";
+      }
+      {
+        mode = [ "n" "i" "v" ];
+        key = "<Left>";
+        action = "<nop>";
+        options.desc = "Disable arrow key";
+      }
+      {
+        mode = [ "n" "i" "v" ];
+        key = "<Right>";
+        action = "<nop>";
+        options.desc = "Disable arrow key";
+      }
+      {
         mode = "v";
         key = "J";
         action = ":m '>+1<CR>gv=gv";
