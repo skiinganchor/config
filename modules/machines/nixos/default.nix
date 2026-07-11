@@ -1,14 +1,6 @@
 { config, lib, my-secrets, pkgs, sops-nix, ... }:
 let
   secretsPath = builtins.toString my-secrets;
-  nvidiaLegacy580Master = pkgs.pkgs-master.linuxPackages_latest.nvidiaPackages.legacy_580;
-  nvidiaLegacy580 = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-    inherit (nvidiaLegacy580Master) version;
-    sha256_64bit = nvidiaLegacy580Master.src.outputHash;
-    openSha256 = nvidiaLegacy580Master.open.src.outputHash;
-    settingsSha256 = nvidiaLegacy580Master.settings.src.outputHash;
-    persistencedSha256 = nvidiaLegacy580Master.persistenced.src.outputHash;
-  };
 in
 {
   imports = [
@@ -30,7 +22,7 @@ in
     open = false;
     modesetting.enable = true; # wayland requirement
     nvidiaSettings = true;
-    package = nvidiaLegacy580;
+    package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
   };
 
   networking = {
