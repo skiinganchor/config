@@ -95,7 +95,6 @@ in
         integration.scripts.slskd-import-files = {
           on = [
             "DownloadDirectoryComplete"
-            "DownloadFileComplete"
           ];
           run =
             let
