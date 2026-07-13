@@ -8,6 +8,9 @@ let
   inherit (config) homelab;
   cfg = homelab.services.${service};
   settingsFormat = pkgs.formats.yaml { };
+
+  # The lyrics plugin stores fetched lyrics in the beets database. Export them
+  # beside each audio file so media players can find them without reading beets.
   beets-export-lyrics-py = pkgs.writeText "beets-export-lyrics.py" ''
     import os
     import re
@@ -15,14 +18,17 @@ let
     import sys
 
     library = "${config.homelab.services.slskd.musicDir}/beets.db"
+    # A timestamp at the start of a line means the lyrics use the LRC format.
     timestamp = re.compile(r"^\s*\[\d{1,2}:\d{2}(?:[.:]\d{1,3})\]", re.MULTILINE)
 
     def decode_path(path):
+        # Older beets databases can contain paths as SQLite byte strings.
         if isinstance(path, bytes):
             return os.fsdecode(path)
         return path
 
     try:
+        # Read only tracks for which the lyrics plugin stored non-empty text.
         conn = sqlite3.connect(library)
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
@@ -42,6 +48,8 @@ let
             continue
 
         try:
+            # Normalize line endings and remove the source footer added by some
+            # lyrics providers; the sidecar should contain lyrics only.
             lyrics = row["lyrics"].replace("\r\n", "\n").replace("\r", "\n").strip()
             lyrics = re.split(r"\n\nSource: ", lyrics, maxsplit=1)[0].strip()
             extension = ".lrc" if timestamp.search(lyrics) else ".txt"
@@ -55,6 +63,8 @@ let
             except FileNotFoundError:
                 pass
 
+            # Replace the sidecar atomically so readers never observe a
+            # partially written lyrics file.
             tmp_path = lyrics_path + ".tmp"
             with open(tmp_path, "w", encoding="utf-8") as output:
                 output.write(lyrics)
@@ -72,9 +82,13 @@ let
     ${lib.getExe pkgs.python3} ${beets-export-lyrics-py}
   '';
   beet-wrapped = pkgs.writeShellScriptBin "beet-wrapped" ''
+    # Find the beets subcommand while ignoring global options. This lets the
+    # wrapper decide whether the command can change tracks or their paths.
     find_beet_command() {
       local expect_value=0
       for arg in "$@"; do
+        # Options such as --config consume the following argument; that value
+        # must not be mistaken for the subcommand.
         if [ "$expect_value" -eq 1 ]; then
           expect_value=0
           continue
@@ -97,8 +111,17 @@ let
     }
 
     beet_command="$(find_beet_command "$@")"
-    sudo -u ${homelab.mainUser.name} BEETSDIR=/var/lib/slskd-import-files ${lib.getExe pkgs.beets} -c ${config.homelab.services.slskd.beetsConfigFile} "$@"
+    # Always use the homelab user's ownership, the generated configuration,
+    # and a stable directory for beets' state files.
+    sudo -u ${homelab.mainUser.name} \
+      BEETSDIR=/var/lib/slskd-import-files \
+      ${lib.getExe pkgs.beets} \
+      -c ${config.homelab.services.slskd.beetsConfigFile} \
+      "$@"
     beet_status=$?
+
+    # These commands may fetch lyrics or move tracks. Regenerate sidecars so
+    # their contents and locations continue to match the beets database.
     case "$beet_command" in
       import|lyrics|modify|write|move)
         echo "Exporting beets lyrics sidecars after '$beet_command'..." >&2
@@ -109,6 +132,9 @@ let
         export_status=0
         ;;
     esac
+
+    # Report the beets failure first; only report an export failure when the
+    # requested beets operation itself succeeded.
     if [ "$beet_status" -ne 0 ]; then
       exit "$beet_status"
     fi
@@ -121,6 +147,7 @@ let
     plugins = [
       "duplicates"
       "lyrics"
+      "musicbrainz"
     ];
 
     # This handles the cases where odd characters are replaced by '_'
@@ -144,12 +171,14 @@ let
     import = {
       autotag = true;
       bell = true;
-      copy = true;
-      duplicate_action = "merge";
-      log = "/dev/null";
-      move = false;
-      quiet = true;
-      quiet_fallback = "asis";
+      copy = false;
+      duplicate_action = "skip";
+      log = "${config.homelab.services.slskd.musicDir}/.beets/import.log";
+      move = true;
+      # Automated imports pass -q explicitly. Keep manual imports interactive so
+      # ambiguous matches can be resolved instead of silently skipped.
+      quiet = false;
+      quiet_fallback = "skip";
       write = true;
     };
 

@@ -93,6 +93,8 @@ in
         # systemd-socket-proxyd / netns plumbing keeps the listener on 127.0.0.1.
         web.authentication.disabled = true;
         integration.scripts.slskd-import-files = {
+          # Wait for the complete directory so beets sees an album as one unit
+          # instead of importing each track as it arrives.
           on = [
             "DownloadDirectoryComplete"
           ];
@@ -100,9 +102,25 @@ in
             let
               slskd-import-files = pkgs.writeScriptBin "slskd-import-files" ''
                 #!${lib.getExe pkgs.bash}
+
+                # slskd can finish multiple downloads at once. Hold an
+                # exclusive lock so only one importer moves files or writes the
+                # SQLite library at a time. The lock is released on process exit.
+                exec 9>${cfg.musicDir}/.beets/import.lock
+                ${lib.getExe' pkgs.util-linux "flock"} 9
+
+                # Keep beets' state in the writable library directory. -m moves
+                # matched files into the configured layout; -q accepts strong
+                # matches unattended and skips ambiguous matches for later review.
                 cd ${cfg.musicDir}/.beets
-                HOME=${cfg.musicDir}/.beets ${lib.getExe pkgs.beets} -c ${cfg.beetsConfigFile} import -m -A -q ${cfg.downloadDir}
+                HOME=${cfg.musicDir}/.beets \
+                  ${lib.getExe pkgs.beets} \
+                  -c ${cfg.beetsConfigFile} \
+                  import -m -q ${cfg.downloadDir}
                 import_status=$?
+
+                # Refresh sidecars even after a partial import, but preserve the
+                # import error as the script's primary failure status.
                 ${cfg.beetsExportLyricsCommand}
                 export_status=$?
                 if [ "$import_status" -ne 0 ]; then
