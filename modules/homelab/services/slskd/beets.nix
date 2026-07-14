@@ -187,6 +187,7 @@ let
     per_disc_numbering = true;
 
     match = {
+      ignore_data_tracks = false;
       ignore_video_tracks = false;
     };
 
