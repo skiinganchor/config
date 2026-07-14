@@ -8,6 +8,7 @@ let
   inherit (config) homelab;
   cfg = homelab.services.${service};
   ns = homelab.services.wireguard-netns.namespace;
+  beetsPackage = pkgs.pkgs-unstable.beets;
 in
 {
   imports = [ ./beets.nix ];
@@ -114,7 +115,7 @@ in
                 # matches unattended and skips ambiguous matches for later review.
                 cd ${cfg.musicDir}/.beets
                 HOME=${cfg.musicDir}/.beets \
-                  ${lib.getExe pkgs.beets} \
+                  ${lib.getExe beetsPackage} \
                   -c ${cfg.beetsConfigFile} \
                   import -m -q ${cfg.downloadDir}
                 import_status=$?

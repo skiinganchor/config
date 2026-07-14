@@ -8,6 +8,7 @@ let
   inherit (config) homelab;
   cfg = homelab.services.${service};
   settingsFormat = pkgs.formats.yaml { };
+  beetsPackage = pkgs.pkgs-unstable.beets;
 
   # The lyrics plugin stores fetched lyrics in the beets database. Export them
   # beside each audio file so media players can find them without reading beets.
@@ -115,7 +116,7 @@ let
     # and a stable directory for beets' state files.
     sudo -u ${homelab.mainUser.name} \
       BEETSDIR=/var/lib/slskd-import-files \
-      ${lib.getExe pkgs.beets} \
+      ${lib.getExe beetsPackage} \
       -c ${config.homelab.services.slskd.beetsConfigFile} \
       "$@"
     beet_status=$?
@@ -184,6 +185,10 @@ let
 
     original_date = true;
     per_disc_numbering = true;
+
+    match = {
+      ignore_video_tracks = false;
+    };
 
     embedart = {
       auto = true;
