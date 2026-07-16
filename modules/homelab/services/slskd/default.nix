@@ -104,20 +104,58 @@ in
               slskd-import-files = pkgs.writeScriptBin "slskd-import-files" ''
                 #!${lib.getExe pkgs.bash}
 
+                # Keep a persistent transcript while also forwarding output to
+                # systemd-cat, which makes it visible in the slskd journal.
+                import_log=${lib.escapeShellArg "${cfg.musicDir}/.beets/slskd-import.log"}
+                exec > >(${lib.getExe' pkgs.coreutils "tee"} -a "$import_log") 2>&1
+                echo
+                echo "[$(${lib.getExe' pkgs.coreutils "date"} --iso-8601=seconds)] DownloadDirectoryComplete received"
+
+                # slskd supplies event data as JSON. Import only the directory
+                # that completed; importing the download root would also ingest
+                # other albums while their transfers are still in progress.
+                if ! event_directory="$(
+                  ${lib.getExe' pkgs.coreutils "printf"} '%s' "$SLSKD_SCRIPT_DATA" \
+                    | ${lib.getExe pkgs.jq} -er '.localDirectoryName | select(type == "string" and length > 0)'
+                )"; then
+                  echo "Invalid DownloadDirectoryComplete event data" >&2
+                  exit 1
+                fi
+
+                download_root="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- ${lib.escapeShellArg cfg.downloadDir})"
+                if [[ "$event_directory" = /* ]]; then
+                  import_candidate="$event_directory"
+                else
+                  import_candidate=${lib.escapeShellArg "${cfg.downloadDir}/"}"$event_directory"
+                fi
+                if ! import_directory="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- "$import_candidate")"; then
+                  echo "Completed download directory does not exist: $import_candidate" >&2
+                  exit 1
+                fi
+                case "$import_directory" in
+                  "$download_root"/*) ;;
+                  *)
+                    echo "Refusing to import directory outside $download_root: $import_directory" >&2
+                    exit 1
+                    ;;
+                esac
+                echo "Importing completed directory: $import_directory"
+
                 # slskd can finish multiple downloads at once. Hold an
                 # exclusive lock so only one importer moves files or writes the
                 # SQLite library at a time. The lock is released on process exit.
-                exec 9>${cfg.musicDir}/.beets/import.lock
+                exec 9>${lib.escapeShellArg "${cfg.musicDir}/.beets/import.lock"}
                 ${lib.getExe' pkgs.util-linux "flock"} 9
 
-                # Keep beets' state in the writable library directory. -m moves
-                # matched files into the configured layout; -q accepts strong
-                # matches unattended and skips ambiguous matches for later review.
-                cd ${cfg.musicDir}/.beets
-                HOME=${cfg.musicDir}/.beets \
+                # Keep beets' state in the writable library directory. Verbose
+                # output records why a candidate was accepted or skipped; -m
+                # moves matches and -q accepts only strong recommendations.
+                cd ${lib.escapeShellArg "${cfg.musicDir}/.beets"}
+                HOME=${lib.escapeShellArg "${cfg.musicDir}/.beets"} \
                   ${lib.getExe beetsPackage} \
+                  -v \
                   -c ${cfg.beetsConfigFile} \
-                  import -m -q ${cfg.downloadDir}
+                  import -m -q "$import_directory"
                 import_status=$?
 
                 # Refresh sidecars even after a partial import, but preserve the
@@ -131,9 +169,10 @@ in
               '';
             in
             {
-              executable = "${lib.getExe pkgs.bash}";
+              executable = "${lib.getExe' pkgs.systemd "systemd-cat"}";
               arglist = [
-                "-c"
+                "--identifier=slskd-import"
+                (lib.getExe pkgs.bash)
                 (lib.getExe slskd-import-files)
               ];
             };

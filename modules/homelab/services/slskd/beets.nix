@@ -177,11 +177,10 @@ let
       log = "${config.homelab.services.slskd.musicDir}/.beets/import.log";
       move = true;
       # Manual `beet-wrapped import` commands do not pass -q and remain
-      # interactive. The slskd completion hook does pass -q; for that automated
-      # import, retain existing tags when no strong recommendation is available
-      # and still add the files to the library instead of leaving them in staging.
+      # interactive. The slskd completion hook does pass -q and leaves albums
+      # without a strong recommendation in staging for manual review.
       quiet = false;
-      quiet_fallback = "asis";
+      quiet_fallback = "skip";
       write = true;
     };
 
