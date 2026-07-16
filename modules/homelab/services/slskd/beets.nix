@@ -176,10 +176,12 @@ let
       duplicate_action = "skip";
       log = "${config.homelab.services.slskd.musicDir}/.beets/import.log";
       move = true;
-      # Automated imports pass -q explicitly. Keep manual imports interactive so
-      # ambiguous matches can be resolved instead of silently skipped.
+      # Manual `beet-wrapped import` commands do not pass -q and remain
+      # interactive. The slskd completion hook does pass -q; for that automated
+      # import, retain existing tags when no strong recommendation is available
+      # and still add the files to the library instead of leaving them in staging.
       quiet = false;
-      quiet_fallback = "skip";
+      quiet_fallback = "asis";
       write = true;
     };
 
@@ -189,6 +191,11 @@ let
     match = {
       ignore_data_tracks = false;
       ignore_video_tracks = false;
+      # An incomplete album may still be a strong match. Extra files that the
+      # candidate release cannot account for retain beets' safer default cap.
+      max_rec = {
+        missing_tracks = "strong";
+      };
     };
 
     embedart = {

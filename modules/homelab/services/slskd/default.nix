@@ -132,7 +132,10 @@ in
             in
             {
               executable = "${lib.getExe pkgs.bash}";
-              command = "-c ${lib.getExe slskd-import-files}";
+              arglist = [
+                "-c"
+                (lib.getExe slskd-import-files)
+              ];
             };
         };
         directories = {
