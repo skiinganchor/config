@@ -3,6 +3,7 @@
 let
   homelab = config.homelab;
   allUsers = [ homelab.mainUser ] ++ homelab.extraUsers;
+  vimSettings = builtins.toJSON { "vim.useSystemClipboard" = true; };
 
   mkSystemUser = u: lib.nameValuePair u.name (
     {
@@ -34,6 +35,9 @@ let
       registries = ['docker.io']
     '';
 
+    # Keep clipboard yanks working for both local VSCodium and remote editors.
+    programs.vscodium.profiles.default.userSettings."vim.useSystemClipboard" = true;
+
     programs.git = {
       settings.user = {
         name = if u.gitUserName != null then u.gitUserName else config.homelab.git.userName;
@@ -49,7 +53,10 @@ let
       );
     };
 
-    home.file = lib.mkIf homelab.git.createWorkspaces (
+    home.file = {
+      ".vscode-server/data/Machine/settings.json".text = vimSettings;
+      ".vscodium-server/data/Machine/settings.json".text = vimSettings;
+    } // lib.optionalAttrs homelab.git.createWorkspaces (
       lib.listToAttrs (map
         (ws:
           {
