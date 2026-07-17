@@ -86,6 +86,7 @@
         gs = "git status";
         gsta = "git stash";
         gstaa = "git stash apply";
+        gstal = "git stash && git pull && git stash apply";
         gstl = "git stash list";
         ipp = "curl ipinfo.io/ip";
         k = "${lib.getExe pkgs.kubectl}";
