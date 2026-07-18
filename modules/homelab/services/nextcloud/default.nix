@@ -128,39 +128,24 @@ in
       https = true;
 
       extraApps = {
-        inherit (config.services.nextcloud.package.packages.apps) calendar contacts deck news notes tasks twofactor_webauthn;
-        cospend = pkgs.fetchNextcloudApp {
-          license = "agpl3Plus";
-          url =
-            "https://github.com/julien-nc/cospend-nc/releases/download/v4.0.0/cospend-4.0.0.tar.gz";
-          hash = "sha256-fxIC0gEYCek1LZ0rxmRAbWyYSfuHt6Bs/JCLYPR7ZFM=";
-        };
+        inherit (config.services.nextcloud.package.packages.apps)
+          calendar
+          contacts
+          cospend
+          deck
+          news
+          notes
+          oidc_login
+          phonetrack
+          tasks
+          twofactor_admin
+          twofactor_webauthn;
 
         drawio = pkgs.fetchNextcloudApp {
           license = "agpl3Plus";
           url =
-            "https://github.com/jgraph/drawio-nextcloud/releases/download/v4.2.3/drawio-v4.2.3.tar.gz";
-          hash = "sha256-XLcDIcb7nr4oW7OtYC1FrF1lOsZTddhFT0HgjFsXXvg=";
-        };
-
-        phonetrack = pkgs.fetchNextcloudApp {
-          license = "agpl3Plus";
-          url =
-            "https://github.com/julien-nc/phonetrack/releases/download/v1.2.0/phonetrack-1.2.0.tar.gz";
-          hash = "sha256-d6vPKCJ1Us0zQIFkIlSQ5cmEgO1zXGtdDniIjfqGh28=";
-        };
-
-        twofactor_admin = pkgs.fetchNextcloudApp {
-          license = "agpl3Plus";
-          url =
-            "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.11.1/twofactor_admin-v4.11.1.tar.gz";
-          hash = "sha256-dx8bEsC/rSAKN9rwP2hf3d8G3f3J1RzCrSqU6BbcvRY=";
-        };
-
-        oidc_login = pkgs.fetchNextcloudApp {
-          license = "agpl3Plus";
-          url = "https://github.com/pulsejet/nextcloud-oidc-login/releases/download/v3.3.1/oidc_login.tar.gz";
-          hash = "sha256-KBa8A7aC0uS6FQoOSa7nIkaaYe+A2KeAtzfqoKw0Gn4=";
+            "https://github.com/arnowelzel/drawio-nextcloud/releases/download/v4.3.0/drawio-v4.3.0.tar.gz";
+          hash = "sha256-nVcO2V0zo7VdL/o8c6IRbiIqFnGBH7NdqL/eefQ/ip0=";
         };
       };
       extraAppsEnable = true;
