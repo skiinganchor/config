@@ -1,8 +1,12 @@
 { lib, config, ... }:
 let
   cfg = config.homelab.services.matrix;
-  mas = cfg.mas;
+  inherit (cfg) mas;
   hl = config.homelab;
+  credentialPath = name: "\${CREDENTIALS_DIRECTORY}/${name}";
+  signingKeyCredentials = lib.listToAttrs (
+    lib.imap0 (i: path: lib.nameValuePair "signing-key-${toString i}" path) mas.signingKeyFiles
+  );
 in
 {
   options.homelab.services.matrix.mas = {
@@ -25,16 +29,18 @@ in
       default = 8083; # 8080 is the default but is already in use
       description = "Local port MAS listens on (loopback only, nginx fronts TLS)";
     };
-    configFile = lib.mkOption {
+    encryptionSecretFile = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
       description = ''
-        Path to the fully-rendered MAS configuration YAML (typically a sops
-        secret). Must contain all secrets (encryption key, signing keys,
-        matrix.secret, and upstream_oauth2 with the Keycloak provider).
-        Generate a starting point with `mas-cli config generate`, then edit
-        the URLs and add the Keycloak upstream provider.
+        Path to the MAS encryption secret. The existing value must be preserved
+        because MAS uses it to encrypt data stored in its database.
       '';
+    };
+    signingKeyFiles = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Paths to the private signing keys used by MAS";
     };
     sharedSecretFile = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
@@ -45,17 +51,40 @@ in
         matrix.secret in the MAS configuration.
       '';
     };
+    upstreamOAuth2 = {
+      providerId = lib.mkOption {
+        type = lib.types.str;
+        description = "Stable ULID identifying the upstream OAuth 2.0 provider";
+      };
+      clientId = lib.mkOption {
+        type = lib.types.str;
+        description = "OAuth 2.0 client ID used by MAS with the upstream provider";
+      };
+      clientSecretFile = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Path to the OAuth 2.0 client secret used by MAS";
+      };
+    };
   };
 
   config = lib.mkIf (cfg.enable && mas.enable) {
     assertions = [
       {
-        assertion = mas.configFile != null;
-        message = "homelab.services.matrix.mas.configFile must be set when MAS is enabled";
+        assertion = mas.encryptionSecretFile != null;
+        message = "homelab.services.matrix.mas.encryptionSecretFile must be set when MAS is enabled";
+      }
+      {
+        assertion = mas.signingKeyFiles != [ ];
+        message = "homelab.services.matrix.mas.signingKeyFiles must contain at least one signing key when MAS is enabled";
       }
       {
         assertion = mas.sharedSecretFile != null;
         message = "homelab.services.matrix.mas.sharedSecretFile must be set when MAS is enabled";
+      }
+      {
+        assertion = mas.upstreamOAuth2.clientSecretFile != null;
+        message = "homelab.services.matrix.mas.upstreamOAuth2.clientSecretFile must be set when MAS is enabled";
       }
       {
         assertion = cfg.oidcClientSecretFile == null;
@@ -66,11 +95,96 @@ in
     services.matrix-authentication-service = {
       enable = true;
       createDatabase = true;
-      extraConfigFiles = [ mas.configFile ];
-      # MAS additively merges lists from every config file. Keep this empty
-      # while configFile is still a complete legacy configuration, otherwise
-      # both listener sets try to bind the same address.
-      settings.http.listeners = [ ];
+      credentials = {
+        encryption = mas.encryptionSecretFile;
+        synapse-shared-secret = mas.sharedSecretFile;
+        upstream-oauth2-client-secret = mas.upstreamOAuth2.clientSecretFile;
+      } // signingKeyCredentials;
+      settings = {
+        http = {
+          public_base = "https://${mas.url}/";
+          issuer = "https://${mas.url}/";
+          listeners = [
+            {
+              name = "web";
+              resources = map (name: { inherit name; }) [
+                "discovery"
+                "human"
+                "oauth"
+                "compat"
+                "graphql"
+                "assets"
+              ];
+              binds = [
+                {
+                  host = "127.0.0.1";
+                  inherit (mas) port;
+                }
+              ];
+              proxy_protocol = false;
+            }
+          ];
+        };
+        database = {
+          uri = "postgresql:///matrix-authentication-service?host=/run/postgresql";
+          max_connections = 10;
+          min_connections = 0;
+          connect_timeout = 30;
+          idle_timeout = 600;
+          max_lifetime = 1800;
+        };
+        email = {
+          from = ''"Authentication Service" <root@localhost>'';
+          reply_to = ''"Authentication Service" <root@localhost>'';
+          transport = "blackhole";
+        };
+        secrets = {
+          encryption_file = credentialPath "encryption";
+          keys = lib.imap0
+            (i: _: {
+              key_file = credentialPath "signing-key-${toString i}";
+            })
+            mas.signingKeyFiles;
+        };
+        passwords = {
+          enabled = false;
+          minimum_complexity = 3;
+        };
+        matrix = {
+          kind = "synapse";
+          homeserver = cfg.url;
+          secret_file = credentialPath "synapse-shared-secret";
+          endpoint = "http://[::1]:8008/";
+        };
+        upstream_oauth2.providers = [
+          {
+            id = mas.upstreamOAuth2.providerId;
+            issuer = "https://${hl.services.keycloak.url}/realms/sacred";
+            client_id = mas.upstreamOAuth2.clientId;
+            client_secret_file = credentialPath "upstream-oauth2-client-secret";
+            id_token_signed_response_alg = "ES256";
+            pkce_method = "always";
+            token_endpoint_auth_method = "client_secret_post";
+            scope = "openid profile email";
+            claims_imports = {
+              skip_confirmation = true;
+              localpart = {
+                action = "require";
+                template = "{{ user.preferred_username }}";
+              };
+              displayname = {
+                action = "force";
+                template = "{{ user.name }}";
+              };
+              email = {
+                action = "force";
+                template = "{{ user.email }}";
+                set_email_verification = "import";
+              };
+            };
+          }
+        ];
+      };
     };
 
     services.nginx.virtualHosts."${mas.url}" = {

@@ -18,10 +18,15 @@ in
   sops.secrets."matrix/registration-secret" = {
     owner = "matrix-synapse";
   };
-  sops.secrets."matrix/mas-config" = { };
-  sops.secrets."matrix/mas-shared-secret" = {
+  sops.secrets."matrix/mas/encryption" = { };
+  sops.secrets."matrix/mas/signing-key-rsa" = { };
+  sops.secrets."matrix/mas/signing-key-ec-1" = { };
+  sops.secrets."matrix/mas/signing-key-ec-2" = { };
+  sops.secrets."matrix/mas/signing-key-ec-3" = { };
+  sops.secrets."matrix/mas/synapse-shared-secret" = {
     owner = "matrix-synapse";
   };
+  sops.secrets."matrix/oidc-client-secret" = { };
   sops.secrets."navidrome/env-file" = { };
   sops.secrets."ntfy/env-file" = { };
   sops.secrets."nextcloud/db-password" = {
@@ -111,8 +116,19 @@ in
         ipRangeWhitelist = [ "127.0.0.1" "192.168.31.21" ];
         mas = {
           enable = true;
-          configFile = config.sops.secrets."matrix/mas-config".path;
-          sharedSecretFile = config.sops.secrets."matrix/mas-shared-secret".path;
+          encryptionSecretFile = config.sops.secrets."matrix/mas/encryption".path;
+          signingKeyFiles = map (name: config.sops.secrets."matrix/mas/${name}".path) [
+            "signing-key-rsa"
+            "signing-key-ec-1"
+            "signing-key-ec-2"
+            "signing-key-ec-3"
+          ];
+          sharedSecretFile = config.sops.secrets."matrix/mas/synapse-shared-secret".path;
+          upstreamOAuth2 = {
+            providerId = "01KT73JSNJTTJ5MDCAEJ7NX2A2";
+            clientId = "matrix-auth";
+            clientSecretFile = config.sops.secrets."matrix/oidc-client-secret".path;
+          };
         };
       };
       navidrome = {
