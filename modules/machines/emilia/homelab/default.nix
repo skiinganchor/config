@@ -18,10 +18,8 @@ in
   sops.secrets."matrix/registration-secret" = {
     owner = "matrix-synapse";
   };
-  sops.secrets."matrix/mas-config" = {
-    owner = "matrix-authentication-service";
-  };
-  sops.secrets."matrix/mas-synapse-msc3861" = {
+  sops.secrets."matrix/mas-config" = { };
+  sops.secrets."matrix/mas-shared-secret" = {
     owner = "matrix-synapse";
   };
   sops.secrets."navidrome/env-file" = { };
@@ -114,7 +112,7 @@ in
         mas = {
           enable = true;
           configFile = config.sops.secrets."matrix/mas-config".path;
-          synapseExtraConfigFile = config.sops.secrets."matrix/mas-synapse-msc3861".path;
+          sharedSecretFile = config.sops.secrets."matrix/mas-shared-secret".path;
         };
       };
       navidrome = {

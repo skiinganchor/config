@@ -1,9 +1,8 @@
-{ pkgs, lib, config, ... }:
+{ lib, config, ... }:
 let
   cfg = config.homelab.services.matrix;
   mas = cfg.mas;
   hl = config.homelab;
-  masUser = "matrix-authentication-service";
 in
 {
   options.homelab.services.matrix.mas = {
@@ -11,17 +10,10 @@ in
       type = lib.types.bool;
       default = false;
       description = ''
-        Enable Matrix Authentication Service (MAS) for MSC3861 OAuth 2.0
-        authentication. Required for clients like Element X. When enabled,
-        Synapse delegates all authentication to MAS, replacing the legacy
-        oidc_providers integration.
+        Enable Matrix Authentication Service (MAS) and configure Synapse to
+        delegate authentication to it. This replaces Synapse's legacy
+        oidc_providers integration and supports clients such as Element X.
       '';
-    };
-    monitoredServices = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [
-        "matrix-authentication-service"
-      ];
     };
     url = lib.mkOption {
       type = lib.types.str;
@@ -39,19 +31,18 @@ in
       description = ''
         Path to the fully-rendered MAS configuration YAML (typically a sops
         secret). Must contain all secrets (encryption key, signing keys,
-        matrix.secret, clients, upstream_oauth2 with the Keycloak provider).
+        matrix.secret, and upstream_oauth2 with the Keycloak provider).
         Generate a starting point with `mas-cli config generate`, then edit
-        URLs, add the Keycloak upstream provider, and the Synapse client.
+        the URLs and add the Keycloak upstream provider.
       '';
     };
-    synapseExtraConfigFile = lib.mkOption {
+    sharedSecretFile = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = null;
       description = ''
-        Path to a YAML fragment loaded into Synapse via extraConfigFiles,
-        containing the experimental_features.msc3861 block. Must share the
-        admin_token and client_secret with the matrix.secret and clients
-        sections of the MAS config.
+        Path to the shared secret used by Synapse and MAS to authenticate
+        requests between the two services. Its contents must match
+        matrix.secret in the MAS configuration.
       '';
     };
   };
@@ -63,55 +54,23 @@ in
         message = "homelab.services.matrix.mas.configFile must be set when MAS is enabled";
       }
       {
-        assertion = mas.synapseExtraConfigFile != null;
-        message = "homelab.services.matrix.mas.synapseExtraConfigFile must be set when MAS is enabled";
+        assertion = mas.sharedSecretFile != null;
+        message = "homelab.services.matrix.mas.sharedSecretFile must be set when MAS is enabled";
       }
       {
         assertion = cfg.oidcClientSecretFile == null;
-        message = "homelab.services.matrix.oidcClientSecretFile cannot be used together with MAS. MSC3861 disables Synapse's legacy OIDC path; configure Keycloak as an upstream provider in the MAS config instead.";
+        message = "homelab.services.matrix.oidcClientSecretFile cannot be used together with MAS. Delegated authentication disables Synapse's legacy OIDC path; configure Keycloak as an upstream provider in the MAS config instead.";
       }
     ];
 
-    users.users.${masUser} = {
-      isSystemUser = true;
-      group = masUser;
-      home = "/var/lib/${masUser}";
-      createHome = true;
-    };
-    users.groups.${masUser} = { };
-
-    services.postgresql = {
-      ensureDatabases = [ masUser ];
-      ensureUsers = [
-        {
-          name = masUser;
-          ensureDBOwnership = true;
-        }
-      ];
-    };
-
-    systemd.services.matrix-authentication-service = {
-      description = "Matrix Authentication Service";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "postgresql.service" ];
-      requires = [ "postgresql.service" ];
-      serviceConfig = {
-        User = masUser;
-        Group = masUser;
-        ExecStartPre = [
-          "${pkgs.matrix-authentication-service}/bin/mas-cli database migrate --config=${mas.configFile}"
-          "${pkgs.matrix-authentication-service}/bin/mas-cli config sync --config=${mas.configFile}"
-        ];
-        ExecStart = "${pkgs.matrix-authentication-service}/bin/mas-cli server --config=${mas.configFile}";
-        Restart = "on-failure";
-        RestartSec = "10s";
-        StateDirectory = masUser;
-        WorkingDirectory = "/var/lib/${masUser}";
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
-        NoNewPrivileges = true;
-      };
+    services.matrix-authentication-service = {
+      enable = true;
+      createDatabase = true;
+      extraConfigFiles = [ mas.configFile ];
+      # MAS additively merges lists from every config file. Keep this empty
+      # while configFile is still a complete legacy configuration, otherwise
+      # both listener sets try to bind the same address.
+      settings.http.listeners = [ ];
     };
 
     services.nginx.virtualHosts."${mas.url}" = {
@@ -124,11 +83,27 @@ in
       sslCertificateKey = "/var/lib/acme/${hl.baseDomain}/key.pem";
       locations."/" = {
         proxyPass = "http://127.0.0.1:${toString mas.port}";
+        extraConfig = ''
+          proxy_http_version 1.1;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        '';
       };
+    };
+
+    services.nginx.virtualHosts."${cfg.url}".locations."~ ^/_matrix/client/(.*)/(login|logout|refresh)" = {
+      proxyPass = "http://127.0.0.1:${toString mas.port}";
+      extraConfig = ''
+        proxy_http_version 1.1;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      '';
     };
 
     homelab.services.matrix.monitoredServices = [ "matrix-synapse" "matrix-authentication-service" ];
 
-    services.matrix-synapse.extraConfigFiles = [ mas.synapseExtraConfigFile ];
+    services.matrix-synapse.settings.matrix_authentication_service = {
+      enabled = true;
+      endpoint = "http://127.0.0.1:${toString mas.port}/";
+      secret_path = mas.sharedSecretFile;
+    };
   };
 }

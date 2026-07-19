@@ -81,6 +81,8 @@
               };
               modules = [
                 disko.nixosModules.disko
+                # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
+                (import "${nixpkgs-master}/nixos/modules/services/matrix/matrix-authentication-service.nix")
                 (import "${self}/modules/machines/emilia")
               ]
               ++ defaultModules;
