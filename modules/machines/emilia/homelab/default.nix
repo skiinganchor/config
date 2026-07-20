@@ -42,6 +42,11 @@ in
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
 
+  systemd.services = {
+    slskd.restartTriggers = [ config.sops.secrets."wireguard-netns/config".sopsFileHash ];
+    wg_client.restartTriggers = [ config.sops.secrets."wireguard-netns/config".sopsFileHash ];
+  };
+
   homelab = {
     baseDomain = domain;
     mainUser = {
@@ -52,7 +57,7 @@ in
     networks.local.wireguard-ext = {
       id = 15;
       cidr = {
-        v4 = "10.68.0.1";
+        v4 = "10.2.0.1";
         v6 = null;
       };
       dhcp = {

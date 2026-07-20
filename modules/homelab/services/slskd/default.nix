@@ -213,6 +213,7 @@ in
         ];
       }
       // lib.attrsets.optionalAttrs homelab.services.wireguard-netns.enable {
+        after = [ "${ns}.service" ];
         bindsTo = [ "netns@${ns}.service" ];
         environment = {
           DOTNET_USE_POLLING_FILE_WATCHER = "true";

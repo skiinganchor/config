@@ -35,6 +35,8 @@ in
           PublicKey = <server's publickey>
           Endpoint = <server's ip>:51820
           AllowedIPs = 0.0.0.0/0
+
+          PersistentKeepalive = 25
         '''
       '';
     };
@@ -71,6 +73,13 @@ in
           with pkgs;
           writers.writeBash "wg-up" ''
             set -e
+
+            # A failed setup can leave wg0 behind because systemd does not run
+            # ExecStop when ExecStart fails. Remove only this module's fixed
+            # interface name before creating it again.
+            ${iproute2}/bin/ip link del wg0 2>/dev/null || true
+            ${iproute2}/bin/ip -n ${cfg.namespace} link del wg0 2>/dev/null || true
+
             ${iproute2}/bin/ip link add wg0 type wireguard
             ${iproute2}/bin/ip link set wg0 netns ${cfg.namespace}
             ${iproute2}/bin/ip -n ${cfg.namespace} address add ${cfg.privateIP} dev wg0
@@ -83,9 +92,9 @@ in
         ExecStop =
           with pkgs;
           writers.writeBash "wg-down" ''
-            set -e
-            ${iproute2}/bin/ip -n ${cfg.namespace} route del default dev wg0
-            ${iproute2}/bin/ip -n ${cfg.namespace} link del wg0
+            ${iproute2}/bin/ip -n ${cfg.namespace} route del default dev wg0 2>/dev/null || true
+            ${iproute2}/bin/ip -n ${cfg.namespace} link del wg0 2>/dev/null || true
+            ${iproute2}/bin/ip link del wg0 2>/dev/null || true
           '';
       };
     };
