@@ -8,6 +8,7 @@ in
     (import ./boot.nix)
     (import ./disko-config.nix)
     (import ./users.nix)
+    ../../homelab/services/matrix/mas.nix
     ./homelab
   ];
 

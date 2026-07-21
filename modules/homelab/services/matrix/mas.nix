@@ -9,65 +9,6 @@ let
   );
 in
 {
-  options.homelab.services.matrix.mas = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Enable Matrix Authentication Service (MAS) and configure Synapse to
-        delegate authentication to it. This replaces Synapse's legacy
-        oidc_providers integration and supports clients such as Element X.
-      '';
-    };
-    url = lib.mkOption {
-      type = lib.types.str;
-      default = "matrix-auth.${hl.baseDomain}";
-      description = "Public hostname for MAS (used as OAuth 2.0 issuer)";
-    };
-    port = lib.mkOption {
-      type = lib.types.port;
-      default = 8083; # 8080 is the default but is already in use
-      description = "Local port MAS listens on (loopback only, nginx fronts TLS)";
-    };
-    encryptionSecretFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = ''
-        Path to the MAS encryption secret. The existing value must be preserved
-        because MAS uses it to encrypt data stored in its database.
-      '';
-    };
-    signingKeyFiles = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "Paths to the private signing keys used by MAS";
-    };
-    sharedSecretFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = ''
-        Path to the shared secret used by Synapse and MAS to authenticate
-        requests between the two services. Its contents must match
-        matrix.secret in the MAS configuration.
-      '';
-    };
-    upstreamOAuth2 = {
-      providerId = lib.mkOption {
-        type = lib.types.str;
-        description = "Stable ULID identifying the upstream OAuth 2.0 provider";
-      };
-      clientId = lib.mkOption {
-        type = lib.types.str;
-        description = "OAuth 2.0 client ID used by MAS with the upstream provider";
-      };
-      clientSecretFile = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-        description = "Path to the OAuth 2.0 client secret used by MAS";
-      };
-    };
-  };
-
   config = lib.mkIf (cfg.enable && mas.enable) {
     assertions = [
       {
