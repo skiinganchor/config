@@ -16,6 +16,7 @@
       let
         image = "org.gnome.eog.desktop";
         inode = "org.gnome.Nautilus.desktop";
+        music = "feishin.desktop";
         office = "onlyoffice-desktopeditors.desktop";
         pdf = "org.gnome.Papers.desktop";
         text = "codium.desktop";
@@ -25,6 +26,33 @@
       {
         enable = true;
         addedAssociations = {
+          "application/ogg" = [ music ];
+          "application/vnd.apple.mpegurl" = [ music ];
+          "application/x-mpegurl" = [ music ];
+          "audio/aac" = [ music ];
+          "audio/flac" = [ music ];
+          "audio/mp4" = [ music ];
+          "audio/mpeg" = [ music ];
+          "audio/ogg" = [ music ];
+          "audio/opus" = [ music ];
+          "audio/vnd.wave" = [ music ];
+          "audio/webm" = [ music ];
+          "audio/x-aac" = [ music ];
+          "audio/x-aiff" = [ music ];
+          "audio/x-ape" = [ music ];
+          "audio/x-flac" = [ music ];
+          "audio/x-m4a" = [ music ];
+          "audio/x-matroska" = [ music ];
+          "audio/x-mp3" = [ music ];
+          "audio/x-mpegurl" = [ music ];
+          "audio/x-ms-wma" = [ music ];
+          "audio/x-musepack" = [ music ];
+          "audio/x-opus+ogg" = [ music ];
+          "audio/x-pn-realaudio" = [ music ];
+          "audio/x-scpls" = [ music ];
+          "audio/x-speex" = [ music ];
+          "audio/x-vorbis+ogg" = [ music ];
+          "audio/x-wav" = [ music ];
           "inode/directory" = [ inode ];
           "x-scheme-handler/http" = [ web ];
           "x-scheme-handler/https" = [ web ];
@@ -101,6 +129,35 @@
           "video/x-mpeg-system" = [ video ];
         };
         defaultApplications = {
+          # Music and playlists
+          "application/ogg" = music;
+          "application/vnd.apple.mpegurl" = music;
+          "application/x-mpegurl" = music;
+          "audio/aac" = music;
+          "audio/flac" = music;
+          "audio/mp4" = music;
+          "audio/mpeg" = music;
+          "audio/ogg" = music;
+          "audio/opus" = music;
+          "audio/vnd.wave" = music;
+          "audio/webm" = music;
+          "audio/x-aac" = music;
+          "audio/x-aiff" = music;
+          "audio/x-ape" = music;
+          "audio/x-flac" = music;
+          "audio/x-m4a" = music;
+          "audio/x-matroska" = music;
+          "audio/x-mp3" = music;
+          "audio/x-mpegurl" = music;
+          "audio/x-ms-wma" = music;
+          "audio/x-musepack" = music;
+          "audio/x-opus+ogg" = music;
+          "audio/x-pn-realaudio" = music;
+          "audio/x-scpls" = music;
+          "audio/x-speex" = music;
+          "audio/x-vorbis+ogg" = music;
+          "audio/x-wav" = music;
+
           # Word processing
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = office; # .docx
           "application/msword" = office; # .doc

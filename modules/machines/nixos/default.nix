@@ -80,5 +80,6 @@ in
 
   environment.systemPackages = with pkgs; [
     devenv
+    pkgs-unstable.feishin # music player working well with lyrics
   ];
 }
