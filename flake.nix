@@ -7,6 +7,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixpkgs-master.url = "github:NixOS/nixpkgs/master";
+    nixpkgs-update.url = "github:nix-community/nixpkgs-update";
     nixvim.url = "github:nix-community/nixvim/nixos-26.05";
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
@@ -59,6 +60,7 @@
                 inherit self;
                 inherit stateVersion;
                 my-secrets = inputs.my-secrets;
+                nixpkgsUpdate = inputs.nixpkgs-update;
                 sops-nix = inputs.sops-nix;
               };
               modules = [

@@ -1,4 +1,4 @@
-{ config, lib, my-secrets, pkgs, sops-nix, ... }:
+{ config, lib, my-secrets, nixpkgsUpdate, pkgs, sops-nix, ... }:
 let
   secretsPath = builtins.toString my-secrets;
 in
@@ -9,6 +9,13 @@ in
     ./homelab
     ./users.nix
   ];
+
+  nix.settings = {
+    extra-substituters = [ "https://nix-community.cachix.org" ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
 
   sops.secrets."acme/environment-file" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
@@ -80,6 +87,7 @@ in
 
   environment.systemPackages = with pkgs; [
     devenv
+    nixpkgsUpdate.packages.${pkgs.stdenv.hostPlatform.system}.nixpkgs-update
     pkgs-unstable.feishin # music player working well with lyrics
   ];
 }
