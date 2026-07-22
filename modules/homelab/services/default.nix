@@ -8,7 +8,7 @@ in
     sops-nix.nixosModules.sops
     ./arr/bazarr
     ./arr/seerr
-    ./arr/lidarr
+    #./arr/lidarr
     ./arr/prowlarr
     ./arr/radarr
     ./arr/sonarr
