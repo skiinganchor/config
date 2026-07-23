@@ -1,16 +1,15 @@
-{ ... }:
+{ lib, ... }:
 {
   xdg.configFile."opencode/opencode.jsonc".text = builtins.toJSON {
     plugin = [
-      "oh-my-opencode"
+      "oh-my-openagent"
     ];
   };
 
-  xdg.configFile."opencode/oh-my-opencode.jsonc".text = builtins.toJSON {
-    "$schema" = "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json";
+  xdg.configFile."opencode/oh-my-openagent.jsonc".text = builtins.toJSON {
+    "$schema" = "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json";
 
-    # Configure categories with Copilot-available models
-    # GitHub Copilot supports: gpt-4o, gpt-4o-mini, o1-preview, o1-mini
+    # Keep existing Copilot model assignments; verify availability with `opencode models`.
     categories = {
       quick = {
         model = "copilot/gpt-4o-mini";
@@ -51,4 +50,17 @@
       };
     };
   };
+
+  # Remove the previous Nix-managed config name without touching user-owned files.
+  home.activation.removeLegacyOhMyOpenCodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    legacyConfig="$HOME/.config/opencode/oh-my-opencode.jsonc"
+
+    if [ -L "$legacyConfig" ]; then
+      case "$(readlink -f "$legacyConfig")" in
+        /nix/store/*)
+          rm -- "$legacyConfig"
+          ;;
+      esac
+    fi
+  '';
 }
