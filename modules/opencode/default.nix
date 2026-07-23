@@ -14,6 +14,12 @@ _:
   xdg.configFile."opencode/oh-my-openagent.jsonc".text = builtins.toJSON {
     "$schema" = "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json";
 
+    # Disable Claude Code compatibility hooks. Their transcript hook writes to
+    # ~/.claude even when OpenCode is using an OpenAI model.
+    disabled_hooks = [
+      "claude-code-hooks"
+    ];
+
     # ChatGPT Plus models authenticated through OpenCode's OpenAI provider.
     categories = {
       quick = {
