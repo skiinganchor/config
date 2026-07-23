@@ -1,4 +1,4 @@
-{ lib, ... }:
+_:
 {
   xdg.configFile."opencode/opencode.jsonc".text = builtins.toJSON {
     plugin = [
@@ -9,58 +9,45 @@
   xdg.configFile."opencode/oh-my-openagent.jsonc".text = builtins.toJSON {
     "$schema" = "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json";
 
-    # Keep existing Copilot model assignments; verify availability with `opencode models`.
+    # ChatGPT Plus models authenticated through OpenCode's OpenAI provider.
     categories = {
       quick = {
-        model = "copilot/gpt-4o-mini";
+        model = "openai/gpt-5.4-mini";
       };
       visual-engineering = {
-        model = "copilot/gpt-4o";
+        model = "openai/gpt-5.6-sol";
       };
       ultrabrain = {
-        model = "copilot/o1-preview";
+        model = "openai/gpt-5.6-sol";
       };
       deep = {
-        model = "copilot/o1-mini";
+        model = "openai/gpt-5.6-terra";
       };
       artistry = {
-        model = "copilot/gpt-4o";
+        model = "openai/gpt-5.6-sol";
       };
       unspecified-low = {
-        model = "copilot/gpt-4o-mini";
+        model = "openai/gpt-5.6-luna";
       };
       unspecified-high = {
-        model = "copilot/gpt-4o";
+        model = "openai/gpt-5.6-sol";
       };
       writing = {
-        model = "copilot/gpt-4o-mini";
+        model = "openai/gpt-5.6-luna";
       };
     };
 
     # Agent-specific model overrides
     agents = {
       oracle = {
-        model = "copilot/gpt-4o";
+        model = "openai/gpt-5.6-sol";
       };
       librarian = {
-        model = "copilot/gpt-4o-mini";
+        model = "openai/gpt-5.4-mini-fast";
       };
       explore = {
-        model = "copilot/gpt-4o-mini";
+        model = "openai/gpt-5.4-mini-fast";
       };
     };
   };
-
-  # Remove the previous Nix-managed config name without touching user-owned files.
-  home.activation.removeLegacyOhMyOpenCodeConfig = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    legacyConfig="$HOME/.config/opencode/oh-my-opencode.jsonc"
-
-    if [ -L "$legacyConfig" ]; then
-      case "$(readlink -f "$legacyConfig")" in
-        /nix/store/*)
-          rm -- "$legacyConfig"
-          ;;
-      esac
-    fi
-  '';
 }
