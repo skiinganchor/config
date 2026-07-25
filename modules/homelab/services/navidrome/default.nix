@@ -1,11 +1,31 @@
 { config
 , lib
+, pkgs
 , ...
 }:
 let
   service = "navidrome";
   inherit (config) homelab;
   cfg = homelab.services.${service};
+  navidromeLyricsPlugin = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
+    pname = "nd-lyrics";
+    version = "7.1.0";
+
+    src = pkgs.fetchurl {
+      url = "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v${finalAttrs.version}/nd-lyrics.ndp";
+      hash = "sha256-N0OJ0GuTWISvCjooxttRDl6O5GYDOomcPH6yClSFLOc=";
+    };
+
+    dontUnpack = true;
+
+    installPhase = ''
+      runHook preInstall
+      install -Dm444 "$src" "$out/share/${finalAttrs.pname}.ndp"
+      runHook postInstall
+    '';
+
+    passthru.isNavidromePlugin = true;
+  });
 in
 {
   options.homelab.services.${service} = {
@@ -75,6 +95,7 @@ in
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
+      plugins = [ navidromeLyricsPlugin ];
       settings = {
         DefaultDownsamplingFormat = "aac";
         ExtAuth = {
@@ -85,7 +106,7 @@ in
           UserHeader = "X-User";
         };
         LogLevel = "debug";
-        LyricsPriority = ".lrc,embedded,.txt";
+        LyricsPriority = ".ttml,.yaml,.yml,.elrc,.srt,nd-lyrics,embedded,.lrc,.txt";
         MusicFolder = "${cfg.musicDir}";
       };
     };
