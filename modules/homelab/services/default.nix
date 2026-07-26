@@ -16,6 +16,7 @@ in
     ./backup
     ./deluge
     ./fail2ban
+    ./hermes
     ./homepage
     ./immich
     ./jellyfin

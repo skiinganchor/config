@@ -13,6 +13,10 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     my-secrets = {
       url = "git+ssh://git@github.com/skiinganchor/config-private.git?ref=main&shallow=1";
       flake = false;
@@ -31,6 +35,7 @@
         defaultModules = [
           sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager
+          hermes-agent.nixosModules.default
           nixvim.nixosModules.nixvim
           (import "${self}/pkgs/overlays.nix" inputs)
           (import "${self}/modules/machines/_common")
@@ -59,6 +64,7 @@
               specialArgs = {
                 inherit self;
                 inherit stateVersion;
+                hermes-agent = inputs.hermes-agent;
                 my-secrets = inputs.my-secrets;
                 nixpkgsUpdate = inputs.nixpkgs-update;
                 sops-nix = inputs.sops-nix;
@@ -78,6 +84,7 @@
               specialArgs = {
                 inherit self;
                 inherit stateVersion;
+                hermes-agent = inputs.hermes-agent;
                 my-secrets = inputs.my-secrets;
                 sops-nix = inputs.sops-nix;
               };
