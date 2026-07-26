@@ -133,6 +133,7 @@ in
           contacts
           cospend
           deck
+          drawio
           news
           notes
           oidc_login
@@ -140,13 +141,6 @@ in
           tasks
           twofactor_admin
           twofactor_webauthn;
-
-        drawio = pkgs.fetchNextcloudApp {
-          license = "agpl3Plus";
-          url =
-            "https://github.com/arnowelzel/drawio-nextcloud/releases/download/v4.3.0/drawio-v4.3.0.tar.gz";
-          hash = "sha256-nVcO2V0zo7VdL/o8c6IRbiIqFnGBH7NdqL/eefQ/ip0=";
-        };
       };
       extraAppsEnable = true;
 
