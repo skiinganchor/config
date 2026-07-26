@@ -9,6 +9,7 @@ let
   cfg = homelab.services.${service};
   settingsFormat = pkgs.formats.yaml { };
   beetsPackage = pkgs.pkgs-unstable.beets;
+  lyricsEnabled = cfg.beetsLyrics.enable;
 
   # The lyrics plugin stores fetched lyrics in the beets database. Export them
   # beside each audio file so media players can find them without reading beets.
@@ -121,25 +122,28 @@ let
       "$@"
     beet_status=$?
 
-    # These commands may fetch lyrics or move tracks. Regenerate sidecars so
-    # their contents and locations continue to match the beets database.
-    case "$beet_command" in
-      import|lyrics|modify|write|move)
-        echo "Exporting beets lyrics sidecars after '$beet_command'..." >&2
-        sudo -u ${homelab.mainUser.name} ${lib.getExe beets-export-lyrics}
-        export_status=$?
-        ;;
-      *)
-        export_status=0
-        ;;
-    esac
+    ${lib.optionalString lyricsEnabled ''
+      # These commands may fetch lyrics or move tracks. Regenerate sidecars so
+      # their contents and locations continue to match the beets database.
+      case "$beet_command" in
+        import|lyrics|modify|write|move)
+          echo "Exporting beets lyrics sidecars after '$beet_command'..." >&2
+          sudo -u ${homelab.mainUser.name} ${lib.getExe beets-export-lyrics}
+          export_status=$?
+          ;;
+        *)
+          export_status=0
+          ;;
+      esac
 
-    # Report the beets failure first; only report an export failure when the
-    # requested beets operation itself succeeded.
-    if [ "$beet_status" -ne 0 ]; then
-      exit "$beet_status"
-    fi
-    exit "$export_status"
+      # Report the beets failure first; only report an export failure when the
+      # requested beets operation itself succeeded.
+      if [ "$beet_status" -ne 0 ]; then
+        exit "$beet_status"
+      fi
+      exit "$export_status"
+    ''}
+    exit "$beet_status"
   '';
   beetsConfig = {
     directory = "${config.homelab.services.slskd.musicDir}";
@@ -147,9 +151,8 @@ let
 
     plugins = [
       "duplicates"
-      "lyrics"
       "musicbrainz"
-    ];
+    ] ++ lib.optionals lyricsEnabled [ "lyrics" ];
 
     # This handles the cases where odd characters are replaced by '_'
     replace = {
@@ -240,6 +243,7 @@ let
       source = "album";
     };
 
+  } // lib.optionalAttrs lyricsEnabled {
     lyrics = {
       auto = true;
       sources = [
@@ -254,7 +258,7 @@ in
 {
   config = lib.mkIf cfg.enable {
     homelab.services.slskd.beetsConfigFile = settingsFormat.generate "beets.yaml" beetsConfig;
-    homelab.services.slskd.beetsExportLyricsCommand = lib.getExe beets-export-lyrics;
+    homelab.services.slskd.beetsExportLyricsCommand = lib.mkIf lyricsEnabled (lib.getExe beets-export-lyrics);
     # this was added for manually being able to use beet-wrapped commands
     systemd.tmpfiles.rules = [
       "d /var/lib/slskd-import-files 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -"
@@ -262,7 +266,6 @@ in
 
     environment.systemPackages = [
       beet-wrapped
-      beets-export-lyrics
-    ];
+    ] ++ lib.optionals lyricsEnabled [ beets-export-lyrics ];
   };
 }

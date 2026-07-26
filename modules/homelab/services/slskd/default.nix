@@ -39,8 +39,10 @@ in
     beetsConfigFile = lib.mkOption {
       type = lib.types.path;
     };
+    beetsLyrics.enable = lib.mkEnableOption "fetching and exporting lyrics with Beets";
     beetsExportLyricsCommand = lib.mkOption {
-      type = lib.types.str;
+      type = lib.types.nullOr lib.types.str;
+      default = null;
     };
     environmentFile = lib.mkOption {
       description = ''
@@ -158,14 +160,17 @@ in
                   import -m -q "$import_directory"
                 import_status=$?
 
-                # Refresh sidecars even after a partial import, but preserve the
-                # import error as the script's primary failure status.
-                ${cfg.beetsExportLyricsCommand}
-                export_status=$?
-                if [ "$import_status" -ne 0 ]; then
-                  exit "$import_status"
-                fi
-                exit "$export_status"
+                ${lib.optionalString cfg.beetsLyrics.enable ''
+                  # Refresh sidecars even after a partial import, but preserve
+                  # the import error as the script's primary failure status.
+                  ${cfg.beetsExportLyricsCommand}
+                  export_status=$?
+                  if [ "$import_status" -ne 0 ]; then
+                    exit "$import_status"
+                  fi
+                  exit "$export_status"
+                ''}
+                exit "$import_status"
               '';
             in
             {
