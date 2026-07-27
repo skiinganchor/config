@@ -16,7 +16,7 @@
       let
         image = "org.gnome.eog.desktop";
         inode = "org.gnome.Nautilus.desktop";
-        music = "feishin.desktop";
+        music = "org.gnome.Decibels";
         office = "onlyoffice-desktopeditors.desktop";
         pdf = "org.gnome.Papers.desktop";
         text = "codium.desktop";
