@@ -265,6 +265,12 @@ in
       ];
     };
 
+    opencode.useOpencodeGo = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Whether to use opencode-go models for oh-my-openagent.";
+    };
+
     shell = mkOption {
       type = types.nullOr (types.either types.shellPackage (types.passwdEntry types.path));
       default = pkgs.shadow;
