@@ -11,6 +11,9 @@ in
     enable = true;
   };
 
+  # weekly service to free up with SSD firmware blocks no longer in use
+  services.fstrim.enable = true;
+
   nix.gc.automatic = true;
 
   home-manager = {
