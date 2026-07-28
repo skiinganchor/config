@@ -88,6 +88,10 @@
         gstaa = "git stash apply";
         gstal = "git stash && git pull && git stash apply";
         gstl = "git stash list";
+        gwta = "git worktree add";
+        gwtls = "git worktree list";
+        gwtp = "git worktree prune";
+        gwtrm = "git worktree remove";
         ipp = "curl ipinfo.io/ip";
         k = "${lib.getExe pkgs.kubectl}";
         la = "ls --color -lha";
