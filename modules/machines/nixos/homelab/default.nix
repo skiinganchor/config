@@ -11,6 +11,10 @@ in
       bazarr.enable = false;
       deluge.enable = false;
       fail2ban.enable = true;
+      hermes = {
+        enable = true;
+        environmentFile = config.sops.secrets."hermes/env-file".path;
+      };
       jellyfin.enable = true;
       seerr.enable = false;
       netboot-xyz.enable = false;
