@@ -51,6 +51,12 @@ let
           })
           homelab.git.workspaces
       );
+      # Global excludes so individual projects don't need to exclude oh-my-openagent files
+      ignores = [
+        ".omo/*"
+        ".omo/rules/"
+        ".omo/rules/**"
+      ];
     };
 
     home.file = {
