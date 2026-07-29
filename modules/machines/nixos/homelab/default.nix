@@ -11,9 +11,11 @@ in
       bazarr.enable = false;
       deluge.enable = false;
       fail2ban.enable = true;
-      hermes = {
+      hermes-agent = {
         enable = true;
+        addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
+        settings.model.default = "opencode-go/qwen3.7-plus";
       };
       jellyfin.enable = true;
       seerr.enable = false;

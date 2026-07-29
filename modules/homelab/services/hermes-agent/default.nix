@@ -1,12 +1,22 @@
 { config, hermes-agent, lib, pkgs, ... }:
 let
-  service = "hermes";
+  service = "hermes-agent";
   cfg = config.homelab.services.${service};
 in
 {
   options.homelab.services.${service} = {
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
+    };
+
+    addToSystemPackages = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Add the hermes CLI to environment.systemPackages and export
+        HERMES_HOME system-wide (via environment.variables) so interactive
+        shells share state with the gateway service.
+      '';
     };
 
     package = lib.mkOption {
@@ -56,9 +66,12 @@ in
       }
     ];
 
+    # See options in: https://github.com/NousResearch/hermes-agent/blob/main/nix/nixosModules.nix
     services.hermes-agent = {
       enable = true;
+      addToSystemPackages = cfg.addToSystemPackages;
       environmentFiles = [ cfg.environmentFile ];
+      settings = cfg.settings;
     };
   };
 }
