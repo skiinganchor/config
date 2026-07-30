@@ -75,11 +75,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1785365196,
-        "narHash": "sha256-fHzP/KLbbtaTGWHm0K+5jutqlb0a6E2pN7MY+FY3hKM=",
+        "lastModified": 1785426179,
+        "narHash": "sha256-y7wuOFhz/SGq1cC95+jzid9JN81BDO23PL5fOBuuTU8=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "92856bc28acebbc6672e2bd26ae482dced3ce0e8",
+        "rev": "acfd376d66836a2542f0b2d9bca0252f0663fdd1",
         "type": "github"
       },
       "original": {
@@ -134,10 +134,10 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1785268172,
-        "narHash": "sha256-waaTIjRjhAH2Gczrcll8rUI01rjDE9OaFfl0xKRHWSg=",
+        "lastModified": 1785427331,
+        "narHash": "sha256-gS06V/8XutAs1jyF4IIsfBR9UXtV/pmCV94iKmRbops=",
         "ref": "main",
-        "rev": "cb7aad44cd0791d2d06811c828412faa7ee34389",
+        "rev": "9cf75334d3370caaffee6f411a32a0d6b94911bf",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/skiinganchor/config-private.git"
@@ -151,11 +151,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1785133411,
-        "narHash": "sha256-Yjv0WEg39KRYS0rBdTbu6Fc/or/ihAKk13W9sQ6VWd0=",
+        "lastModified": 1785386831,
+        "narHash": "sha256-sPS3CaXH8RAT3FZRuy4VcV47iuYIWMMfa0GbyJKC3o4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2f5a153c270b70cb0f8c11f46d96d6d3bc39f4e3",
+        "rev": "21ea275a7c46aef9d4d6ddc962e6d562e9d94183",
         "type": "github"
       },
       "original": {
@@ -167,11 +167,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1785364965,
-        "narHash": "sha256-AjNpUw7uS/UZMDLhI3FXLZmd2USVJt3M8cJIU9kiUfE=",
+        "lastModified": 1785427003,
+        "narHash": "sha256-eroo1uvvxz/c6uxjhlbZkX6AAuRKtVlF/IX7TQJyRgg=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "5226b63285e7a1ec0566c4d137e655ee6656fd14",
+        "rev": "e60eb124f0e00674f90c0e3b1c4df116a0b05c0b",
         "type": "github"
       },
       "original": {
