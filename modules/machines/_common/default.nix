@@ -41,6 +41,7 @@ in
   homelab.motd.enable = true;
 
   environment.systemPackages = with pkgs; [
+    pkgs-unstable.bleachbit
     iperf3
     jq
     ncdu
