@@ -24,6 +24,7 @@ in
     ./kvm
     ./mariadb
     ./matrix
+    ./monitoring/prometheus
     ./navidrome
     ./netboot-xyz
     ./nextcloud
