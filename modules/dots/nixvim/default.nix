@@ -266,6 +266,7 @@
       neo-tree = {
         enable = true;
         settings = {
+          clipboard.sync = "universal";
           close_if_last_window = true;
           filesystem = {
             filtered_items = {
