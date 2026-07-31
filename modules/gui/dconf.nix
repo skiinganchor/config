@@ -19,6 +19,18 @@ in
         })
       ];
     }
+    # Quake-style drop-down for Ghostty
+    {
+      "org/gnome/shell/extensions/quake-terminal" = {
+        terminal-id = "com.mitchellh.ghostty.desktop";
+        terminal-shortcut = [ "<Super>Return" ]; # Start + Enter
+        vertical-size = 50;
+        horizontal-size = 100;
+        auto-hide-window = true;
+        skip-taskbar = true;
+        render-on-current-monitor = true;
+      };
+    }
     {
       # Clean built-in screenshot keybindings
       "org/gnome/shell/keybindings" = {

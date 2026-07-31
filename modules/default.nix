@@ -79,7 +79,7 @@ in
           gnomeExtensions = mkOption {
             type = listOf package;
             default = [ ];
-            description = "List of Gnome extensions.";
+            description = "List of Gnome extensions. Requires Gnome session restart to take effect!";
           };
           hotCorners = mkOption {
             type = bool;
@@ -132,8 +132,6 @@ in
         favoriteApps = [ "brave-browser.desktop" "org.gnome.Nautilus.desktop" "org.gnome.Terminal.desktop" ];
         gnomeExtensions = with pkgs.gnomeExtensions; [
           appindicator
-          tiling-assistant
-          vitals
         ];
         hotCorners = false;
         keyboardLayout = [
