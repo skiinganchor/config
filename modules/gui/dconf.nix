@@ -7,7 +7,6 @@
       "org/gnome/shell" = lib.mkMerge [
         # Gnome extensions
         {
-
           disable-user-extensions = false;
           enabled-extensions = lib.lists.forEach homelab.dconf.gnomeExtensions (e: e.extensionUuid);
         }
@@ -25,18 +24,6 @@
         command = "script --command ' flameshot gui ' /dev/null";
       };
     }
-    # Guake keybinding
-    (lib.mkIf (homelab.dconf.guakeHotkey != null) {
-      "org/gnome/settings-daemon/plugins/media-keys" = {
-        custom-keybindings = [ "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/guake/" ];
-      };
-
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/guake" = {
-        name = "Guake";
-        command = "/usr/bin/guake-toggle";
-        binding = homelab.dconf.guakeHotkey;
-      };
-    })
     # Hot corners
     {
       "org/gnome/desktop/interface".enable-hot-corners = homelab.dconf.hotCorners;

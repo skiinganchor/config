@@ -81,17 +81,6 @@ in
             default = [ ];
             description = "List of Gnome extensions.";
           };
-          guakeHotkey = mkOption {
-            type = types.nullOr str;
-            default = null;
-            example = "F12";
-            description = "Optional hotkey for toggling Guake.";
-          };
-          hotCorners = mkOption {
-            type = bool;
-            default = false;
-            description = "Whether to enable hot corners on Gnome.";
-          };
           keyboardLayout = mkOption {
             type = with types; listOf (submodule {
               options = {
@@ -141,7 +130,6 @@ in
           tiling-assistant
           vitals
         ];
-        guakeHotkey = "F12";
         hotCorners = false;
         keyboardLayout = [
           { layout = "us"; variant = "intl"; }
