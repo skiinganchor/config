@@ -1,5 +1,8 @@
 { lib, homelab, ... }:
 
+let
+  flameshotPath = "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/flameshot";
+in
 {
   home.packages = homelab.dconf.gnomeExtensions;
   dconf.settings = lib.mkMerge [
@@ -16,12 +19,20 @@
         })
       ];
     }
-    # Flameshot keybinding
     {
-      "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
-        name = "flameshot";
+      # Clean built-in screenshot keybindings
+      "org/gnome/shell/keybindings" = {
+        show-screenshot-ui = lib.hm.gvariant.mkEmptyArray lib.hm.gvariant.type.string;
+        screenshot = lib.hm.gvariant.mkEmptyArray lib.hm.gvariant.type.string;
+        screenshot-window = lib.hm.gvariant.mkEmptyArray lib.hm.gvariant.type.string;
+      };
+      # Register custom keybinding
+      "org/gnome/settings-daemon/plugins/media-keys".custom-keybindings = [ "/${flameshotPath}/" ];
+      # Flameshot - declare custom keybinding
+      ${flameshotPath} = {
+        name = "Flameshot";
         binding = "Print";
-        command = "script --command ' flameshot gui ' /dev/null";
+        command = "sh -c 'flameshot gui'";
       };
     }
     # Hot corners

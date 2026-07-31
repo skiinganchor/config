@@ -81,6 +81,11 @@ in
             default = [ ];
             description = "List of Gnome extensions.";
           };
+          hotCorners = mkOption {
+            type = bool;
+            default = false;
+            description = "Whether to enable hot corners on Gnome.";
+          };
           keyboardLayout = mkOption {
             type = with types; listOf (submodule {
               options = {
