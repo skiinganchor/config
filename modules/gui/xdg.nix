@@ -2,7 +2,9 @@
 {
   environment.systemPackages = with pkgs; [
     eog
-    flameshot # screenshot tool for gnome, for deley use -d, eg 'flameshot gui -d 1000'
+    # screenshot tool for gnome, for deley use -d, eg 'flameshot gui -d 1000'
+    # flameshot unstable (14 needed on nixos 26.05 since version 13 has unpatched #4664 and #4498 PRs)
+    pkgs.pkgs-unstable.flameshot # screenshot tool for gnome, for deley use -d, eg 'flameshot gui -d 1000'
     nautilus
     onlyoffice-desktopeditors
     papers
