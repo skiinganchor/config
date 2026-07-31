@@ -60,8 +60,8 @@
       shellAliases = {
         clip = "wl-copy";
         cplocal = "viewlocal|clip";
-        editflake = "sudo nvim /etc/nixos/flake.nix";
-        editlocal = "sudo nvim /etc/nixos/local.nix";
+        editflake = "sudo vim /etc/nixos/flake.nix";
+        editlocal = "sudo vim /etc/nixos/local.nix";
         viewflake = "cat /etc/nixos/flake.nix";
         viewlocal = "cat /etc/nixos/local.nix";
         ngc = "nix store gc";
