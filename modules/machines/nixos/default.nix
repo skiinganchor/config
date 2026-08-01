@@ -95,7 +95,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    devenv
+    pkgs-unstable.devenv
     nixpkgsUpdate.packages.${pkgs.stdenv.hostPlatform.system}.nixpkgs-update
     pkgs-unstable.feishin # music player working well with lyrics
   ];
