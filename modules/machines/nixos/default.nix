@@ -21,7 +21,7 @@ in
     "acme/environment-file" = {
       sopsFile = "${secretsPath}/secrets/shared.yaml";
     };
-    "hermes/env-file" = {
+    "hermes/env-file" = lib.mkIf config.homelab.services.hermes-agent.enable {
       sopsFile = "${secretsPath}/secrets/shared.yaml";
       owner = "hermes";
       group = "hermes";
