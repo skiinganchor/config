@@ -20,6 +20,7 @@
     in
     {
       nixosConfigurations = builtins.mapAttrs mkHost {
+        alertson = cfg.systemTypes.alertson;
         nixos = cfg.systemTypes.x86_64;
         emilia = cfg.systemTypes.emilia;
       };

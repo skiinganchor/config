@@ -68,11 +68,24 @@ in
       globalConfig.scrape_interval = "10s"; # "1m"
       scrapeConfigs = cfg.scrapeTargets;
     };
-    services.caddy.virtualHosts."${cfg.url}" = {
-      useACMEHost = homelab.baseDomain;
-      extraConfig = ''
-        reverse_proxy ${prometheusUrl}
-      '';
+    services.nginx = {
+      virtualHosts."${cfg.url}" = {
+        forceSSL = true;
+        # uses security.acme instead
+        enableACME = false;
+        extraConfig = ''
+          # Add HSTS header to force HTTPS
+          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+          # Add X-XSS-Protection header for additional XSS protection
+          add_header X-XSS-Protection "1; mode=block" always;
+        '';
+        locations."/" = {
+          proxyPass = prometheusUrl;
+        };
+        sslCertificate = "/var/lib/acme/${homelab.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${homelab.baseDomain}/key.pem";
+      };
     };
   };
 }

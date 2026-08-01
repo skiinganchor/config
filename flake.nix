@@ -77,6 +77,23 @@
               ++ defaultModules
               ++ optionalLocalModules attrs.modules;
             };
+          alertson =
+            attrs:
+            nixpkgs.lib.nixosSystem {
+              system = self.systemArch.amd;
+              specialArgs = {
+                inherit self;
+                inherit stateVersion;
+                hermes-agent = inputs.hermes-agent;
+                my-secrets = inputs.my-secrets;
+                sops-nix = inputs.sops-nix;
+              };
+              modules = [
+                disko.nixosModules.disko
+                (import "${self}/modules/machines/alertson")
+              ]
+              ++ defaultModules;
+            };
           emilia =
             attrs:
             nixpkgs.lib.nixosSystem {
