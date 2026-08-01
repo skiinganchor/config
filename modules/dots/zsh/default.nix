@@ -28,6 +28,9 @@
         zstyle ':completion:*' list-colors ''${(s.:.)LS_COLORS}
         zstyle ':completion:*' menu yes=long select
 
+        # Temporary fix for https://github.com/cachix/devenv/issues/2880
+        export DEVENV_SHELL_TYPE=zsh
+
         export EDITOR=nvim || export EDITOR=vim
         export LANG=en_US.UTF-8
         export LC_CTYPE=en_US.UTF-8
