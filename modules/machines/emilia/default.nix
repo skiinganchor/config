@@ -13,7 +13,7 @@ in
   ];
 
   sops.defaultSopsFile = "${secretsPath}/secrets/emilia.yaml";
-  sops.age.keyFile = "/home/wookie/.config/sops/age/keys.txt";
+  sops.age.keyFile = "/etc/sops/age/keys.txt";
   sops.secrets."acme/environment-file" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
