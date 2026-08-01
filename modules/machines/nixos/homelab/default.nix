@@ -12,7 +12,7 @@ in
       deluge.enable = false;
       fail2ban.enable = true;
       hermes-agent = {
-        enable = true;
+        enable = false;
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
         settings.model.default = "opencode-go/qwen3.7-plus";
