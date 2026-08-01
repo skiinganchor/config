@@ -168,7 +168,7 @@ in
       };
       sonarr.enable = true;
       stirling-pdf.enable = true;
-      uptime-kuma.enable = true;
+      uptime-kuma.enable = false;
       vaultwarden.enable = false;
       wireguard-netns = {
         enable = true;
