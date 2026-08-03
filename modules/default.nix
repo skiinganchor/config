@@ -59,6 +59,37 @@ in
   options.homelab = {
     enable = lib.mkEnableOption "The homelab services and configuration variables";
 
+    ambidextrousWeeklySwitch = mkOption {
+      type = with types; submodule {
+        options = {
+          enable = mkOption {
+            type = bool;
+            default = false;
+            description = ''
+              Whether to enable weekly primary mouse button switching. Disabling
+              stops future switches but leaves the current primary-button setting
+              untouched; reset it manually with `gsettings set org.gnome.desktop.peripherals.mouse left-handed false`.
+            '';
+          };
+
+          notify = mkOption {
+            type = bool;
+            default = true;
+            description = "Whether to show a desktop notification when the primary mouse button actually changes.";
+          };
+        };
+      };
+      default = { };
+      example = {
+        enable = true;
+        notify = true;
+      };
+      description = ''
+        Opt-in weekly GNOME primary mouse button switching on a deterministic
+        Monday boundary.
+      '';
+    };
+
     baseDomain = lib.mkOption {
       default = "";
       type = lib.types.str;

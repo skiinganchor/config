@@ -104,6 +104,7 @@ in
     (import "${self}/src/home.nix")
     (import "${self}/modules/dots/ghostty/default.nix")
     (import "${self}/modules/dots/vscodium/default.nix")
+    (import "${self}/modules/gui/ambidextrous-weekly-switch.nix")
     (import "${self}/modules/gui/dconf.nix")
     (import "${self}/modules/gui/gnome-terminal.nix")
     (import "${self}/modules/opencode")
