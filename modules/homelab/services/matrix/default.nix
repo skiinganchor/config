@@ -122,7 +122,7 @@ in
     ipRangeWhitelist = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ ];
-      example = [ "192.168.31.21" ];
+      example = [ "192.168.1.1" ];
       description = ''
         IPs/CIDRs to exempt from Synapse's default ip_range_blacklist (which
         blocks private/loopback ranges to prevent SSRF). Needed when an
