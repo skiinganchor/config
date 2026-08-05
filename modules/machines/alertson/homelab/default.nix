@@ -36,12 +36,4 @@
     };
     timeZone = "Europe/Amsterdam";
   };
-
-  # Scraped by the prometheus job above; loopback-only, so no firewall
-  # rule is needed.
-  services.prometheus.exporters.node = {
-    enable = true;
-    listenAddress = "127.0.0.1";
-    port = 9100;
-  };
 }

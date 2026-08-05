@@ -14,6 +14,18 @@ in
   # weekly service to free up with SSD firmware blocks no longer in use
   services.fstrim.enable = true;
 
+  # exports metrics for metrics store
+  services.prometheus.exporters = {
+    systemd = {
+      enable = true;
+      openFirewall = false;
+    };
+    node = {
+      enable = true;
+      openFirewall = false;
+    };
+  };
+
   nix.gc.automatic = true;
 
   home-manager = {
@@ -36,9 +48,9 @@ in
     Defaults env_keep += "SSH_AUTH_SOCK"
   '';
 
-  programs.zsh.enable = true;
-
   homelab.motd.enable = true;
+
+  programs.zsh.enable = true;
 
   environment.systemPackages = with pkgs; [
     pkgs-unstable.bleachbit
