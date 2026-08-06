@@ -37,8 +37,8 @@ in
             tcp dport 443 accept comment "443 Nginx"
             # LAN/WireGuard only — the router must never forward these;
             # restricting the source here keeps them private even if it does
-            ip saddr { 192.168.0.0/16, 10.0.0.0/8 } tcp dport { 22, 5055, 7878, 8686, 8989 } accept comment "22 SSH, 5055 Seerr, 7878 Radarr, 8686 Lidarr, 8989 Sonarr"
-            ip6 saddr { fe80::/10, fc00::/7 } tcp dport { 22, 5055, 7878, 8686, 8989 } accept comment "same, for link-local/ULA IPv6 LAN clients"
+            ip saddr { 192.168.0.0/16, 10.0.0.0/8 } tcp dport { 22, 5055, 7878, 8686, 8989, 9100, 9558 } accept comment "22 SSH, 5055 Seerr, 7878 Radarr, 8686 Lidarr, 8989 Sonarr, 9100 Prometheus node exporter, 9558 Prometheus systemd exporter"
+            ip6 saddr { fe80::/10, fc00::/7 } tcp dport { 22, 5055, 7878, 8686, 8989, 9100, 9558 } accept comment "same ports/services as IPv4, for link-local/ULA IPv6 LAN clients"
             ${lib.optionalString config.homelab.services.matrix.calls.enable ''
               tcp dport 7881 accept comment "LiveKit TURN TCP"
               udp dport { 7881, 50000-60000 } accept comment "LiveKit TURN UDP and WebRTC media"
