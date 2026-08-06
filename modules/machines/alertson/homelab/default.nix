@@ -1,4 +1,7 @@
-{ config, ... }:
+{ config
+, lib
+, ...
+}:
 {
   # The grafana service runs as the "grafana" user and reads its
   # secret_key at runtime via $__file{...}; sops secrets default to
@@ -23,14 +26,18 @@
       };
       prometheus = {
         enable = true;
-        scrapeTargets = [
-          {
-            job_name = "node";
-            static_configs = [
-              { targets = [ "127.0.0.1:9100" ]; }
-            ];
-          }
-        ];
+        scrapeTargets = lib.lists.forEach [ "node" "systemd" ] (exporter: {
+          job_name = exporter;
+          static_configs = [
+            {
+              targets = (
+                lib.lists.forEach [ "localhost" "emilia" ] (
+                  target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
+                )
+              );
+            }
+          ];
+        });
       };
       uptime-kuma.enable = true;
     };
