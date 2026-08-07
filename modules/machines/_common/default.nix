@@ -26,6 +26,13 @@ in
     };
   };
 
+  # Per-unit memory and IO accounting feed the systemd Prometheus exporter
+  # and its Grafana dashboard (systemd_unit_memory_bytes, systemd_unit_io_*).
+  systemd.settings.Manager = {
+    DefaultMemoryAccounting = "yes";
+    DefaultIOAccounting = "yes";
+  };
+
   nix.gc.automatic = true;
 
   home-manager = {
