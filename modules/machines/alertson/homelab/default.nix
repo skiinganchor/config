@@ -9,6 +9,18 @@
   sops.secrets."grafana/secret-key" = {
     owner = "grafana";
   };
+  sops.secrets."grafana/admin-password" = {
+    owner = "grafana";
+  };
+  sops.secrets."grafana/keycloak-client-secret" = {
+    owner = "grafana";
+  };
+  sops.secrets."alertmanager/ntfy-token" = {
+    owner = "alertmanager";
+  };
+  sops.secrets."alertmanager/smtp-password" = {
+    owner = "alertmanager";
+  };
 
   homelab = {
     baseDomain = "tapirus.cc";
@@ -23,9 +35,26 @@
       grafana = {
         enable = true;
         secretKeyFile = config.sops.secrets."grafana/secret-key".path;
+        adminPasswordFile = config.sops.secrets."grafana/admin-password".path;
+        oidcClientSecretFile = config.sops.secrets."grafana/keycloak-client-secret".path;
       };
       prometheus = {
         enable = true;
+        alerting = {
+          enable = true;
+          ntfy = {
+            tokenFile = config.sops.secrets."alertmanager/ntfy-token".path;
+          };
+          smtp = {
+            enable = true;
+            # TODO: fill in with your SMTP details during Phase 0 pre-flight
+            smarthost = "smtp.example.com:587";
+            authUsername = "alerts@example.com";
+            authPasswordFile = config.sops.secrets."alertmanager/smtp-password".path;
+            from = "alerts@example.com";
+            to = "you@example.com";
+          };
+        };
         scrapeTargets = lib.lists.forEach [ "node" "systemd" ] (exporter: {
           job_name = exporter;
           static_configs = [
