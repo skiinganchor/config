@@ -1,0 +1,110 @@
+---
+groups:
+  - name: homelab
+    rules:
+      - alert: InstanceDown
+        expr: 'up{availability="always-on"} == 0'
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Instance {{ $labels.instance }} down'
+          description: '{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 2 minutes.'
+      - alert: NodeHighCPU
+        expr: '100 - avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 90'
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High CPU usage on {{ $labels.instance }}'
+          description: 'CPU usage is above 90% for more than 10 minutes.'
+      - alert: NodeHighMemory
+        expr: '(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9'
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High memory usage on {{ $labels.instance }}'
+          description: 'Memory usage is above 90% for more than 10 minutes.'
+      - alert: NodeDiskAlmostFull
+        expr: 'node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs"} / node_filesystem_size_bytes < 0.1'
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Disk almost full on {{ $labels.instance }}'
+          description: '{{ $labels.mountpoint }} has less than 10% free space.'
+      - alert: NodeDiskWillFillIn4Hours
+        expr: 'predict_linear(node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs"}[6h], 4 * 3600) < 0'
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Disk filling rapidly on {{ $labels.instance }}'
+          description: '{{ $labels.mountpoint }} is predicted to run out of space within 4 hours.'
+      - alert: SystemdUnitFailed
+        expr: 'systemd_unit_state{state="failed"} == 1'
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Systemd unit failed on {{ $labels.instance }}'
+          description: 'Unit {{ $labels.name }} has been in failed state for more than 5 minutes.'
+      - alert: SystemdServiceFlapping
+        expr: 'changes(systemd_service_restart_total[15m]) > 5'
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Systemd service flapping on {{ $labels.instance }}'
+          description: 'Unit {{ $labels.name }} restarted more than 5 times in 15 minutes.'
+  - name: smartctl
+    rules:
+      - alert: SmartctlDeviceUnhealthy
+        expr: 'smartctl_device_smart_status{availability="best-effort"} == 0'
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'SMART health failure on {{ $labels.instance }} device {{ $labels.device }}'
+          description: 'SMART reports an overall-health failure for {{ $labels.instance }} device {{ $labels.device }}.'
+      - alert: SmartctlCriticalWarning
+        expr: 'smartctl_device_critical_warning{availability="best-effort"} != 0'
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'SMART critical warning on {{ $labels.instance }} device {{ $labels.device }}'
+          description: 'SMART reports a critical warning for {{ $labels.instance }} device {{ $labels.device }}.'
+      - alert: SmartctlAvailableSpareLow
+        expr: 'smartctl_device_available_spare{availability="best-effort"} < smartctl_device_available_spare_threshold{availability="best-effort"}'
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'SMART available spare low on {{ $labels.instance }} device {{ $labels.device }}'
+          description: 'Available spare is below its threshold for {{ $labels.instance }} device {{ $labels.device }}.'
+      - alert: SmartctlMediaErrorsRising
+        expr: 'increase(smartctl_device_media_errors{availability="best-effort"}[1h]) > 0'
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'SMART media errors rising on {{ $labels.instance }} device {{ $labels.device }}'
+          description: 'Media errors increased during the last hour for {{ $labels.instance }} device {{ $labels.device }}.'
+      - alert: SmartctlErrorLogEntriesRising
+        expr: 'increase(smartctl_device_num_err_log_entries{availability="best-effort"}[1h]) > 0'
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'SMART error log entries rising on {{ $labels.instance }} device {{ $labels.device }}'
+          description: 'Error log entries increased during the last hour for {{ $labels.instance }} device {{ $labels.device }}.'
+      - alert: SmartctlDeviceHot
+        expr: 'smartctl_device_temperature{availability="best-effort"} > 60'
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'SMART device hot on {{ $labels.instance }} device {{ $labels.device }}'
+          description: 'Temperature is above 60 degrees Celsius for {{ $labels.instance }} device {{ $labels.device }}.'

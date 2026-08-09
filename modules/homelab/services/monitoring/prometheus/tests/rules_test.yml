@@ -1,0 +1,124 @@
+---
+rule_files: ["../rules/homelab.yml"]
+evaluation_interval: 1m
+
+tests:
+  - name: InstanceDown fires for an always-on target
+    interval: 1m
+    input_series:
+      - series: 'up{instance="server:9100",job="node",availability="always-on"}'
+        values: '0x2'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: InstanceDown
+        exp_alerts:
+          - exp_labels:
+              instance: server:9100
+              job: node
+              availability: always-on
+              severity: critical
+            exp_annotations:
+              summary: Instance server:9100 down
+              description: server:9100 of job node has been down for more than 2 minutes.
+
+  - name: InstanceDown ignores a best-effort target
+    interval: 1m
+    input_series:
+      - series: 'up{instance="desktop:9100",job="node",availability="best-effort"}'
+        values: '0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: InstanceDown
+        exp_alerts: []
+
+  - name: SmartctlDeviceUnhealthy fires for failed SMART health
+    interval: 1m
+    input_series:
+      - series: 'smartctl_device_smart_status{instance="desktop:9633",device="nvme0",availability="best-effort"}'
+        values: '0x1'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: SmartctlDeviceUnhealthy
+        exp_alerts:
+          - exp_labels:
+              instance: desktop:9633
+              device: nvme0
+              availability: best-effort
+              severity: critical
+            exp_annotations:
+              summary: SMART health failure on desktop:9633 device nvme0
+              description: SMART reports an overall-health failure for desktop:9633 device nvme0.
+
+  - name: SmartctlCriticalWarning fires for a nonzero warning
+    interval: 1m
+    input_series:
+      - series: 'smartctl_device_critical_warning{instance="desktop:9633",device="nvme0",availability="best-effort"}'
+        values: '1x1'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: SmartctlCriticalWarning
+        exp_alerts:
+          - exp_labels:
+              instance: desktop:9633
+              device: nvme0
+              availability: best-effort
+              severity: critical
+            exp_annotations:
+              summary: SMART critical warning on desktop:9633 device nvme0
+              description: SMART reports a critical warning for desktop:9633 device nvme0.
+
+  - name: SmartctlAvailableSpareLow fires after five minutes
+    interval: 1m
+    input_series:
+      - series: 'smartctl_device_available_spare{instance="desktop:9633",device="nvme0",availability="best-effort"}'
+        values: '9x5'
+      - series: 'smartctl_device_available_spare_threshold{instance="desktop:9633",device="nvme0",availability="best-effort"}'
+        values: '10x5'
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: SmartctlAvailableSpareLow
+        exp_alerts:
+          - exp_labels:
+              instance: desktop:9633
+              device: nvme0
+              availability: best-effort
+              severity: critical
+            exp_annotations:
+              summary: SMART available spare low on desktop:9633 device nvme0
+              description: Available spare is below its threshold for desktop:9633 device nvme0.
+
+  - name: SmartctlMediaErrorsRising fires after a one-hour increase
+    interval: 1m
+    input_series:
+      - series: 'smartctl_device_media_errors{instance="desktop:9633",device="nvme0",availability="best-effort"}'
+        values: '0x60 1x10'
+    alert_rule_test:
+      - eval_time: 71m
+        alertname: SmartctlMediaErrorsRising
+        exp_alerts:
+          - exp_labels:
+              instance: desktop:9633
+              device: nvme0
+              availability: best-effort
+              severity: warning
+            exp_annotations:
+              summary: SMART media errors rising on desktop:9633 device nvme0
+              description: Media errors increased during the last hour for desktop:9633 device nvme0.
+
+  - name: SmartctlDeviceHot fires after fifteen minutes
+    interval: 1m
+    input_series:
+      - series: 'smartctl_device_temperature{instance="desktop:9633",device="nvme0",availability="best-effort"}'
+        values: '61x15'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: SmartctlDeviceHot
+        exp_alerts:
+          - exp_labels:
+              instance: desktop:9633
+              device: nvme0
+              availability: best-effort
+              severity: warning
+            exp_annotations:
+              summary: SMART device hot on desktop:9633 device nvme0
+              description: Temperature is above 60 degrees Celsius for desktop:9633 device nvme0.

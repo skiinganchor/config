@@ -40,6 +40,8 @@ in
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
   };
+  # enable additional exporter for SMART to monitor hard-drive
+  services.prometheus.exporters.smartctl.enable = true;
 
   networking = {
     hostName = "nixos";
@@ -51,6 +53,9 @@ in
         8096 # Jellyfin
         11111 # Open-WebUI
       ];
+      extraCommands = ''
+        ${pkgs.nftables}/bin/nft add rule ip filter nixos-fw ip saddr { 192.168.0.0/16, 10.0.0.0/8 } tcp dport { 9100, 9558, 9633 } accept comment "Prometheus exporters from LAN/WireGuard"
+      '';
       checkReversePath = "loose"; # Fix VPN issue
     };
   };

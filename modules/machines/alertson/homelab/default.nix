@@ -55,18 +55,36 @@
             to = "you@example.com";
           };
         };
-        scrapeTargets = lib.lists.forEach [ "node" "systemd" ] (exporter: {
-          job_name = exporter;
-          static_configs = [
+        scrapeTargets =
+          lib.lists.forEach [ "node" "systemd" ]
+            (exporter: {
+              job_name = exporter;
+              static_configs = [
+                {
+                  targets = (
+                    lib.lists.forEach [ "localhost" "emilia" ] (
+                      target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
+                    )
+                  );
+                  labels.availability = "always-on";
+                }
+                {
+                  targets = [ "desktop:${toString config.services.prometheus.exporters.${exporter}.port}" ];
+                  labels.availability = "best-effort";
+                }
+              ];
+            })
+          ++ [
             {
-              targets = (
-                lib.lists.forEach [ "localhost" "emilia" ] (
-                  target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
-                )
-              );
+              job_name = "smartctl";
+              static_configs = [
+                {
+                  targets = [ "desktop:${toString config.services.prometheus.exporters.smartctl.port}" ];
+                  labels.availability = "best-effort";
+                }
+              ];
             }
           ];
-        });
       };
       uptime-kuma.enable = true;
     };

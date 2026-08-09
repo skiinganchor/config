@@ -22,6 +22,12 @@ let
     sha256 = "0zphdrf18hsnvxj00nfmq3ajyb5jl6mgy20ljcpjzqjjqsz5c2pz";
   };
 
+  smartctlExporter = mkDashboard {
+    id = 22381;
+    rev = 1;
+    sha256 = "sha256-E1f+UvVNxg9DsvkLIsUwIqfFm5K+Wd4kKIg+8h1uxpg=";
+  };
+
   # Grafana's provisioning layer does not substitute env vars into dashboard
   # JSON, so the correct datasource has to be baked in here. The pipeline
   # drops `__inputs` (Grafana.com import variables this config does not
@@ -53,4 +59,5 @@ pkgs.runCommand "grafana-dashboards"
     # placeholder in its queries; sed rewrites it to ''${datasource} so it
     # binds to the template variable defined in fixDatasourceVars above.
     jq '${fixDatasourceVars}' "${systemdExporter}" | sed 's/''${DS_PROMETHEUS}/''${datasource}/g' > "$out/systemd-exporter.json"
+    jq '${fixDatasourceVars}' "${smartctlExporter}" | sed 's/''${DS_VICTORIAMETRICS}/''${datasource}/g' > "$out/smartctl-exporter.json"
   ''

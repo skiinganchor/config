@@ -15,6 +15,8 @@
     pkgs.nil
     pkgs.statix
     pkgs.nix-tree
+    pkgs.prometheus
+    pkgs.prometheus.cli
   ];
 
   # https://devenv.sh/languages/
@@ -42,8 +44,11 @@
 
   # https://devenv.sh/tests/
   enterTest = ''
+    set -e
     echo "Running tests"
     prek run --all-files
+    promtool check rules modules/homelab/services/monitoring/prometheus/rules/homelab.yml
+    promtool test rules modules/homelab/services/monitoring/prometheus/tests/rules_test.yml
   '';
 
   # https://devenv.sh/git-hooks/
