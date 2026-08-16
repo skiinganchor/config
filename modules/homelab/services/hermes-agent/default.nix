@@ -36,6 +36,9 @@ in
       description = "Environment file containing Matrix and provider secrets";
       example = lib.literalExpression ''
         pkgs.writeText "hermes-env" '''
+          # Model provider configs, eg. OpenAI or OpenCode Go
+          OPENCODE_GO_API_KEY=secret-api-key
+          # Matrix configs
           MATRIX_E2EE_MODE=required|optional|off
           MATRIX_HOMESERVER=https://matrix.some.domain
           MATRIX_ACCESS_TOKEN=sometoken

@@ -15,7 +15,12 @@ in
         enable = true;
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
-        settings.model.default = "opencode-go/qwen3.7-plus";
+        # Select either configurations based on using opencode-go or openai-codex (needs manual auth) as main provider
+        # settings.model.default = "opencode-go/qwen3.7-plus";
+        settings.model = {
+          provider = "openai-codex";
+          default = "gpt-5.6-luna";
+        };
       };
       jellyfin.enable = true;
       seerr.enable = false;
