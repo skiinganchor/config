@@ -78,12 +78,13 @@ let
   };
 
   opencodeGoModelConfig = {
+    # Roster uses only the enabled providers (openai + opencode-go) and follows
+    # the oh-my-openagent recommended stack for OpenCode Go subscribers.
     agents = {
       sisyphus = {
-        model = "opencode-go/kimi-k2.7-code";
+        model = "opencode-go/kimi-k3";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
           {
             model = "openai/gpt-5.6-sol";
             variant = "high";
@@ -94,53 +95,47 @@ let
         model = "openai/gpt-5.6-sol";
         variant = "medium";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       oracle = {
         model = "openai/gpt-5.6-sol";
         variant = "high";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "opencode-go/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       librarian = {
-        model = "zai-coding-plan/glm-5-turbo";
+        model = "opencode-go/qwen3.7-plus";
         fallback_models = [
-          { model = "zai-coding-plan/glm-4.7"; }
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "openai/gpt-5.4-mini-fast"; }
           { model = "opencode-go/minimax-m3"; }
+          { model = "opencode-go/minimax-m2.7"; }
+          { model = "openai/gpt-5.4-mini-fast"; }
         ];
       };
       explore = {
-        model = "opencode/deepseek-v4-flash-free";
+        model = "opencode-go/qwen3.7-plus";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5-turbo"; }
           { model = "opencode-go/minimax-m3"; }
-          { model = "opencode-go/qwen3.7-plus"; }
-          { model = "opencode-go/qwen3.7-max"; }
+          { model = "opencode-go/minimax-m2.7"; }
           { model = "openai/gpt-5.4-mini-fast"; }
         ];
       };
       "multimodal-looker" = {
-        model = "openai/gpt-5.6-sol";
+        model = "opencode-go/kimi-k3";
         variant = "high";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5v-turbo"; }
-          { model = "opencode-go/kimi-k2.6"; }
-          { model = "openai/gpt-5.4-mini-fast"; }
+          { model = "opencode-go/glm-5.2"; }
+          {
+            model = "openai/gpt-5.6-sol";
+            variant = "medium";
+          }
         ];
       };
       prometheus = {
-        model = "zai-coding-plan/glm-5.2";
+        model = "opencode-go/kimi-k2.7-code";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "opencode-go/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
           {
             model = "openai/gpt-5.6-sol";
             variant = "high";
@@ -148,12 +143,10 @@ let
         ];
       };
       metis = {
-        model = "zai-coding-plan/glm-5.2";
+        model = "opencode-go/glm-5.2";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "opencode-go/glm-5.1"; }
           {
-            model = "openai/gpt-5.5";
+            model = "openai/gpt-5.6-sol";
             variant = "high";
           }
         ];
@@ -162,27 +155,21 @@ let
         model = "openai/gpt-5.6-terra";
         variant = "high";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "opencode-go/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       atlas = {
-        model = "opencode-go/kimi-k2.7-code";
+        model = "opencode-go/kimi-k3";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
           { model = "opencode-go/qwen3.7-plus"; }
-          { model = "opencode-go/qwen3.7-max"; }
           { model = "opencode-go/minimax-m3"; }
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "zai-coding-plan/glm-5-turbo"; }
+          { model = "opencode-go/minimax-m2.7"; }
         ];
       };
       "sisyphus-junior" = {
-        model = "zai-coding-plan/glm-5-turbo";
+        model = "opencode-go/kimi-k2.7-code";
         fallback_models = [
-          { model = "zai-coding-plan/glm-4.7"; }
-          { model = "opencode-go/kimi-k2.7-code"; }
+          { model = "opencode-go/qwen3.7-plus"; }
           { model = "opencode-go/minimax-m3"; }
           {
             model = "openai/gpt-5.6-terra";
@@ -194,79 +181,69 @@ let
 
     categories = {
       visual-engineering = {
-        model = "zai-coding-plan/glm-5v-turbo";
+        model = "opencode-go/kimi-k3";
+        variant = "max";
         fallback_models = [
           {
             model = "openai/gpt-5.6-sol";
             variant = "medium";
           }
-          { model = "opencode-go/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       ultrabrain = {
         model = "openai/gpt-5.6-sol";
-        variant = "high";
+        variant = "xhigh";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "opencode-go/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       deep = {
-        model = "openai/gpt-5.6-terra";
-        variant = "high";
+        model = "openai/gpt-5.6-sol";
+        variant = "medium";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
           { model = "opencode-go/kimi-k2.7-code"; }
           { model = "opencode-go/qwen3.7-plus"; }
-          { model = "opencode-go/qwen3.7-max"; }
         ];
       };
       artistry = {
-        model = "openai/gpt-5.6-sol";
-        variant = "high";
+        model = "opencode-go/kimi-k3";
+        variant = "xhigh";
         fallback_models = [
-          { model = "opencode-go/kimi-k2.6"; }
-          { model = "zai-coding-plan/glm-5.1"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       quick = {
-        model = "opencode/deepseek-v4-flash-free";
+        model = "opencode-go/minimax-m2.7";
         fallback_models = [
-          { model = "opencode/mimo-v2.5-free"; }
-          { model = "opencode/nemotron-3-ultra-free"; }
-          { model = "zai-coding-plan/glm-4.5-air"; }
-          { model = "opencode-go/minimax-m3"; }
           { model = "openai/gpt-5.4-mini-fast"; }
+          { model = "opencode-go/minimax-m3"; }
         ];
       };
       unspecified-low = {
-        model = "zai-coding-plan/glm-5-turbo";
+        model = "opencode-go/kimi-k2.7-code";
         fallback_models = [
-          { model = "zai-coding-plan/glm-4.7"; }
-          { model = "opencode-go/kimi-k2.7-code"; }
           { model = "opencode-go/minimax-m3"; }
+          { model = "opencode-go/minimax-m2.7"; }
         ];
       };
       unspecified-high = {
-        model = "openai/gpt-5.6-sol";
-        variant = "high";
+        model = "opencode-go/kimi-k3";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.2"; }
-          { model = "zai-coding-plan/glm-5.1"; }
-          { model = "opencode-go/kimi-k2.7-code"; }
-          { model = "opencode-go/qwen3.7-plus"; }
-          { model = "opencode-go/qwen3.7-max"; }
+          {
+            model = "openai/gpt-5.6-sol";
+            variant = "high";
+          }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
       writing = {
-        model = "zai-coding-plan/glm-5.2";
+        model = "opencode-go/kimi-k3";
+        variant = "low";
         fallback_models = [
-          { model = "zai-coding-plan/glm-5.1"; }
           { model = "openai/gpt-5.6-luna"; }
-          { model = "opencode-go/kimi-k2.6"; }
-          { model = "opencode-go/minimax-m3"; }
+          { model = "opencode-go/glm-5.2"; }
         ];
       };
     };
