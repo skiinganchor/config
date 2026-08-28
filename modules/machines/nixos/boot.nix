@@ -11,6 +11,7 @@
       device = "nodev"; # or "nodev" for efi only
       memtest86.enable = true;
     };
-    kernelPackages = pkgs.linuxPackages_latest;
+    # limited by Nvidia legacy driver 580
+    kernelPackages = pkgs.linuxPackages_6_18;
   };
 }
