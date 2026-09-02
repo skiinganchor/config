@@ -5,7 +5,6 @@ let
 in
 {
   homelab = {
-    opencode.useOpencodeGo = true;
     services = {
       enable = true;
       bazarr.enable = false;
