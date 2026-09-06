@@ -4,6 +4,7 @@ let
   homelab = config.homelab;
   allUsers = [ homelab.mainUser ] ++ homelab.extraUsers;
   vimSettings = builtins.toJSON { "vim.useSystemClipboard" = true; };
+  podmanRuntimeDir = u: "/run/user/${toString u.uid}";
 
   mkSystemUser = u: lib.nameValuePair u.name (
     {
@@ -29,11 +30,24 @@ let
       homeDirectory = "/home/${u.name}";
     };
 
-    # User-scoped ~/.config/containers/registries.conf
-    xdg.configFile."containers/registries.conf".text = ''
-      [registries.search]
-      registries = ['docker.io']
-    '';
+    # User-scoped ~/.config/containers configuration.
+    xdg.configFile = {
+      "containers/registries.conf".text = ''
+        [registries.search]
+        registries = ['docker.io']
+      '';
+    } // lib.optionalAttrs (u.uid != null) {
+      "containers/containers.conf".text = ''
+        [engine]
+        tmp_dir = "${podmanRuntimeDir u}/libpod/tmp"
+      '';
+      "containers/storage.conf".text = ''
+        [storage]
+        driver = "overlay"
+        graphroot = "/home/${u.name}/.local/share/containers/storage"
+        runroot = "${podmanRuntimeDir u}/containers"
+      '';
+    };
 
     # Keep clipboard yanks working for both local VSCodium and remote editors.
     programs.vscodium.profiles.default.userSettings."vim.useSystemClipboard" = true;
