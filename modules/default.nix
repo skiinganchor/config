@@ -8,6 +8,34 @@ let
         type = str;
         description = "Username for the user.";
       };
+      accounts = mkOption {
+        type = listOf (submodule {
+          options = {
+            serverAddress = mkOption {
+              type = str;
+              example = "https://cloud.example.com";
+              description = "HTTPS base address of the Nextcloud server.";
+            };
+            username = mkOption {
+              type = str;
+              example = "alice";
+              description = "Nextcloud username used for GNOME Online Accounts.";
+            };
+            sopsSecretName = mkOption {
+              type = str;
+              example = "nextcloud/app-password";
+              description = "SOPS key containing the Nextcloud app password.";
+            };
+            sopsFile = mkOption {
+              type = path;
+              example = "/path/to/secrets/alice.yaml";
+              description = "SOPS file containing sopsSecretName.";
+            };
+          };
+        });
+        default = [ ];
+        description = "Nextcloud accounts provisioned through GNOME Online Accounts.";
+      };
       group = mkOption {
         type = str;
         description = "Primary group for the user.";

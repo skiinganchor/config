@@ -1,4 +1,4 @@
-{ self, config, lib, pkgs, ... }:
+{ self, config, lib, pkgs, sops-nix, ... }:
 
 let
   homelab = config.homelab;
@@ -29,6 +29,8 @@ let
       username = u.name;
       homeDirectory = "/home/${u.name}";
     };
+
+    services.goa-nextcloud.accounts = u.accounts;
 
     # User-scoped ~/.config/containers configuration.
     xdg.configFile = {
@@ -115,12 +117,14 @@ in
   home-manager.users = lib.listToAttrs (map mkHomeManagerUser allUsers);
 
   home-manager.sharedModules = [
+    sops-nix.homeManagerModules.sops
     (import "${self}/src/home.nix")
     (import "${self}/modules/dots/ghostty/default.nix")
     (import "${self}/modules/dots/vscodium/default.nix")
     (import "${self}/modules/gui/ambidextrous-weekly-switch.nix")
     (import "${self}/modules/gui/dconf.nix")
     (import "${self}/modules/gui/gnome-terminal.nix")
+    (import "${self}/modules/gui/goa-nextcloud")
     (import "${self}/modules/opencode")
     (import "${self}/modules/dots/zsh/default.nix")
     { programs.zsh.initContent = lib.mkAfter ''eval "$(devenv hook zsh)"''; }
