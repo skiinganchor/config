@@ -7,6 +7,7 @@ in
     sops-nix.nixosModules.sops
     ./boot.nix
     ./homelab
+    ./storage.nix
     ./users.nix
   ];
 
