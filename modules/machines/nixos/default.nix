@@ -52,6 +52,9 @@ in
       allowedTCPPorts = [
         443 # Nginx
         8096 # Jellyfin
+        9100 # Metrics Node Exporter
+        9558 # Metrics SystemD Exporter
+        9633 # Metrics SmartCTL Exporter
         11111 # Open-WebUI
       ];
       extraInputRules = ''

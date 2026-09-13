@@ -62,9 +62,14 @@
               static_configs = [
                 {
                   targets = (
-                    lib.lists.forEach [ "localhost" "emilia" ] (
-                      target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
-                    )
+                    lib.lists.forEach
+                      (
+                        [ "localhost" "emilia" ]
+                        ++ lib.optionals (exporter == "node") [ "saga" ]
+                      )
+                      (
+                        target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
+                      )
                   );
                   labels.availability = "always-on";
                 }
