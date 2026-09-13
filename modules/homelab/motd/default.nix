@@ -11,14 +11,17 @@ let
       )
       config.homelab.services
   );
-  monitoredServices = lib.lists.flatten (
-    lib.lists.forEach enabledNixosServices (
-      x:
-      let
-        svc = config.homelab.services.${x};
-      in
-      if (svc ? monitoredServices) then svc.monitoredServices else [ x ]
-    )
+  monitoredServices = lib.lists.sort lib.lessThan (
+    lib.lists.flatten
+      (
+        lib.lists.forEach enabledNixosServices (
+          x:
+          let
+            svc = config.homelab.services.${x};
+          in
+          if (svc ? monitoredServices) then svc.monitoredServices else [ x ]
+        )
+      ) ++ config.homelab.motd.monitoredServices
   );
 
   motd = pkgs.writeShellScriptBin "motd" ''
@@ -104,6 +107,11 @@ in
       description = "Network interfaces to monitor";
       type = lib.types.listOf lib.types.str;
       default = [ "" ];
+    };
+    monitoredServices = lib.mkOption {
+      description = "Additional systemd services to show in the MOTD status list";
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
     };
   };
   config = lib.mkIf config.homelab.motd.enable {

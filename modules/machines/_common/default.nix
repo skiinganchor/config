@@ -55,7 +55,13 @@ in
     Defaults env_keep += "SSH_AUTH_SOCK"
   '';
 
-  homelab.motd.enable = true;
+  homelab.motd = {
+    enable = true;
+    monitoredServices = [
+      "prometheus-node-exporter"
+      "prometheus-systemd-exporter"
+    ];
+  };
 
   programs.zsh.enable = true;
 

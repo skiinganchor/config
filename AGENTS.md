@@ -43,6 +43,9 @@ pkgs/             # package overlays
 - `nixos`: system config for desktop
 - `emilia`: low power server with disko based on `emily` from https://git.notthebe.ee/notthebee/nix-config
 
+The `nixos` flake machine is reached by Prometheus through the DNS name `desktop`.
+Keep Prometheus scrape targets for that machine as `desktop`, not `nixos`.
+
 ## Update Nixpkgs
 
 1. Edit `flake.nix` input version

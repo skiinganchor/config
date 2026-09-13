@@ -6,20 +6,20 @@ tests:
   - name: InstanceDown fires for an always-on target
     interval: 1m
     input_series:
-      - series: 'up{instance="server:9100",job="node",availability="always-on"}'
+      - series: 'up{instance="emilia:9100",job="node",availability="always-on"}'
         values: '0x2'
     alert_rule_test:
       - eval_time: 2m
         alertname: InstanceDown
         exp_alerts:
           - exp_labels:
-              instance: server:9100
+              instance: "emilia:9100"
               job: node
               availability: always-on
               severity: critical
             exp_annotations:
-              summary: Instance server:9100 down
-              description: server:9100 of job node has been down for more than 2 minutes.
+              summary: Instance emilia:9100 down
+              description: emilia:9100 of job node has been down for more than 2 minutes.
 
   - name: InstanceDown ignores a best-effort target
     interval: 1m
@@ -41,7 +41,7 @@ tests:
         alertname: SmartctlDeviceUnhealthy
         exp_alerts:
           - exp_labels:
-              instance: desktop:9633
+              instance: "desktop:9633"
               device: nvme0
               availability: best-effort
               severity: critical
@@ -59,7 +59,7 @@ tests:
         alertname: SmartctlCriticalWarning
         exp_alerts:
           - exp_labels:
-              instance: desktop:9633
+              instance: "desktop:9633"
               device: nvme0
               availability: best-effort
               severity: critical
@@ -79,7 +79,7 @@ tests:
         alertname: SmartctlAvailableSpareLow
         exp_alerts:
           - exp_labels:
-              instance: desktop:9633
+              instance: "desktop:9633"
               device: nvme0
               availability: best-effort
               severity: critical
@@ -97,7 +97,7 @@ tests:
         alertname: SmartctlMediaErrorsRising
         exp_alerts:
           - exp_labels:
-              instance: desktop:9633
+              instance: "desktop:9633"
               device: nvme0
               availability: best-effort
               severity: warning
@@ -115,7 +115,7 @@ tests:
         alertname: SmartctlDeviceHot
         exp_alerts:
           - exp_labels:
-              instance: desktop:9633
+              instance: "desktop:9633"
               device: nvme0
               availability: best-effort
               severity: warning
