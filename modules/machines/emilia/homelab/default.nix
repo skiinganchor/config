@@ -93,7 +93,10 @@ in
     services = {
       enable = true;
       audiobookshelf.enable = false;
-      aurral.enable = true;
+      aurral = {
+        enable = true;
+        openFirewall = true;
+      };
       bazarr.enable = true;
       deluge.enable = false;
       fail2ban.enable = true;
