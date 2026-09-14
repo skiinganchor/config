@@ -43,6 +43,11 @@ in
               tcp dport 7881 accept comment "LiveKit TURN TCP"
               udp dport { 7881, 50000-60000 } accept comment "LiveKit TURN UDP and WebRTC media"
             ''}
+
+            ${lib.optionalString config.homelab.firewallLogging ''
+              # Log packets that are about to hit the chain's drop policy.
+              limit rate 5/second burst 10 packets log prefix "nft-input-drop: "
+            ''}
           }
 
           chain forward {

@@ -204,6 +204,14 @@ in
       description = "DConf configuration for Gnome.";
     };
 
+    # Adds a rule to nftables to log dropped packets
+    # Those could be viewed with: sudo journalctl -k -f | grep 'nft-input-drop'
+    firewallLogging = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Log packets that are about to hit the nftables input chain's drop policy.";
+    };
+
     git = mkOption {
       type = with types; submodule {
         options = {

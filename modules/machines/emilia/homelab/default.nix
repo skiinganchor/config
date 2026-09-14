@@ -49,6 +49,7 @@ in
 
   homelab = {
     baseDomain = domain;
+    firewallLogging = false;
     mainUser = {
       name = mainUserName;
       group = mainUserGroup;

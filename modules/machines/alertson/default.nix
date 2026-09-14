@@ -37,6 +37,10 @@ in
             # restricting the source here keeps them private even if it does
             ip saddr { 192.168.0.0/16, 10.0.0.0/8 } tcp dport 22 accept comment "22 SSH"
             ip6 saddr { fe80::/10, fc00::/7 } tcp dport 22 accept comment "same, for link-local/ULA IPv6 LAN clients"
+            ${lib.optionalString config.homelab.firewallLogging ''
+              # Log packets that are about to hit the chain's drop policy.
+              limit rate 5/second burst 10 packets log prefix "nft-input-drop: "
+            ''}
           }
 
           chain forward {
