@@ -37,6 +37,8 @@
           home-manager.nixosModules.home-manager
           hermes-agent.nixosModules.default
           nixvim.nixosModules.nixvim
+          # TODO: Remove after the nixpkgs pin includes NixOS/nixpkgs#562425.
+          (import "${nixpkgs-master}/nixos/modules/services/misc/aurral.nix")
           (import "${self}/pkgs/overlays.nix" inputs)
           (import "${self}/modules/machines/_common")
           (import "${self}/modules")

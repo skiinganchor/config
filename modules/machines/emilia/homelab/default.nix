@@ -93,6 +93,7 @@ in
     services = {
       enable = true;
       audiobookshelf.enable = false;
+      aurral.enable = true;
       bazarr.enable = true;
       deluge.enable = false;
       fail2ban.enable = true;
@@ -100,13 +101,13 @@ in
       homepage.enable = true;
       immich.enable = false;
       jellyfin.enable = false;
-      seerr.enable = true;
       keycloak = {
         enable = true;
         dbPasswordFile = config.sops.secrets."keycloak/db-password".path;
         oauth2ProxyEnvFile = config.sops.secrets."keycloak/oauth2-proxy-env-file".path;
       };
       kvm.enable = true;
+      lidarr.enable = true;
       mariadb.enable = true;
       matrix = {
         enable = true;
@@ -162,6 +163,7 @@ in
         enable = true;
         host = "0.0.0.0";
       };
+      seerr.enable = true;
       slskd = {
         enable = true;
         environmentFile = config.sops.secrets."slskd/env-file".path;

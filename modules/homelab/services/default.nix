@@ -6,9 +6,10 @@ in
 {
   imports = [
     sops-nix.nixosModules.sops
+    ./arr/aurral
     ./arr/bazarr
     ./arr/seerr
-    #./arr/lidarr
+    ./arr/lidarr
     ./arr/prowlarr
     ./arr/radarr
     ./arr/sonarr
