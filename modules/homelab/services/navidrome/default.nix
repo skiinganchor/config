@@ -91,6 +91,7 @@ in
       RootDirectory = lib.mkForce "";
       BindReadOnlyPaths = lib.mkForce [ ];
     };
+    systemd.services.navidrome.path = [ pkgs.ffmpeg-headless ];
     services.${service} = {
       enable = true;
       user = homelab.mainUser.name;
