@@ -37,8 +37,6 @@
           home-manager.nixosModules.home-manager
           hermes-agent.nixosModules.default
           nixvim.nixosModules.nixvim
-          # TODO: Remove after the nixpkgs pin includes NixOS/nixpkgs#562425.
-          (import "${nixpkgs-master}/nixos/modules/services/misc/aurral.nix")
           (import "${self}/pkgs/overlays.nix" inputs)
           (import "${self}/modules/machines/_common")
           (import "${self}/modules")
@@ -111,6 +109,8 @@
                 disko.nixosModules.disko
                 # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
                 (import "${nixpkgs-master}/nixos/modules/services/matrix/matrix-authentication-service.nix")
+                # TODO: Remove after the nixpkgs pin includes NixOS/nixpkgs#562425.
+                (import "${nixpkgs-master}/nixos/modules/services/misc/aurral.nix")
                 (import "${self}/modules/machines/emilia")
               ]
               ++ defaultModules;
