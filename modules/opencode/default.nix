@@ -6,7 +6,7 @@ let
     # ChatGPT Plus models authenticated through OpenCode's OpenAI provider.
     categories = {
       quick = {
-        model = "openai/gpt-5.4-mini-fast";
+        model = "openai/gpt-5.6-luna-fast";
         variant = "low";
       };
       visual-engineering = {
@@ -297,7 +297,7 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-5.4-mini-fast";
+            model = "openai/gpt-5.6-luna-fast";
             reasoning = "low";
           }
           {
