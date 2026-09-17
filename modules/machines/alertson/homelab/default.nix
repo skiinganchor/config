@@ -65,7 +65,7 @@
                     lib.lists.forEach
                       (
                         [ "localhost" "emilia" ]
-                        ++ lib.optionals (exporter == "node") [ "saga" ]
+                        ++ lib.optionals (exporter == "node") [ "saga" "homeassistant" ]
                       )
                       (
                         target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
@@ -76,6 +76,14 @@
                 {
                   targets = [ "desktop:${toString config.services.prometheus.exporters.${exporter}.port}" ];
                   labels.availability = "best-effort";
+                }
+              ];
+              metric_relabel_configs = lib.optionals (exporter == "node") [
+                {
+                  source_labels = [ "__name__" "instance" ];
+                  regex = "node_uname_info;homeassistant:${toString config.services.prometheus.exporters.node.port}";
+                  target_label = "nodename";
+                  replacement = "homeassistant";
                 }
               ];
             })
