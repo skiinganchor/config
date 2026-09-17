@@ -65,7 +65,7 @@
                     lib.lists.forEach
                       (
                         [ "localhost" "emilia" ]
-                        ++ lib.optionals (exporter == "node") [ "saga" ]
+                        ++ lib.optionals (exporter == "node") [ "saga" "homeassistant" ]
                       )
                       (
                         target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"

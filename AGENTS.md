@@ -46,6 +46,9 @@ pkgs/             # package overlays
 The `nixos` flake machine is reached by Prometheus through the DNS name `desktop`.
 Keep Prometheus scrape targets for that machine as `desktop`, not `nixos`.
 The Proxmox machine is reached by Prometheus through the stable DNS target name `saga`.
+Home Assistant is reached through the stable DNS target name `homeassistant` in the
+`node` exporter job. The provisioned Node Exporter Full dashboard discovers it
+automatically from Prometheus labels; do not hard-code it in `dashboards.nix`.
 
 ## Update Nixpkgs
 
