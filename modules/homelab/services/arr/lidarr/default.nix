@@ -14,7 +14,11 @@ let
     };
 
     sourceRoot = "Lidarr";
-    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
+    nativeBuildInputs = [
+      pkgs.autoPatchelfHook
+      pkgs.makeWrapper
+    ];
+    dontStrip = true;
     buildInputs = with pkgs; [
       icu
       lttng-ust_2_12
@@ -28,7 +32,9 @@ let
       runHook preInstall
       mkdir -p $out/lib/lidarr $out/bin
       cp -a . $out/lib/lidarr
-      ln -s $out/lib/lidarr/Lidarr $out/bin/Lidarr
+      makeWrapper $out/lib/lidarr/Lidarr $out/bin/Lidarr \
+        --prefix LD_LIBRARY_PATH : ${pkgs.icu}/lib \
+        --prefix LD_LIBRARY_PATH : ${pkgs.openssl.out}/lib
       runHook postInstall
     '';
   };

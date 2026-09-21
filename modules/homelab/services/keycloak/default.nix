@@ -110,6 +110,8 @@ in
       };
     };
 
+    systemd.services.${service}.serviceConfig.TimeoutStartSec = "5min";
+
     services.nginx = {
       virtualHosts."${cfg.url}" = {
         forceSSL = true;
