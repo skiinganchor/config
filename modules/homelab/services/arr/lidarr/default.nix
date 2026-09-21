@@ -3,6 +3,35 @@ let
   service = "lidarr";
   cfg = config.homelab.services.${service};
   homelab = config.homelab;
+  lidarr-nightly = pkgs.stdenvNoCC.mkDerivation {
+    pname = "lidarr";
+    version = "3.1.6.5078";
+
+    src = pkgs.fetchurl {
+      name = "lidarr-nightly.tar.gz";
+      url = "https://lidarr.servarr.com/v1/update/nightly/updatefile?os=linux&runtime=netcore&arch=x64";
+      hash = "sha256-HYFPI3bKbFxP6R/M2uOksR+xA06zRyC+Sd9wi8+MK4E=";
+    };
+
+    sourceRoot = "Lidarr";
+    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
+    buildInputs = with pkgs; [
+      icu
+      lttng-ust_2_12
+      openssl
+      sqlite
+      stdenv.cc.cc.lib
+      zlib
+    ];
+
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out/lib/lidarr $out/bin
+      cp -a . $out/lib/lidarr
+      ln -s $out/lib/lidarr/Lidarr $out/bin/Lidarr
+      runHook postInstall
+    '';
+  };
 in
 {
   options.homelab.services.${service} = {
@@ -39,7 +68,7 @@ in
       enable = true;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
-      package = pkgs.lidarr;
+      package = lidarr-nightly;
       settings.auth = {
         # Delegate authentication to the reverse proxy (oauth2-proxy + Keycloak).
         method = "External";
