@@ -23,7 +23,8 @@ in
     };
     directories = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [ ];
+      default = [ "/mnt/media/music" ];
+      description = "Paths whose backing mounts Aurral must wait for before starting.";
     };
     environment = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
@@ -63,10 +64,22 @@ in
     services.${service} = {
       enable = true;
       package = pkgs.pkgs-master.aurral;
-      inherit (cfg) directories port openFirewall environment environmentFile;
+      inherit (cfg) port openFirewall environment environmentFile;
       dataDir = cfg.configDir;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
+    };
+
+    # The confined NFS bind fails with 226/NAMESPACE on Emilia.
+    # Use the host mount as Lidarr does while keeping system paths read-only.
+    systemd.services.aurral = {
+      confinement.enable = lib.mkForce false;
+      unitConfig.RequiresMountsFor = cfg.directories;
+      serviceConfig = {
+        BindPaths = lib.mkForce [ ];
+        BindReadOnlyPaths = lib.mkForce [ ];
+        ProtectSystem = lib.mkForce "full";
+      };
     };
 
     services.nginx = {
