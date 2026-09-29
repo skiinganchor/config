@@ -7,25 +7,6 @@ let
   service = "navidrome";
   inherit (config) homelab;
   cfg = homelab.services.${service};
-  navidromeLyricsPlugin = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
-    pname = "nd-lyrics";
-    version = "8.0.0";
-
-    src = pkgs.fetchurl {
-      url = "https://github.com/J0R6IT0/navidrome-lyrics-plugin/releases/download/v${finalAttrs.version}/nd-lyrics.ndp";
-      hash = "sha256-7vfUje9U8LtlAzuBudaVkSxka34aYFjK3W1pvlBuUog=";
-    };
-
-    dontUnpack = true;
-
-    installPhase = ''
-      runHook preInstall
-      install -Dm444 "$src" "$out/share/${finalAttrs.pname}.ndp"
-      runHook postInstall
-    '';
-
-    passthru.isNavidromePlugin = true;
-  });
 in
 {
   options.homelab.services.${service} = {
@@ -94,9 +75,13 @@ in
     systemd.services.navidrome.path = [ pkgs.ffmpeg-headless ];
     services.${service} = {
       enable = true;
+      # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
+      package = pkgs.pkgs-master.navidrome;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
-      plugins = [ navidromeLyricsPlugin ];
+      # TODO: Remove master after upgrading nixpkgs to 26.11, where this module is included.
+
+      plugins = [ pkgs.pkgs-master.pkgsCross.wasi32.navidromePlugins.lyrics-plugin ];
       settings = {
         DefaultDownsamplingFormat = "aac";
         ExtAuth = {
