@@ -6,11 +6,11 @@ let
     # ChatGPT Plus models authenticated through OpenCode's OpenAI provider.
     categories = {
       quick = {
-        model = "openai/gpt-5.6-luna-fast";
+        model = "openai/gpt-6-luna";
         variant = "low";
       };
       visual-engineering = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "medium";
       };
       ultrabrain = {
@@ -22,11 +22,11 @@ let
         variant = "high";
       };
       artistry = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "medium";
       };
       unspecified-low = {
-        model = "openai/gpt-5.6-luna-fast";
+        model = "openai/gpt-6-luna";
         variant = "low";
       };
       unspecified-high = {
@@ -34,7 +34,7 @@ let
         variant = "high";
       };
       writing = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "medium";
       };
     };
@@ -42,35 +42,35 @@ let
     # Agent-specific model overrides
     agents = {
       sisyphus = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "medium";
       };
       oracle = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "high";
       };
       librarian = {
-        model = "openai/gpt-5.6-luna-fast";
+        model = "openai/gpt-6-luna";
         variant = "low";
       };
       explore = {
-        model = "openai/gpt-5.6-luna-fast";
+        model = "openai/gpt-6-luna";
         variant = "low";
       };
       "multimodal-looker" = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "medium";
       };
       hephaestus = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-sol";
         variant = "medium";
       };
       prometheus = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "high";
       };
       metis = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-astra";
         variant = "high";
       };
       momus = {
@@ -78,11 +78,11 @@ let
         variant = "xhigh";
       };
       atlas = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-sol";
         variant = "medium";
       };
       "sisyphus-junior" = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-sol";
         variant = "medium";
       };
     };
@@ -94,7 +94,7 @@ let
         model = "opencode-go/kimi-k3";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
           {
@@ -104,7 +104,7 @@ let
         ];
       };
       hephaestus = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-sol";
         variant = "medium";
         fallback_models = [
           { model = "opencode-go/kimi-k2.7-code"; }
@@ -115,7 +115,7 @@ let
         ];
       };
       oracle = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-sol";
         variant = "high";
         fallback_models = [
           {
@@ -129,11 +129,11 @@ let
         ];
       };
       librarian = {
-        model = "openai/gpt-5.6-luna-fast";
+        model = "opencode-go/gpt-6-luna";
         variant = "low";
         fallback_models = [
           {
-            model = "opencode-go/deepseek-v4-flash";
+            model = "opencode-go/deepseek-v4.1-flash";
             reasoning = "low";
           }
           {
@@ -147,17 +147,17 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-luna-fast";
+            model = "opencode-go/gpt-6-luna";
             reasoning = "low";
           }
           {
-            model = "opencode-go/deepseek-v4-flash";
+            model = "opencode-go/deepseek-v4.1-flash";
             reasoning = "low";
           }
         ];
       };
       "multimodal-looker" = {
-        model = "openai/gpt-5.6-sol";
+        model = "openai/gpt-6-sol";
         variant = "medium";
         fallback_models = [
           { model = "opencode-go/kimi-k3"; }
@@ -176,7 +176,7 @@ let
         variant = "high";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "high";
           }
           {
@@ -190,7 +190,7 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "high";
           }
           {
@@ -208,7 +208,7 @@ let
             reasoning = "max";
           }
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "xhigh";
           }
         ];
@@ -217,7 +217,7 @@ let
         model = "opencode-go/kimi-k3";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
           { model = "opencode-go/kimi-k2.7-code"; }
@@ -227,7 +227,7 @@ let
         model = "opencode-go/kimi-k2.7-code";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
           {
@@ -244,7 +244,7 @@ let
         variant = "high";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             variant = "medium";
           }
           {
@@ -262,7 +262,7 @@ let
             reasoning = "max";
           }
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "xhigh";
           }
         ];
@@ -273,7 +273,7 @@ let
         fallback_models = [
           { model = "opencode-go/kimi-k3"; }
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
         ];
@@ -283,12 +283,16 @@ let
         variant = "high";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
           {
             model = "opencode-go/qwen3.8-max";
             reasoning = "xhigh";
+          }
+          {
+            model = "opencode-go/grok-4.6";
+            reasoning = "high";
           }
         ];
       };
@@ -297,11 +301,11 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-luna-fast";
+            model = "opencode-go/gpt-6-luna";
             reasoning = "low";
           }
           {
-            model = "opencode-go/deepseek-v4-flash";
+            model = "opencode-go/deepseek-v4.1-flash";
             reasoning = "low";
           }
         ];
@@ -311,7 +315,7 @@ let
         variant = "medium";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-luna-fast";
+            model = "opencode-go/gpt-6-luna";
             reasoning = "low";
           }
           { model = "opencode-go/minimax-m3"; }
@@ -323,7 +327,7 @@ let
         fallback_models = [
           { model = "opencode-go/kimi-k3"; }
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
         ];
@@ -333,12 +337,16 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-5.6-sol";
+            model = "openai/gpt-6-sol";
             reasoning = "medium";
           }
           {
             model = "opencode-go/qwen3.8-max";
             reasoning = "medium";
+          }
+          {
+            model = "opencode-go/mimo-v2.5-pro";
+            reasoning = "high";
           }
         ];
       };
@@ -351,7 +359,7 @@ in
 
     plugin = [
       "oh-my-openagent"
-      "@cortexkit/opencode-openai-auth@0.4.3"
+      "@cortexkit/opencode-openai-auth@0.10.0"
     ];
   };
 

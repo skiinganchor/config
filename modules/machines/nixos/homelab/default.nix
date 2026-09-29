@@ -18,7 +18,7 @@ in
         # settings.model.default = "opencode-go/qwen3.7-plus";
         settings.model = {
           provider = "openai-codex";
-          default = "gpt-5.6-luna";
+          default = "gpt-6-luna";
         };
       };
       jellyfin.enable = true;
