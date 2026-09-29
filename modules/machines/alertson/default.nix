@@ -79,4 +79,8 @@ in
       extraLegoRenewFlags = [ "--ari-disable" ];
     };
   };
+
+  services = {
+    qemuGuest.enable = true;
+  };
 }
