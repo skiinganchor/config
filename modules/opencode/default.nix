@@ -62,7 +62,7 @@ let
         variant = "medium";
       };
       hephaestus = {
-        model = "openai/gpt-6-sol";
+        model = "openai/gpt-6.1-sol";
         variant = "medium";
       };
       prometheus = {
@@ -78,11 +78,11 @@ let
         variant = "xhigh";
       };
       atlas = {
-        model = "openai/gpt-6-sol";
+        model = "openai/gpt-6.1-sol";
         variant = "medium";
       };
       "sisyphus-junior" = {
-        model = "openai/gpt-6-sol";
+        model = "openai/gpt-6.1-sol";
         variant = "medium";
       };
     };
@@ -94,7 +94,7 @@ let
         model = "opencode-go/kimi-k3";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
           {
@@ -104,7 +104,7 @@ let
         ];
       };
       hephaestus = {
-        model = "openai/gpt-6-sol";
+        model = "openai/gpt-6.1-sol";
         variant = "medium";
         fallback_models = [
           { model = "opencode-go/kimi-k2.7-code"; }
@@ -115,7 +115,7 @@ let
         ];
       };
       oracle = {
-        model = "openai/gpt-6-sol";
+        model = "openai/gpt-6.1-sol";
         variant = "high";
         fallback_models = [
           {
@@ -157,7 +157,7 @@ let
         ];
       };
       "multimodal-looker" = {
-        model = "openai/gpt-6-sol";
+        model = "openai/gpt-6.1-sol";
         variant = "medium";
         fallback_models = [
           { model = "opencode-go/kimi-k3"; }
@@ -176,7 +176,7 @@ let
         variant = "high";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "high";
           }
           {
@@ -190,7 +190,7 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "high";
           }
           {
@@ -208,7 +208,7 @@ let
             reasoning = "max";
           }
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "xhigh";
           }
         ];
@@ -217,7 +217,7 @@ let
         model = "opencode-go/kimi-k3";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
           { model = "opencode-go/kimi-k2.7-code"; }
@@ -227,7 +227,7 @@ let
         model = "opencode-go/kimi-k2.7-code";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
           {
@@ -244,7 +244,7 @@ let
         variant = "high";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             variant = "medium";
           }
           {
@@ -262,7 +262,7 @@ let
             reasoning = "max";
           }
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "xhigh";
           }
         ];
@@ -273,7 +273,7 @@ let
         fallback_models = [
           { model = "opencode-go/kimi-k3"; }
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
         ];
@@ -283,7 +283,7 @@ let
         variant = "high";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
           {
@@ -327,7 +327,7 @@ let
         fallback_models = [
           { model = "opencode-go/kimi-k3"; }
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
         ];
@@ -337,7 +337,7 @@ let
         variant = "low";
         fallback_models = [
           {
-            model = "openai/gpt-6-sol";
+            model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
           {
@@ -358,18 +358,16 @@ in
     enabled_providers = [ "openai" ] ++ lib.optionals useOpencodeGo [ "opencode-go" ];
 
     plugin = [
-      "oh-my-openagent"
-      "@cortexkit/opencode-openai-auth@0.10.0"
+      "oh-my-openagent@5.1.7"
+      "@cortexkit/opencode-openai-auth@0.11.0"
     ];
   };
 
-  xdg.configFile."opencode/oh-my-openagent.jsonc".text = builtins.toJSON ({
-    "$schema" = "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json";
-
-    # Disable Claude Code compatibility hooks. Their transcript hook writes to
-    # ~/.claude even when OpenCode is using an OpenAI model.
-    disabled_hooks = [
-      "claude-code-hooks"
-    ];
-  } // (if useOpencodeGo then opencodeGoModelConfig else defaultModelConfig));
+  home.file.".omo/omo.jsonc".text = builtins.toJSON {
+    "[opencode]" = {
+      disabled_hooks = [
+        "claude-code-hooks"
+      ];
+    } // (if useOpencodeGo then opencodeGoModelConfig else defaultModelConfig);
+  };
 }
