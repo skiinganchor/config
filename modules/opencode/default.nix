@@ -1,4 +1,4 @@
-{ lib, osConfig ? { }, ... }:
+{ config, lib, osConfig, pkgs ? { }, ... }:
 let
   useOpencodeGo = lib.attrByPath [ "homelab" "opencode" "useOpencodeGo" ] false osConfig;
 
@@ -7,35 +7,35 @@ let
     categories = {
       quick = {
         model = "openai/gpt-6-luna";
-        variant = "low";
+        reasoning = "low";
       };
       visual-engineering = {
         model = "openai/gpt-6-astra";
-        variant = "medium";
+        reasoning = "medium";
       };
       ultrabrain = {
         model = "openai/gpt-6-astra";
-        variant = "xhigh";
+        reasoning = "xhigh";
       };
       deep = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
       };
       artistry = {
         model = "openai/gpt-6-astra";
-        variant = "medium";
+        reasoning = "medium";
       };
       unspecified-low = {
         model = "openai/gpt-6-luna";
-        variant = "low";
+        reasoning = "low";
       };
       unspecified-high = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
       };
       writing = {
         model = "openai/gpt-6-astra";
-        variant = "medium";
+        reasoning = "medium";
       };
     };
 
@@ -43,47 +43,47 @@ let
     agents = {
       sisyphus = {
         model = "openai/gpt-6-astra";
-        variant = "medium";
+        reasoning = "medium";
       };
       oracle = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
       };
       librarian = {
         model = "openai/gpt-6-luna";
-        variant = "low";
+        reasoning = "low";
       };
       explore = {
         model = "openai/gpt-6-luna";
-        variant = "low";
+        reasoning = "low";
       };
       "multimodal-looker" = {
         model = "openai/gpt-6-astra";
-        variant = "medium";
+        reasoning = "medium";
       };
       hephaestus = {
         model = "openai/gpt-6.1-sol";
-        variant = "medium";
+        reasoning = "medium";
       };
       prometheus = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
       };
       metis = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
       };
       momus = {
         model = "openai/gpt-6-astra";
-        variant = "xhigh";
+        reasoning = "xhigh";
       };
       atlas = {
         model = "openai/gpt-6.1-sol";
-        variant = "medium";
+        reasoning = "medium";
       };
       "sisyphus-junior" = {
         model = "openai/gpt-6.1-sol";
-        variant = "medium";
+        reasoning = "medium";
       };
     };
   };
@@ -91,7 +91,7 @@ let
   opencodeGoModelConfig = {
     agents = {
       sisyphus = {
-        model = "opencode-go/kimi-k3";
+        model = "opencode-go/deepseek-v4.1-flash";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
@@ -105,9 +105,9 @@ let
       };
       hephaestus = {
         model = "openai/gpt-6.1-sol";
-        variant = "medium";
+        reasoning = "medium";
         fallback_models = [
-          { model = "opencode-go/kimi-k2.7-code"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
           {
             model = "opencode-go/glm-5.3";
             reasoning = "high";
@@ -116,7 +116,7 @@ let
       };
       oracle = {
         model = "openai/gpt-6.1-sol";
-        variant = "high";
+        reasoning = "high";
         fallback_models = [
           {
             model = "opencode-go/glm-5.3";
@@ -130,7 +130,7 @@ let
       };
       librarian = {
         model = "opencode-go/gpt-6-luna";
-        variant = "low";
+        reasoning = "low";
         fallback_models = [
           {
             model = "opencode-go/deepseek-v4.1-flash";
@@ -144,7 +144,7 @@ let
       };
       explore = {
         model = "opencode-go/qwen3.8-flash";
-        variant = "low";
+        reasoning = "low";
         fallback_models = [
           {
             model = "opencode-go/gpt-6-luna";
@@ -158,9 +158,9 @@ let
       };
       "multimodal-looker" = {
         model = "openai/gpt-6.1-sol";
-        variant = "medium";
+        reasoning = "medium";
         fallback_models = [
-          { model = "opencode-go/kimi-k3"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
           {
             model = "opencode-go/qwen3.8-max";
             reasoning = "medium";
@@ -172,8 +172,8 @@ let
         ];
       };
       prometheus = {
-        model = "opencode-go/kimi-k3";
-        variant = "high";
+        model = "opencode-go/deepseek-v4.1-flash";
+        reasoning = "high";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
@@ -186,8 +186,8 @@ let
         ];
       };
       metis = {
-        model = "opencode-go/kimi-k3";
-        variant = "low";
+        model = "opencode-go/deepseek-v4.1-flash";
+        reasoning = "low";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
@@ -201,7 +201,7 @@ let
       };
       momus = {
         model = "openai/gpt-6-astra";
-        variant = "xhigh";
+        reasoning = "xhigh";
         fallback_models = [
           {
             model = "opencode-go/glm-5.3";
@@ -214,17 +214,17 @@ let
         ];
       };
       atlas = {
-        model = "opencode-go/kimi-k3";
+        model = "opencode-go/deepseek-v4.1-flash";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
             reasoning = "medium";
           }
-          { model = "opencode-go/kimi-k2.7-code"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
         ];
       };
       "sisyphus-junior" = {
-        model = "opencode-go/kimi-k2.7-code";
+        model = "opencode-go/deepseek-v4.1-flash";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
@@ -240,12 +240,12 @@ let
 
     categories = {
       visual-engineering = {
-        model = "opencode-go/kimi-k3";
-        variant = "high";
+        model = "opencode-go/deepseek-v4.1-flash";
+        reasoning = "high";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
-            variant = "medium";
+            reasoning = "medium";
           }
           {
             model = "opencode-go/qwen3.8-max";
@@ -255,7 +255,7 @@ let
       };
       ultrabrain = {
         model = "openai/gpt-6-astra";
-        variant = "xhigh";
+        reasoning = "xhigh";
         fallback_models = [
           {
             model = "opencode-go/glm-5.3";
@@ -269,9 +269,9 @@ let
       };
       deep = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
         fallback_models = [
-          { model = "opencode-go/kimi-k3"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
           {
             model = "openai/gpt-6.1-sol";
             reasoning = "medium";
@@ -279,8 +279,8 @@ let
         ];
       };
       artistry = {
-        model = "opencode-go/kimi-k3";
-        variant = "high";
+        model = "opencode-go/deepseek-v4.1-flash";
+        reasoning = "high";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
@@ -298,7 +298,7 @@ let
       };
       quick = {
         model = "opencode-go/qwen3.8-flash";
-        variant = "low";
+        reasoning = "low";
         fallback_models = [
           {
             model = "opencode-go/gpt-6-luna";
@@ -312,7 +312,7 @@ let
       };
       unspecified-low = {
         model = "opencode-go/qwen3.8-flash";
-        variant = "medium";
+        reasoning = "medium";
         fallback_models = [
           {
             model = "opencode-go/gpt-6-luna";
@@ -323,9 +323,9 @@ let
       };
       unspecified-high = {
         model = "openai/gpt-6-astra";
-        variant = "high";
+        reasoning = "high";
         fallback_models = [
-          { model = "opencode-go/kimi-k3"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
           {
             model = "openai/gpt-6.1-sol";
             reasoning = "medium";
@@ -333,8 +333,8 @@ let
         ];
       };
       writing = {
-        model = "opencode-go/kimi-k3";
-        variant = "low";
+        model = "opencode-go/deepseek-v4.1-flash";
+        reasoning = "low";
         fallback_models = [
           {
             model = "openai/gpt-6.1-sol";
@@ -363,11 +363,28 @@ in
     ];
   };
 
-  home.file.".omo/omo.jsonc".text = builtins.toJSON {
-    "[opencode]" = {
-      disabled_hooks = [
-        "claude-code-hooks"
-      ];
-    } // (if useOpencodeGo then opencodeGoModelConfig else defaultModelConfig);
-  };
+  home.activation.omoConfig =
+    let
+      omoConfig = pkgs.writeText "omo.jsonc"
+        (
+          builtins.toJSON {
+            "$schema" =
+              "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/v5.1.7/assets/omo.schema.json";
+            "[opencode]" = {
+              disabled_hooks = [
+                "claude-code-hooks"
+              ];
+            } // (if useOpencodeGo then opencodeGoModelConfig else defaultModelConfig);
+          }
+        );
+      omoConfigDir = lib.escapeShellArg "${config.home.homeDirectory}/.omo";
+      omoConfigPath = lib.escapeShellArg "${config.home.homeDirectory}/.omo/omo.jsonc";
+    in
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      run ${pkgs.coreutils}/bin/mkdir -p -- ${omoConfigDir}
+      if [[ -L ${omoConfigPath} ]]; then
+        run ${pkgs.coreutils}/bin/rm -- ${omoConfigPath}
+      fi
+      run ${pkgs.coreutils}/bin/install -m 0600 -- ${omoConfig} ${omoConfigPath}
+    '';
 }
