@@ -30,7 +30,17 @@ in
       enable = true;
       package = pkgs.mariadb;
       ensureDatabases = ensureDatabases;
-      settings.mysqld.init_file = "/var/lib/mysql/init.sql";
+      settings.mysqld =
+        {
+          init_file = "/var/lib/mysql/init.sql";
+        }
+        // lib.optionalAttrs config.homelab.services.nextcloud.enable {
+          innodb_log_file_size = "256M";
+          long_query_time = 2;
+          max_heap_table_size = "64M";
+          slow_query_log = true;
+          tmp_table_size = "64M";
+        };
     };
   };
 }
