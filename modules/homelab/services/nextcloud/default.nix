@@ -123,7 +123,8 @@ in
 
     services.${service} = {
       enable = true;
-      package = pkgs.nextcloud34;
+      # TODO: remove packages master when 35.0.1 is on stable
+      package = pkgs.pkgs-master.nextcloud35;
       hostName = cfg.url;
       https = true;
 
@@ -134,13 +135,25 @@ in
           cospend
           deck
           drawio
-          news
           notes
           oidc_login
           phonetrack
           tasks
-          twofactor_admin
           twofactor_webauthn;
+
+        # TODO: remove when 35 has an official release added to nixpkgs
+        news = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
+          url =
+            "https://github.com/nextcloud/news/releases/download/29.0.0-beta.1/news.tar.gz";
+          hash = "sha256-V0/L4i/D9xwXfY9/0UVfp8bwd54JLRt6QsJLVW9dgLo=";
+        };
+        twofactor_admin = pkgs.fetchNextcloudApp {
+          license = "agpl3Plus";
+          url =
+            "https://github.com/nextcloud-releases/twofactor_admin/releases/download/v4.13.0-rc.0/twofactor_admin-v4.13.0-rc.0.tar.gz";
+          hash = "sha256-24xB3/h8roFbOC+xeSIU0gLGwOv+yWRGinl4FR99w7A=";
+        };
       };
       extraAppsEnable = true;
 
