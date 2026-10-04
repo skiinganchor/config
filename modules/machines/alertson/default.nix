@@ -18,6 +18,8 @@ in
   sops.secrets."ssh/wookie" = {
     sopsFile = "${secretsPath}/secrets/ssh-authorized-keys.yaml";
     key = "wookie";
+    owner = "wookie";
+    mode = "0400";
   };
 
   services.openssh.authorizedKeysFiles = lib.mkAfter [ "/run/secrets/ssh/%u" ];
