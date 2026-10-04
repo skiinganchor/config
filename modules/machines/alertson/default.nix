@@ -15,6 +15,12 @@ in
   sops.secrets."acme/environment-file" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
+  sops.secrets."ssh/wookie" = {
+    sopsFile = "${secretsPath}/secrets/ssh-authorized-keys.yaml";
+    key = "wookie";
+  };
+
+  services.openssh.authorizedKeysFiles = lib.mkAfter [ "/run/secrets/ssh/%u" ];
 
   networking = {
     firewall.enable = false;

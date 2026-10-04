@@ -15,7 +15,6 @@ in
         "wheel" # Enable ‘sudo’ for the user.
       ];
       hashedPasswordFile = config.sops.secrets."admin-user-password".path;
-      openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJC6x212xkUWdmR5gsxDQSyaZnLhrI/ZFw9C2omrAMy7" "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEMFYh6WDPjqrA3RuMSik6B1MD4AgzXJi+xiOSQhVMLX" ];
       packages = homelab.mainUser.pkgs;
     };
 
