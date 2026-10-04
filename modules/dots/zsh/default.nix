@@ -93,7 +93,7 @@
         k = "${lib.getExe pkgs.kubectl}";
         la = "ls --color -lha";
         ls = "ls --color=auto";
-        nfu = "nix flake update";
+        nfu = "GIT_SSH_COMMAND='ssh -i ~/.ssh/sa_id_ed25519 -o IdentitiesOnly=yes' nix flake update";
         nixup = "sudo nix flake update --flake /etc/nixos && sudo nixos-rebuild switch";
         yh = "yt-dlp --continue --no-check-certificate --format=bestvideo+bestaudio --exec='ffmpeg -i {} -c:a copy -c:v copy {}.mkv && rm {}'";
         # usage yd <video-id> or ya <video-id> (just audio)
