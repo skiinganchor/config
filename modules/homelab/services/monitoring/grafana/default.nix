@@ -15,6 +15,23 @@ in
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
     };
+    listenAddress = lib.mkOption {
+      type = lib.types.str;
+      default = "127.0.0.1";
+      description = "Address on which the Grafana backend listens.";
+    };
+    proxy = {
+      enable = lib.mkOption {
+        type = lib.types.bool;
+        default = cfg.enable;
+        description = "Enable the Grafana HTTPS reverse proxy on this host.";
+      };
+      upstream = lib.mkOption {
+        type = lib.types.str;
+        default = "http://${cfg.listenAddress}:${toString config.services.grafana.settings.server.http_port}";
+        description = "URL of the Grafana backend served by the reverse proxy.";
+      };
+    };
     url = lib.mkOption {
       type = lib.types.str;
       default = "monitor.${homelab.baseDomain}";
@@ -59,76 +76,80 @@ in
       default = "Observability";
     };
   };
-  config = lib.mkIf cfg.enable {
-    services.grafana = {
-      enable = true;
-      provision = {
+  config = lib.mkMerge [
+    (lib.mkIf cfg.enable {
+      services.grafana = {
         enable = true;
-        dashboards.settings.providers = [
-          {
-            name = "homelab";
-            orgId = 1;
-            folder = "Homelab";
-            type = "file";
-            disableDeletion = false;
-            updateIntervalSeconds = 30;
-            allowUiUpdates = false;
-            options.path = dashboardsDir;
-            options.foldersFromFilesStructure = false;
-          }
-        ];
-      };
-      settings = {
-        security.secret_key = "$__file{${cfg.secretKeyFile}}";
-        security.admin_password = "$__file{${cfg.adminPasswordFile}}";
-        security.cookie_secure = true;
-        users.allow_sign_up = false;
-        auth.disable_login_form = false;
-        server = {
-          http_addr = "127.0.0.1";
-          http_port = 3000;
-          domain = cfg.url;
-          root_url = "https://${cfg.url}/";
+        provision = {
+          enable = true;
+          dashboards.settings.providers = [
+            {
+              name = "homelab";
+              orgId = 1;
+              folder = "Homelab";
+              type = "file";
+              disableDeletion = false;
+              updateIntervalSeconds = 30;
+              allowUiUpdates = false;
+              options.path = dashboardsDir;
+              options.foldersFromFilesStructure = false;
+            }
+          ];
         };
-      } // lib.optionalAttrs (cfg.oidcClientSecretFile != null) {
-        "auth.generic_oauth" = {
-          enabled = true;
-          name = "Keycloak";
-          icon = "signin";
-          client_id = "grafana";
-          client_secret = "$__file{${cfg.oidcClientSecretFile}}";
-          scopes = "openid profile email";
-          auth_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/auth";
-          token_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/token";
-          api_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/userinfo";
-          allow_sign_up = true;
-          auto_login = false;
-          use_pkce = true;
-          login_attribute_path = "preferred_username";
-          role_attribute_path = "contains(realm_access.roles[*], 'grafana-admin') && 'Admin' || 'Viewer'";
-          signout_redirect_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/logout?post_logout_redirect_uri=https%3A%2F%2F${cfg.url}&client_id=grafana";
+        settings = {
+          security.secret_key = "$__file{${cfg.secretKeyFile}}";
+          security.admin_password = "$__file{${cfg.adminPasswordFile}}";
+          security.cookie_secure = true;
+          users.allow_sign_up = false;
+          auth.disable_login_form = false;
+          server = {
+            http_addr = cfg.listenAddress;
+            http_port = 3000;
+            domain = cfg.url;
+            root_url = "https://${cfg.url}/";
+          };
+        } // lib.optionalAttrs (cfg.oidcClientSecretFile != null) {
+          "auth.generic_oauth" = {
+            enabled = true;
+            name = "Keycloak";
+            icon = "signin";
+            client_id = "grafana";
+            client_secret = "$__file{${cfg.oidcClientSecretFile}}";
+            scopes = "openid profile email";
+            auth_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/auth";
+            token_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/token";
+            api_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/userinfo";
+            allow_sign_up = true;
+            auto_login = false;
+            use_pkce = true;
+            login_attribute_path = "preferred_username";
+            role_attribute_path = "contains(realm_access.roles[*], 'grafana-admin') && 'Admin' || 'Viewer'";
+            signout_redirect_url = "https://${keycloakUrl}/realms/sacred/protocol/openid-connect/logout?post_logout_redirect_uri=https%3A%2F%2F${cfg.url}&client_id=grafana";
+          };
         };
       };
-    };
-    services.nginx = {
-      virtualHosts."${cfg.url}" = {
-        forceSSL = true;
-        # uses security.acme instead
-        enableACME = false;
-        extraConfig = ''
-          # Add HSTS header to force HTTPS
-          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    })
+    (lib.mkIf cfg.proxy.enable {
+      services.nginx = {
+        virtualHosts."${cfg.url}" = {
+          forceSSL = true;
+          # uses security.acme instead
+          enableACME = false;
+          extraConfig = ''
+            # Add HSTS header to force HTTPS
+            add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
-          # Add X-XSS-Protection header for additional XSS protection
-          add_header X-XSS-Protection "1; mode=block" always;
-        '';
-        locations."/" = {
-          proxyPass = "http://${config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}";
-          proxyWebsockets = true; # Grafana Live
+            # Add X-XSS-Protection header for additional XSS protection
+            add_header X-XSS-Protection "1; mode=block" always;
+          '';
+          locations."/" = {
+            proxyPass = cfg.proxy.upstream;
+            proxyWebsockets = true; # Grafana Live
+          };
+          sslCertificate = "/var/lib/acme/${homelab.baseDomain}/fullchain.pem";
+          sslCertificateKey = "/var/lib/acme/${homelab.baseDomain}/key.pem";
         };
-        sslCertificate = "/var/lib/acme/${homelab.baseDomain}/fullchain.pem";
-        sslCertificateKey = "/var/lib/acme/${homelab.baseDomain}/key.pem";
       };
-    };
-  };
+    })
+  ];
 }

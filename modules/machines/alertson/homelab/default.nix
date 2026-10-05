@@ -34,6 +34,8 @@
       nginx.enable = true;
       grafana = {
         enable = true;
+        listenAddress = "0.0.0.0";
+        proxy.enable = false;
         secretKeyFile = config.sops.secrets."grafana/secret-key".path;
         adminPasswordFile = config.sops.secrets."grafana/admin-password".path;
         oidcClientSecretFile = config.sops.secrets."grafana/keycloak-client-secret".path;

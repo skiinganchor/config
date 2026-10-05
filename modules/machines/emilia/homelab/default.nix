@@ -155,6 +155,10 @@ in
         ncDbPassFile = config.sops.secrets."nextcloud/db-password".path;
         secretsJsonFile = config.sops.secrets."nextcloud/secrets".path;
       };
+      grafana.proxy = {
+        enable = true;
+        upstream = "http://alertson:3000";
+      };
       nginx.enable = true;
       ntfy = {
         enable = true;

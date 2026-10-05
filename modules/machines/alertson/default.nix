@@ -41,6 +41,7 @@ in
             ip6 nexthdr icmpv6 accept
 
             tcp dport 443 accept comment "443 Nginx"
+            ip saddr { 192.168.0.0/16, 10.0.0.0/8 } tcp dport 3000 accept comment "3000 Grafana backend for emilia"
             # LAN only — the router must never forward these;
             # restricting the source here keeps them private even if it does
             ip saddr { 192.168.0.0/16, 10.0.0.0/8 } tcp dport 22 accept comment "22 SSH"
