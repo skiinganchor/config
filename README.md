@@ -2,6 +2,48 @@
 
 To update flake you need to use ssh-agent. Based on https://git.notthebe.ee/notthebee/nix-config
 
+## Machine monitoring
+
+Grafana and Prometheus run on the `alertson` VM. Grafana provisions
+**Homelab → Homelab Machines Overview** at `/d/homelab-machines` with three
+matrices: physical machines, Intel NUC VMs, and NAS VMs.
+
+| Machine | Role / placement | Prometheus Node Exporter target |
+| --- | --- | --- |
+| NixOS desktop | Physical desktop | `desktop:9100` |
+| NAS | Physical NAS | `nas:9100` |
+| Intel NUC / Proxmox | Physical hypervisor | `saga:9100` |
+| emilia | VM on `saga` | `emilia:9100` |
+| Home Assistant OS | VM on `saga`, managed outside this repository | `homeassistant:9100` |
+| alertson | VM on `nas`; hosts monitoring | `localhost:9100` |
+| Proxmox Backup Server | VM on `nas` | `pbs:9100` |
+
+Proxmox Backup Server must expose Node Exporter on `pbs:9100`, reachable
+from `alertson`; its exporter installation is managed outside this repository.
+
+Each matrix shows exporter availability, CPU usage, memory usage, the
+fullest writable filesystem, and network receive/transmit rates. Usage
+cells turn yellow at 75% and red at 90%. Down exporters remain visible;
+unavailable metrics show `Unknown`. Filesystem usage excludes temporary
+and container filesystems, and network totals exclude loopback and common
+guest/container interfaces.
+
+Click a machine name to open **Node Exporter Full** with that machine and
+the same time range selected. The matrices show current resource usage;
+CPU and network rates use Grafana's rate interval. The drilldown provides
+the historical charts and detailed filesystem/interface metrics.
+
+Add exporters in `modules/machines/alertson/homelab/default.nix` to the
+`node` scrape job. Set `machine_type` to `physical` or `vm`, and for VMs set
+`hypervisor` to `saga` or `nas`. Those labels place new targets in the
+appropriate matrix automatically. Keep `availability="always-on"` for
+servers and `availability="best-effort"` for the desktop.
+
+After deploying the updated configuration to `alertson`, Grafana's file
+provider loads the dashboard automatically. Dashboard changes belong in
+`modules/homelab/services/monitoring/grafana/machines-overview.nix`, since
+provisioning disables UI edits.
+
 ## GitHub Actions secrets
 
 ### `GH_TOKEN_FOR_UPDATES`

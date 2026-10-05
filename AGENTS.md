@@ -50,6 +50,29 @@ Home Assistant is reached through the stable DNS target name `homeassistant` in 
 `node` exporter job. The provisioned Node Exporter Full dashboard discovers it
 automatically from Prometheus labels; do not hard-code it in `dashboards.nix`.
 
+## Monitoring Topology
+
+Grafana and Prometheus run on `alertson`. Physical machines are the NixOS
+desktop (`desktop`), the NAS (`nas`), and the Intel NUC / Proxmox host (`saga`).
+VM placement:
+
+- `saga`: `emilia` and Home Assistant OS (`homeassistant`). Home Assistant OS
+  is managed outside this NixOS repository.
+- `nas`: `alertson` (scraped as `localhost` from Prometheus) and Proxmox
+  Backup Server (`pbs:9100` in the `node` job).
+
+Node exporter scrape targets carry `machine_type="physical"` or
+`machine_type="vm"`; VM targets also carry `hypervisor="saga"` or
+`hypervisor="nas"`. Preserve these labels when adding or moving targets:
+the provisioned Homelab Machines Overview dashboard uses them to populate
+three matrices automatically. Keep the existing `availability` labels for
+alerting. New VM exporters belong in the `node` job.
+
+The overview's drilldown UID and variables match the pinned Node Exporter
+Full revision in `modules/homelab/services/monitoring/grafana/dashboards.nix`.
+If upgrading that dashboard, verify its UID and `ds_prometheus`, `job`,
+`nodename`, and `node` variables against `machines-overview.nix`.
+
 ## Update Nixpkgs
 
 1. Edit `flake.nix` input version

@@ -28,6 +28,8 @@ let
     sha256 = "sha256-E1f+UvVNxg9DsvkLIsUwIqfFm5K+Wd4kKIg+8h1uxpg=";
   };
 
+  machinesOverview = import ./machines-overview.nix { inherit pkgs; };
+
   # Grafana's provisioning layer does not substitute env vars into dashboard
   # JSON, so the correct datasource has to be baked in here. The pipeline
   # drops `__inputs` (Grafana.com import variables this config does not
@@ -54,6 +56,7 @@ pkgs.runCommand "grafana-dashboards"
 }
   ''
     mkdir -p $out
+    cp "${machinesOverview}" "$out/machines-overview.json"
     jq '${fixDatasourceVars}' "${nodeExporterFull}" > "$out/node-exporter-full.json"
     # The Systemd exporter JSON still uses the legacy ''${DS_PROMETHEUS}
     # placeholder in its queries; sed rewrites it to ''${datasource} so it

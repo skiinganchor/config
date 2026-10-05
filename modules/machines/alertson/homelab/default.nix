@@ -61,21 +61,37 @@
               job_name = exporter;
               static_configs = [
                 {
-                  targets = (
-                    lib.lists.forEach
-                      (
-                        [ "localhost" "emilia" ]
-                        ++ lib.optionals (exporter == "node") [ "homeassistant" "nas" "saga" ]
-                      )
-                      (
-                        target: "${target}:${toString config.services.prometheus.exporters.${exporter}.port}"
-                      )
-                  );
-                  labels.availability = "always-on";
+                  targets = [ "localhost:${toString config.services.prometheus.exporters.${exporter}.port}" ]
+                  ++ lib.optionals (exporter == "node") [ "pbs:${toString config.services.prometheus.exporters.node.port}" ];
+                  labels = {
+                    availability = "always-on";
+                    machine_type = "vm";
+                    hypervisor = "nas";
+                  };
+                }
+                {
+                  targets = [ "emilia:${toString config.services.prometheus.exporters.${exporter}.port}" ]
+                  ++ lib.optionals (exporter == "node") [ "homeassistant:${toString config.services.prometheus.exporters.node.port}" ];
+                  labels = {
+                    availability = "always-on";
+                    machine_type = "vm";
+                    hypervisor = "saga";
+                  };
                 }
                 {
                   targets = [ "desktop:${toString config.services.prometheus.exporters.${exporter}.port}" ];
-                  labels.availability = "best-effort";
+                  labels = {
+                    availability = "best-effort";
+                    machine_type = "physical";
+                  };
+                }
+              ] ++ lib.optionals (exporter == "node") [
+                {
+                  targets = [ "nas:${toString config.services.prometheus.exporters.node.port}" "saga:${toString config.services.prometheus.exporters.node.port}" ];
+                  labels = {
+                    availability = "always-on";
+                    machine_type = "physical";
+                  };
                 }
               ];
               metric_relabel_configs = lib.optionals (exporter == "node") [
