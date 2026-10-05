@@ -172,7 +172,17 @@ in
         overwriteprotocol = "https";
         "overwrite.cli.url" = "https://${cfg.url}";
         mail_sendmailmode = "pipe";
-        mail_smtpmode = "sendmail";
+        mail_smtpmode = "smtp";
+        mail_smtpport = 587;
+        # Empty string selects STARTTLS; Nextcloud upgrades the connection
+        # automatically when the server advertises STARTTLS on port 587.
+        mail_smtpsecure = "";
+        mail_smtpauth = true;
+        mail_from_address = "notification";
+        mail_smtptimeout = 30;
+        # The following keys are intentionally provided through the existing
+        # secretFile (SOPS) mechanism, not here:
+        #   mail_smtphost, mail_smtpname, mail_domain, mail_smtppassword
         # execute maintenance jobs between 01:00am UTC and 05:00am UTC
         maintenance_window_start = 1;
         # authentication related
