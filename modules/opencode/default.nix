@@ -2,88 +2,162 @@
 let
   useOpencodeGo = lib.attrByPath [ "homelab" "opencode" "useOpencodeGo" ] false osConfig;
 
-  defaultModelConfig = {
-    # ChatGPT Plus models authenticated through OpenCode's OpenAI provider.
-    categories = {
-      quick = {
-        model = "openai/gpt-6-luna";
-        reasoning = "low";
-      };
-      visual-engineering = {
-        model = "openai/gpt-6-astra";
-        reasoning = "medium";
-      };
-      ultrabrain = {
-        model = "openai/gpt-6-astra";
-        reasoning = "xhigh";
-      };
-      deep = {
-        model = "openai/gpt-6-astra";
-        reasoning = "high";
-      };
-      artistry = {
-        model = "openai/gpt-6-astra";
-        reasoning = "medium";
-      };
-      unspecified-low = {
-        model = "openai/gpt-6-luna";
-        reasoning = "low";
-      };
-      unspecified-high = {
-        model = "openai/gpt-6-astra";
-        reasoning = "high";
-      };
-      writing = {
-        model = "openai/gpt-6-astra";
-        reasoning = "medium";
-      };
-    };
-
-    # Agent-specific model overrides
+  openaiModelConfig = {
     agents = {
       sisyphus = {
-        model = "openai/gpt-6-astra";
+        model = "openai/gpt-6.1-sol";
         reasoning = "medium";
-      };
-      oracle = {
-        model = "openai/gpt-6-astra";
-        reasoning = "high";
-      };
-      librarian = {
-        model = "openai/gpt-6-luna";
-        reasoning = "low";
-      };
-      explore = {
-        model = "openai/gpt-6-luna";
-        reasoning = "low";
-      };
-      "multimodal-looker" = {
-        model = "openai/gpt-6-astra";
-        reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+        ];
       };
       hephaestus = {
         model = "openai/gpt-6.1-sol";
         reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+        ];
+      };
+      oracle = {
+        model = "openai/gpt-6.1-sol";
+        reasoning = "high";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "high"; }
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+        ];
+      };
+      librarian = {
+        model = "openai/gpt-6-luna";
+        reasoning = "low";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "low"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "low"; }
+        ];
+      };
+      explore = {
+        model = "openai/gpt-6-luna";
+        reasoning = "low";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "low"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "low"; }
+        ];
+      };
+      "multimodal-looker" = {
+        model = "openai/gpt-6-luna";
+        reasoning = "low";
+        fallback_models = [
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-astra"; reasoning = "medium"; }
+        ];
       };
       prometheus = {
-        model = "openai/gpt-6-astra";
+        model = "openai/gpt-6.1-sol";
         reasoning = "high";
+        fallback_models = [
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+          { model = "openai/gpt-6-sol"; reasoning = "high"; }
+        ];
       };
       metis = {
-        model = "openai/gpt-6-astra";
-        reasoning = "high";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-luna"; reasoning = "medium"; }
+        ];
       };
       momus = {
-        model = "openai/gpt-6-astra";
-        reasoning = "xhigh";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "high";
+        fallback_models = [
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+          { model = "openai/gpt-6-sol"; reasoning = "high"; }
+        ];
       };
       atlas = {
-        model = "openai/gpt-6.1-sol";
+        model = "openai/gpt-6-luna";
         reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+        ];
       };
       "sisyphus-junior" = {
+        model = "openai/gpt-6-sol";
+        reasoning = "low";
+        fallback_models = [
+          { model = "openai/gpt-6-luna"; reasoning = "low"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
+        ];
+      };
+    };
+
+    categories = {
+      visual-engineering = {
         model = "openai/gpt-6.1-sol";
         reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-astra"; reasoning = "medium"; }
+        ];
+      };
+      ultrabrain = {
+        model = "openai/gpt-6.1-sol";
+        reasoning = "high";
+        fallback_models = [
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+          { model = "openai/gpt-6-sol"; reasoning = "high"; }
+        ];
+      };
+      deep = {
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+        ];
+      };
+      artistry = {
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6-luna"; reasoning = "medium"; }
+        ];
+      };
+      quick = {
+        model = "openai/gpt-6-luna";
+        reasoning = "low";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "low"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "low"; }
+        ];
+      };
+      unspecified-low = {
+        model = "openai/gpt-6-luna";
+        reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "medium"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
+        ];
+      };
+      unspecified-high = {
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
+        fallback_models = [
+          { model = "openai/gpt-6-sol"; reasoning = "high"; }
+          { model = "openai/gpt-6-astra"; reasoning = "high"; }
+        ];
+      };
+      writing = {
+        model = "openai/gpt-6-luna";
+        reasoning = "low";
+        fallback_models = [
+          { model = "openai/gpt-6.1-sol"; reasoning = "low"; }
+          { model = "openai/gpt-6-sol"; reasoning = "low"; }
+        ];
       };
     };
   };
@@ -91,27 +165,19 @@ let
   opencodeGoModelConfig = {
     agents = {
       sisyphus = {
-        model = "opencode-go/deepseek-v4.1-flash";
+        model = "opencode-go/kimi-k2.7-code";
+        reasoning = "medium";
         fallback_models = [
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
-          {
-            model = "opencode-go/glm-5.3";
-            reasoning = "high";
-          }
+          { model = "opencode-go/minimax-m3"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
         ];
       };
       hephaestus = {
         model = "openai/gpt-6.1-sol";
         reasoning = "medium";
         fallback_models = [
+          { model = "opencode-go/kimi-k2.7-code"; }
           { model = "opencode-go/deepseek-v4.1-flash"; }
-          {
-            model = "opencode-go/glm-5.3";
-            reasoning = "high";
-          }
         ];
       };
       oracle = {
@@ -119,17 +185,17 @@ let
         reasoning = "high";
         fallback_models = [
           {
-            model = "opencode-go/glm-5.3";
-            reasoning = "max";
+            model = "openai/gpt-6-sol";
+            reasoning = "high";
           }
           {
-            model = "openai/gpt-6-astra";
+            model = "opencode-go/glm-5.2";
             reasoning = "high";
           }
         ];
       };
       librarian = {
-        model = "opencode-go/gpt-6-luna";
+        model = "opencode-go/mimo-v2.6-flash";
         reasoning = "low";
         fallback_models = [
           {
@@ -137,217 +203,165 @@ let
             reasoning = "low";
           }
           {
-            model = "opencode-go/qwen3.8-flash";
+            model = "opencode-go/longcat-2.5-preview-free";
             reasoning = "low";
           }
         ];
       };
       explore = {
-        model = "opencode-go/qwen3.8-flash";
+        model = "opencode-go/deepseek-v4.1-flash";
         reasoning = "low";
         fallback_models = [
           {
-            model = "opencode-go/gpt-6-luna";
+            model = "opencode-go/mimo-v2.6-flash";
             reasoning = "low";
           }
           {
-            model = "opencode-go/deepseek-v4.1-flash";
+            model = "opencode-go/longcat-2.5-preview-free";
             reasoning = "low";
           }
         ];
       };
       "multimodal-looker" = {
-        model = "openai/gpt-6.1-sol";
+        model = "opencode-go/deepseek-v4-flash-vision-exp";
         reasoning = "medium";
         fallback_models = [
-          { model = "opencode-go/deepseek-v4.1-flash"; }
           {
-            model = "opencode-go/qwen3.8-max";
-            reasoning = "medium";
+            model = "opencode-go/gpt-6-luna";
+            reasoning = "low";
           }
-          {
-            model = "opencode-go/glm-5.3-flash";
-            reasoning = "high";
-          }
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
         ];
       };
       prometheus = {
-        model = "opencode-go/deepseek-v4.1-flash";
+        model = "openai/gpt-6.1-sol";
         reasoning = "high";
         fallback_models = [
           {
-            model = "openai/gpt-6.1-sol";
+            model = "opencode-go/glm-5.2";
             reasoning = "high";
           }
           {
-            model = "opencode-go/qwen3.8-max";
-            reasoning = "medium";
+            model = "opencode-go/deepseek-v4-pro";
           }
         ];
       };
       metis = {
-        model = "opencode-go/deepseek-v4.1-flash";
-        reasoning = "low";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
         fallback_models = [
           {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "high";
+            model = "opencode-go/deepseek-v4-pro";
           }
           {
-            model = "opencode-go/glm-5.3";
-            reasoning = "high";
+            model = "opencode-go/minimax-m3";
           }
         ];
       };
       momus = {
-        model = "openai/gpt-6-astra";
-        reasoning = "xhigh";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "high";
         fallback_models = [
           {
-            model = "opencode-go/glm-5.3";
-            reasoning = "max";
+            model = "openai/gpt-6-astra";
+            reasoning = "high";
           }
           {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "xhigh";
+            model = "opencode-go/glm-5.2";
+            reasoning = "high";
           }
         ];
       };
       atlas = {
-        model = "opencode-go/deepseek-v4.1-flash";
+        model = "opencode-go/gpt-6-luna";
+        reasoning = "medium";
         fallback_models = [
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
           { model = "opencode-go/deepseek-v4.1-flash"; }
         ];
       };
       "sisyphus-junior" = {
         model = "opencode-go/deepseek-v4.1-flash";
+        reasoning = "low";
         fallback_models = [
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
-          {
-            model = "opencode-go/glm-5.3";
-            reasoning = "high";
-          }
+          { model = "opencode-go/kimi-k2.7-code"; }
+          { model = "openai/gpt-6.1-sol"; reasoning = "medium"; }
         ];
       };
     };
 
     categories = {
       visual-engineering = {
-        model = "opencode-go/deepseek-v4.1-flash";
-        reasoning = "high";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
         fallback_models = [
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
-          {
-            model = "opencode-go/qwen3.8-max";
-            reasoning = "medium";
-          }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
+          { model = "opencode-go/qwen3.7-plus"; }
         ];
       };
       ultrabrain = {
-        model = "openai/gpt-6-astra";
-        reasoning = "xhigh";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "high";
         fallback_models = [
           {
-            model = "opencode-go/glm-5.3";
-            reasoning = "max";
+            model = "openai/gpt-6-astra";
+            reasoning = "high";
           }
           {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "xhigh";
+            model = "opencode-go/glm-5.2";
+            reasoning = "high";
           }
         ];
       };
       deep = {
-        model = "openai/gpt-6-astra";
-        reasoning = "high";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
         fallback_models = [
-          { model = "opencode-go/deepseek-v4.1-flash"; }
+          { model = "opencode-go/deepseek-v4-pro"; }
           {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
+            model = "opencode-go/glm-5.2";
+            reasoning = "high";
           }
         ];
       };
       artistry = {
-        model = "opencode-go/deepseek-v4.1-flash";
-        reasoning = "high";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
         fallback_models = [
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
-          {
-            model = "opencode-go/qwen3.8-max";
-            reasoning = "xhigh";
-          }
-          {
-            model = "opencode-go/grok-4.6";
-            reasoning = "high";
-          }
+          { model = "opencode-go/qwen3.7-plus"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
         ];
       };
       quick = {
-        model = "opencode-go/qwen3.8-flash";
+        model = "opencode-go/gpt-6-luna";
         reasoning = "low";
         fallback_models = [
-          {
-            model = "opencode-go/gpt-6-luna";
-            reasoning = "low";
-          }
-          {
-            model = "opencode-go/deepseek-v4.1-flash";
-            reasoning = "low";
-          }
+          { model = "opencode-go/mimo-v2.6-flash"; reasoning = "low"; }
+          { model = "opencode-go/longcat-2.5-preview-free"; }
         ];
       };
       unspecified-low = {
-        model = "opencode-go/qwen3.8-flash";
-        reasoning = "medium";
+        model = "opencode-go/mimo-v2.6-pro";
+        reasoning = "high";
         fallback_models = [
-          {
-            model = "opencode-go/gpt-6-luna";
-            reasoning = "low";
-          }
-          { model = "opencode-go/minimax-m3"; }
+          { model = "opencode-go/gpt-6-luna"; reasoning = "medium"; }
+          { model = "opencode-go/deepseek-v4.1-flash"; }
         ];
       };
       unspecified-high = {
-        model = "openai/gpt-6-astra";
-        reasoning = "high";
+        model = "openai/gpt-6.1-sol";
+        reasoning = "medium";
         fallback_models = [
-          { model = "opencode-go/deepseek-v4.1-flash"; }
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
+          { model = "opencode-go/deepseek-v4-pro"; }
+          { model = "opencode-go/glm-5.2"; reasoning = "high"; }
         ];
       };
       writing = {
-        model = "opencode-go/deepseek-v4.1-flash";
+        model = "opencode-go/qwen3.7-plus";
         reasoning = "low";
         fallback_models = [
-          {
-            model = "openai/gpt-6.1-sol";
-            reasoning = "medium";
-          }
-          {
-            model = "opencode-go/qwen3.8-max";
-            reasoning = "medium";
-          }
-          {
-            model = "opencode-go/mimo-v2.5-pro";
-            reasoning = "high";
-          }
+          { model = "openai/gpt-6.1-sol"; reasoning = "low"; }
+          { model = "opencode-go/mimo-v2.6-pro"; }
         ];
       };
     };
@@ -374,7 +388,7 @@ in
               disabled_hooks = [
                 "claude-code-hooks"
               ];
-            } // (if useOpencodeGo then opencodeGoModelConfig else defaultModelConfig);
+            } // (if useOpencodeGo then opencodeGoModelConfig else openaiModelConfig);
           }
         );
       omoConfigDir = lib.escapeShellArg "${config.home.homeDirectory}/.omo";
