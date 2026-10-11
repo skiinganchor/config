@@ -3,13 +3,13 @@ let
   service = "lidarr";
   cfg = config.homelab.services.${service};
   homelab = config.homelab;
-  lidarr-nightly = pkgs.stdenvNoCC.mkDerivation {
+  lidarr-nightly = pkgs.stdenvNoCC.mkDerivation (finalAttrs: {
     pname = "lidarr";
     version = "3.1.6.5078";
 
     src = pkgs.fetchurl {
-      name = "lidarr-nightly.tar.gz";
-      url = "https://lidarr.servarr.com/v1/update/nightly/updatefile?os=linux&runtime=netcore&arch=x64";
+      # Pin the release archive: the latest-nightly endpoint changes its content.
+      url = "https://github.com/Lidarr/Lidarr/releases/download/v${finalAttrs.version}/Lidarr.develop.${finalAttrs.version}.linux-core-x64.tar.gz";
       hash = "sha256-HYFPI3bKbFxP6R/M2uOksR+xA06zRyC+Sd9wi8+MK4E=";
     };
 
@@ -37,7 +37,7 @@ let
         --prefix LD_LIBRARY_PATH : ${pkgs.openssl.out}/lib
       runHook postInstall
     '';
-  };
+  });
 in
 {
   options.homelab.services.${service} = {
