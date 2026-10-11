@@ -3,6 +3,20 @@ let
   service = "aurral";
   cfg = config.homelab.services.${service};
   inherit (config) homelab;
+  beets = homelab.services.slskd;
+  importAlbum = pkgs.writeShellScript "aurral-beets-import-album" ''
+    export BEETSDIR=/var/lib/slskd-import-files
+    ${lib.getExe pkgs.pkgs-unstable.beets} -c ${beets.beetsConfigFile} import -m "$1"
+    import_status=$?
+    ${lib.optionalString beets.beetsLyrics.enable ''
+      ${beets.beetsExportLyricsCommand}
+      export_status=$?
+      if [ "$import_status" -eq 0 ]; then
+        exit "$export_status"
+      fi
+    ''}
+    exit "$import_status"
+  '';
 in
 {
   options.homelab.services.${service} = {
@@ -12,6 +26,15 @@ in
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/${service}";
+    };
+    downloadDir = lib.mkOption {
+      type = lib.types.externalPath;
+      default = "/mnt/media/music/aurral";
+      description = ''
+        Aurral's managed download folder. Enforced on service startup, including
+        installations with a different path saved in the web UI.
+        Existing files are not moved when this option changes.
+      '';
     };
     url = lib.mkOption {
       type = lib.types.str;
@@ -24,7 +47,7 @@ in
     directories = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [ "/mnt/media/music" ];
-      description = "Paths whose backing mounts Aurral must wait for before starting.";
+      description = "Additional directories exposed to Aurral, whose backing mounts it must wait for.";
     };
     environment = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
@@ -64,7 +87,12 @@ in
     services.${service} = {
       enable = true;
       package = pkgs.pkgs-master.aurral;
-      inherit (cfg) port openFirewall environment environmentFile;
+      inherit (cfg) port openFirewall directories environmentFile;
+      environment = cfg.environment // {
+        DOWNLOAD_FOLDER = cfg.downloadDir;
+        FILE_BROWSE_ROOTS = cfg.environment.FILE_BROWSE_ROOTS or
+          (lib.concatStringsSep "," (lib.unique (cfg.directories ++ [ cfg.downloadDir ])));
+      };
       dataDir = cfg.configDir;
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
@@ -74,13 +102,47 @@ in
     # Use the host mount as Lidarr does while keeping system paths read-only.
     systemd.services.aurral = {
       confinement.enable = lib.mkForce false;
-      unitConfig.RequiresMountsFor = cfg.directories;
+      unitConfig.RequiresMountsFor = lib.unique (cfg.directories ++ [ cfg.downloadDir ]);
+      preStart = ''
+        ${lib.getExe' pkgs.coreutils "install"} -d -m 0770 -- ${lib.escapeShellArg cfg.downloadDir}
+        ${lib.getExe pkgs.python3} ${./configure-download-folder.py}
+      '';
       serviceConfig = {
         BindPaths = lib.mkForce [ ];
         BindReadOnlyPaths = lib.mkForce [ ];
         ProtectSystem = lib.mkForce "full";
       };
     };
+
+    # Keep imports explicit: moving Aurral's managed files can invalidate its
+    # playback paths. Use the same beets configuration and lock as slskd.
+    environment.systemPackages = lib.optionals homelab.services.slskd.enable [
+      (pkgs.writeShellScriptBin "aurral-beets-import" ''
+        set -euo pipefail
+        if [ "$#" -ne 1 ]; then
+          echo "Usage: aurral-beets-import <artist/album>" >&2
+          exit 2
+        fi
+        download_root="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- ${lib.escapeShellArg cfg.downloadDir})"
+        album="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- "$download_root/$1")"
+        case "$album" in
+          "$download_root"/_flows|"$download_root"/_flows/*|"$download_root"/aurral-weekly-flow|"$download_root"/aurral-weekly-flow/*)
+            echo "Temporary flow tracks and playlist metadata are not library imports" >&2
+            exit 2
+            ;;
+          "$download_root"/*/*) ;;
+          *)
+            echo "Select an album directory inside $download_root" >&2
+            exit 2
+            ;;
+        esac
+        test -d "$album"
+        exec sudo -u ${lib.escapeShellArg homelab.mainUser.name} \
+          ${lib.getExe' pkgs.util-linux "flock"} \
+          ${lib.escapeShellArg "${homelab.services.slskd.musicDir}/.beets/import.lock"} \
+          ${importAlbum} "$album"
+      '')
+    ];
 
     services.nginx = {
       virtualHosts."${cfg.url}" = {
