@@ -100,9 +100,7 @@ let
 in
 {
   options.homelab.motd = {
-    enable = lib.mkEnableOption {
-      description = "motd Greeting";
-    };
+    enable = lib.mkEnableOption "motd Greeting";
     networkInterfaces = lib.mkOption {
       description = "Network interfaces to monitor";
       type = lib.types.listOf lib.types.str;

@@ -29,9 +29,7 @@ let
 in
 {
   options.homelab.services.matrix = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
     calls.enable = lib.mkOption {
       type = lib.types.bool;
       default = false;

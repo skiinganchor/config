@@ -5,9 +5,7 @@ let
 in
 {
   options.homelab.services.kvm = {
-    enable = lib.mkEnableOption {
-      description = "Enable KVM";
-    };
+    enable = lib.mkEnableOption "KVM";
     url = lib.mkOption {
       type = lib.types.str;
       default = "kvm.${homelab.baseDomain}";

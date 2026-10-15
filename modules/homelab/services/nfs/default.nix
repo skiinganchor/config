@@ -6,9 +6,7 @@ let
 in
 {
   options.homelab.services.${service} = {
-    enable = lib.mkEnableOption {
-      description = "Enable declarative NFS exports for the homelab";
-    };
+    enable = lib.mkEnableOption "declarative NFS exports for the homelab";
     exports = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule {
         options = {

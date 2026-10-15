@@ -5,9 +5,7 @@ let
 in
 {
   options.homelab.services.homeassistant = {
-    enable = lib.mkEnableOption {
-      description = "Enable Home Assistant";
-    };
+    enable = lib.mkEnableOption "Home Assistant";
     url = lib.mkOption {
       type = lib.types.str;
       default = "home.${homelab.baseDomain}";
