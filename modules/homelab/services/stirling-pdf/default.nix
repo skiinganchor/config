@@ -31,17 +31,8 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
-      # The React Automate (pipeline) runner hard-codes a 300000ms axios
-      # timeout per step in frontend/editor/src/core/constants/automation.ts; large
-      # PDFs blow past it on Compress. Not configurable via env var — the
-      # value is baked into the JS bundle, so bump it at build time.
-      # Changing to master to have https://github.com/NixOS/nixpkgs/pull/557809
-      package = pkgs.pkgs-master.stirling-pdf.overrideAttrs (old: {
-        postPatch = (old.postPatch or "") + ''
-          substituteInPlace frontend/editor/src/core/constants/automation.ts \
-            --replace-fail 'OPERATION_TIMEOUT: 300000,' 'OPERATION_TIMEOUT: 1800000,'
-        '';
-      });
+      # TODO: remove master as unstable reaches 3.1.0
+      package = pkgs.pkgs-master.stirling-pdf;
       environment = {
         SERVER_PORT = 8888;
       };
