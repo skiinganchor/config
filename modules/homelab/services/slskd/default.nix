@@ -8,10 +8,9 @@ let
   inherit (config) homelab;
   cfg = homelab.services.${service};
   ns = homelab.services.wireguard-netns.namespace;
-  beetsPackage = pkgs.pkgs-unstable.beets;
+  beets = homelab.services.beets;
 in
 {
-  imports = [ ./beets.nix ];
   options.homelab.services.${service} = {
     enable = lib.mkEnableOption {
       description = "Enable ${service}";
@@ -19,10 +18,6 @@ in
     configDir = lib.mkOption {
       type = lib.types.str;
       default = "/var/lib/${service}";
-    };
-    musicDir = lib.mkOption {
-      type = lib.types.str;
-      default = "/mnt/media/music/library";
     };
     downloadDir = lib.mkOption {
       type = lib.types.str;
@@ -36,13 +31,14 @@ in
       type = lib.types.str;
       default = "slskd.${homelab.baseDomain}";
     };
-    beetsConfigFile = lib.mkOption {
-      type = lib.types.path;
-    };
-    beetsLyrics.enable = lib.mkEnableOption "fetching and exporting lyrics with Beets";
-    beetsExportLyricsCommand = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
+    autoImport = lib.mkOption {
+      type = lib.types.bool;
+      default = beets.enable && !(homelab.services.aurral.enable || homelab.services.lidarr.enable);
+      description = ''
+        Import completed slskd directories through the shared beets command.
+        Enable only when no application needs to approve or consume those files.
+        The slskd completion event does not identify the requesting application.
+      '';
     };
     environmentFile = lib.mkOption {
       description = ''
@@ -77,11 +73,18 @@ in
   };
   config = lib.mkIf cfg.enable {
     systemd.tmpfiles.rules = map (x: "d ${x} 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -") [
-      cfg.musicDir
-      "${cfg.musicDir}/.beets"
-      cfg.downloadDir
       cfg.downloadDir
       cfg.incompleteDownloadDir
+    ];
+    assertions = [
+      {
+        assertion = !cfg.autoImport || beets.enable;
+        message = "slskd.autoImport requires homelab.services.beets.enable.";
+      }
+      {
+        assertion = !cfg.autoImport || !(homelab.services.aurral.enable || homelab.services.lidarr.enable);
+        message = "slskd.autoImport cannot run before Aurral approval or race Lidarr's download handling; see docs/music-workflow.md.";
+      }
     ];
     services.${service} = {
       enable = true;
@@ -95,99 +98,30 @@ in
         # Loopback API access (beets, monitoring) stays open because the
         # systemd-socket-proxyd / netns plumbing keeps the listener on 127.0.0.1.
         web.authentication.disabled = true;
-        integration.scripts.slskd-import-files = {
-          # Wait for the complete directory so beets sees an album as one unit
-          # instead of importing each track as it arrives.
-          on = [
-            "DownloadDirectoryComplete"
-          ];
-          run =
-            let
-              slskd-import-files = pkgs.writeScriptBin "slskd-import-files" ''
-                #!${lib.getExe pkgs.bash}
-
-                # Keep a persistent transcript while also forwarding output to
-                # systemd-cat, which makes it visible in the slskd journal.
-                import_log=${lib.escapeShellArg "${cfg.musicDir}/.beets/slskd-import.log"}
-                exec > >(${lib.getExe' pkgs.coreutils "tee"} -a "$import_log") 2>&1
-                echo
-                echo "[$(${lib.getExe' pkgs.coreutils "date"} --iso-8601=seconds)] DownloadDirectoryComplete received"
-
-                # slskd supplies event data as JSON. Import only the directory
-                # that completed; importing the download root would also ingest
-                # other albums while their transfers are still in progress.
-                if ! event_directory="$(
-                  ${lib.getExe' pkgs.coreutils "printf"} '%s' "$SLSKD_SCRIPT_DATA" \
-                    | ${lib.getExe pkgs.jq} -er '.localDirectoryName | select(type == "string" and length > 0)'
-                )"; then
-                  echo "Invalid DownloadDirectoryComplete event data" >&2
-                  exit 1
-                fi
-
-                download_root="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- ${lib.escapeShellArg cfg.downloadDir})"
-                if [[ "$event_directory" = /* ]]; then
-                  import_candidate="$event_directory"
-                else
-                  import_candidate=${lib.escapeShellArg "${cfg.downloadDir}/"}"$event_directory"
-                fi
-                if ! import_directory="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- "$import_candidate")"; then
-                  echo "Completed download directory does not exist: $import_candidate" >&2
-                  exit 1
-                fi
-                case "$import_directory" in
-                  "$download_root"/*) ;;
-                  *)
-                    echo "Refusing to import directory outside $download_root: $import_directory" >&2
-                    exit 1
-                    ;;
-                esac
-                echo "Importing completed directory: $import_directory"
-
-                # slskd can finish multiple downloads at once. Hold an
-                # exclusive lock so only one importer moves files or writes the
-                # SQLite library at a time. The lock is released on process exit.
-                exec 9>${lib.escapeShellArg "${cfg.musicDir}/.beets/import.lock"}
-                ${lib.getExe' pkgs.util-linux "flock"} 9
-
-                # Keep beets' state in the writable library directory. Verbose
-                # output records why a candidate was accepted or skipped; -m
-                # moves matches and -q accepts only strong recommendations.
-                cd ${lib.escapeShellArg "${cfg.musicDir}/.beets"}
-                HOME=${lib.escapeShellArg "${cfg.musicDir}/.beets"} \
-                  ${lib.getExe beetsPackage} \
-                  -v \
-                  -c ${cfg.beetsConfigFile} \
-                  import -m -q "$import_directory"
-                import_status=$?
-
-                ${lib.optionalString cfg.beetsLyrics.enable ''
-                  # Refresh sidecars even after a partial import, but preserve
-                  # the import error as the script's primary failure status.
-                  ${cfg.beetsExportLyricsCommand}
-                  export_status=$?
-                  if [ "$import_status" -ne 0 ]; then
-                    exit "$import_status"
-                  fi
-                  exit "$export_status"
-                ''}
-                exit "$import_status"
-              '';
-            in
-            {
-              executable = "${lib.getExe' pkgs.systemd "systemd-cat"}";
-              arglist = [
-                "--identifier=slskd-import"
-                (lib.getExe pkgs.bash)
-                (lib.getExe slskd-import-files)
-              ];
-            };
+        # This hook only adapts slskd's native event to the common importer.
+        integration.scripts.slskd-import-files = lib.mkIf cfg.autoImport {
+          on = [ "DownloadDirectoryComplete" ];
+          run = {
+            executable = toString (pkgs.writeShellScript "slskd-beets-import" ''
+              set -euo pipefail
+              directory="$(${lib.getExe pkgs.jq} -er '.localDirectoryName | select(type == "string" and length > 0)' <<< "$SLSKD_SCRIPT_DATA")"
+              root="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- ${lib.escapeShellArg cfg.downloadDir})"
+              if [[ "$directory" != /* ]]; then directory="$root/$directory"; fi
+              directory="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- "$directory")"
+              case "$directory" in
+                "$root"/*) ;;
+                *) echo "Completed directory is outside the slskd download folder" >&2; exit 1 ;;
+              esac
+              exec ${beets.importCommand} -q "$directory"
+            '');
+          };
         };
         directories = {
           downloads = cfg.downloadDir;
           incomplete = cfg.incompleteDownloadDir;
         };
         shares = {
-          directories = [ cfg.musicDir ];
+          directories = [ beets.libraryDir ];
           filters = [
             "\.ini$"
             "Thumbs.db$"

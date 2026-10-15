@@ -84,3 +84,19 @@ If upgrading that dashboard, verify its UID and `ds_prometheus`, `job`,
 - **Uses `my-secrets`**: private repo via SSH - need ssh-agent for `nix flake update`
 - Pre-commit runs `nixpkgs-fmt --check` - will reject unformatted code
 - No unit tests - validation is declarative via `nix flake check`
+
+## Music workflow
+
+Before changing Aurral, slskd, Lidarr/Tubifarry, beets, or Navidrome, read
+[docs/music-workflow.md](docs/music-workflow.md).
+
+- slskd is the only music downloader. Keep beets configuration, paths, database,
+  and import locking in `modules/homelab/services/beets/default.nix`.
+- Prefer native application settings and NixOS modules. Do not add per-application
+  importers, application source patches, database polling workers, or receipt caches.
+- Preserve Aurral approval before import. A slskd completion event is earlier than
+  approval and does not identify the requesting application.
+- Do not run two movers on a download. Do not move files tracked by Aurral or Lidarr
+  without a supported way for the owner to accept their final paths.
+- Automatic handoff for the three shared-client routes is an upstream integration
+  gap, documented in the workflow. Do not claim that a path option fixes it.

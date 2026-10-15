@@ -3,20 +3,8 @@ let
   service = "aurral";
   cfg = config.homelab.services.${service};
   inherit (config) homelab;
-  beets = homelab.services.slskd;
-  importAlbum = pkgs.writeShellScript "aurral-beets-import-album" ''
-    export BEETSDIR=/var/lib/slskd-import-files
-    ${lib.getExe pkgs.pkgs-unstable.beets} -c ${beets.beetsConfigFile} import -m "$1"
-    import_status=$?
-    ${lib.optionalString beets.beetsLyrics.enable ''
-      ${beets.beetsExportLyricsCommand}
-      export_status=$?
-      if [ "$import_status" -eq 0 ]; then
-        exit "$export_status"
-      fi
-    ''}
-    exit "$import_status"
-  '';
+  sqlString = value: "'" + lib.replaceStrings [ "'" ] [ "''" ] value + "'";
+
 in
 {
   options.homelab.services.${service} = {
@@ -105,7 +93,18 @@ in
       unitConfig.RequiresMountsFor = lib.unique (cfg.directories ++ [ cfg.downloadDir ]);
       preStart = ''
         ${lib.getExe' pkgs.coreutils "install"} -d -m 0770 -- ${lib.escapeShellArg cfg.downloadDir}
-        ${lib.getExe pkgs.python3} ${./configure-download-folder.py}
+        database=${lib.escapeShellArg (cfg.environment.AURRAL_DB_PATH or "${cfg.configDir}/aurral.db")}
+        if [ -f "$database" ]; then
+          saved="$(${lib.getExe pkgs.sqlite} -cmd '.timeout 5000' "$database" "SELECT value FROM settings WHERE key='downloadFolderPath';")"
+          if [ "$saved" != ${lib.escapeShellArg cfg.downloadDir} ]; then
+            ${lib.getExe' pkgs.coreutils "install"} -d -m 0700 -- ${lib.escapeShellArg "${cfg.configDir}/backups"}
+            ${lib.getExe pkgs.sqlite} -cmd '.timeout 5000' "$database" <<'SQL'
+        VACUUM INTO (${sqlString "${cfg.configDir}/backups/before-download-folder-"} || strftime('%Y%m%d%H%M%f', 'now') || '.db');
+        INSERT INTO settings(key, value) VALUES('downloadFolderPath', ${sqlString cfg.downloadDir})
+          ON CONFLICT(key) DO UPDATE SET value=excluded.value;
+        SQL
+          fi
+        fi
       '';
       serviceConfig = {
         BindPaths = lib.mkForce [ ];
@@ -113,36 +112,6 @@ in
         ProtectSystem = lib.mkForce "full";
       };
     };
-
-    # Keep imports explicit: moving Aurral's managed files can invalidate its
-    # playback paths. Use the same beets configuration and lock as slskd.
-    environment.systemPackages = lib.optionals homelab.services.slskd.enable [
-      (pkgs.writeShellScriptBin "aurral-beets-import" ''
-        set -euo pipefail
-        if [ "$#" -ne 1 ]; then
-          echo "Usage: aurral-beets-import <artist/album>" >&2
-          exit 2
-        fi
-        download_root="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- ${lib.escapeShellArg cfg.downloadDir})"
-        album="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- "$download_root/$1")"
-        case "$album" in
-          "$download_root"/_flows|"$download_root"/_flows/*|"$download_root"/aurral-weekly-flow|"$download_root"/aurral-weekly-flow/*)
-            echo "Temporary flow tracks and playlist metadata are not library imports" >&2
-            exit 2
-            ;;
-          "$download_root"/*/*) ;;
-          *)
-            echo "Select an album directory inside $download_root" >&2
-            exit 2
-            ;;
-        esac
-        test -d "$album"
-        exec sudo -u ${lib.escapeShellArg homelab.mainUser.name} \
-          ${lib.getExe' pkgs.util-linux "flock"} \
-          ${lib.escapeShellArg "${homelab.services.slskd.musicDir}/.beets/import.lock"} \
-          ${importAlbum} "$album"
-      '')
-    ];
 
     services.nginx = {
       virtualHosts."${cfg.url}" = {
