@@ -33,6 +33,11 @@ in
     DefaultIOAccounting = "yes";
   };
 
+  # BBR is a Google algorithm that optimizes outgoing TCP traffic by estimating bandwidth and latency instead of relying on packet loss.
+  # May improve remote transfers (e.g., Nextcloud/Jellyfin); does not directly affect incoming TCP or UDP.
+  boot.kernelModules = [ "tcp_bbr" ];
+  boot.kernel.sysctl."net.ipv4.tcp_congestion_control" = "bbr";
+
   nix.gc.automatic = true;
 
   home-manager = {
