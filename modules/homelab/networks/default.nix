@@ -1,7 +1,4 @@
-{ lib, config, ... }:
-let
-  cfg = config.homelab.networks;
-in
+{ lib, ... }:
 {
   options.homelab.networks = {
     local = lib.mkOption {
@@ -31,10 +28,11 @@ in
                 '';
               };
               dhcp.v6 = lib.mkOption {
-                type = lib.types.bool;
-                default = cfg.cidr.v6;
+                type = lib.types.nullOr lib.types.bool;
+                default = null;
                 description = ''
-                  Whether to run a DHCPv6 server on the network
+                  Whether to run a DHCPv6 server on the network. Null enables it
+                  whenever the network has an IPv6 range.
                 '';
               };
             };
