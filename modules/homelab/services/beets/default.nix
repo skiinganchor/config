@@ -88,6 +88,11 @@ in
       description = "Shared importer state, log, and lock directory.";
     };
     lyrics.enable = lib.mkEnableOption "fetching and embedding lyrics with the native beets plugin";
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      description = "Systemd services to show in the MOTD status list while beets is enabled.";
+    };
     settings = lib.mkOption {
       inherit (settingsFormat) type;
       default = { };
