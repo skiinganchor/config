@@ -13,6 +13,11 @@ in
   ];
 
   sops.secrets."db-password" = { };
+  sops.secrets."fail2ban/ignoreip" = {
+    owner = "root";
+    mode = "0400";
+    restartUnits = [ "fail2ban.service" ];
+  };
   sops.secrets."keycloak/db-password" = { };
   sops.secrets."keycloak/oauth2-proxy-env-file" = { };
   sops.secrets."matrix/registration-secret" = {
@@ -211,5 +216,10 @@ in
       };
     };
     timeZone = "Europe/Amsterdam";
+  };
+
+  services.fail2ban.jails.INCLUDES.settings = {
+    before = "paths-nixos.conf";
+    after = config.sops.secrets."fail2ban/ignoreip".path;
   };
 }

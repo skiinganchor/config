@@ -93,3 +93,5 @@ homelab.mainUser.accounts = [
 ```
 
 Create the matching SOPS key with a Nextcloud app password, and ensure the user's age identity is available at `~/.config/sops/age/keys.txt` before the graphical session starts. The generated user service runs after `sops-nix.service`, checks GOA for the account first, and gives the password to GOA only when it needs to create the account. GOA stores the credential in GNOME Keyring. Do not put passwords in Nix files or Git.
+
+For Emilia's Fail2ban SOPS ignore list format, see [docs/fail2ban-ignoreip.md](docs/fail2ban-ignoreip.md).
