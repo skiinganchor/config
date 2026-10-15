@@ -82,6 +82,20 @@ in
       '';
     };
 
+    cronJobsFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = lib.literalExpression ''config.sops.secrets."hermes/cron-jobs".path'';
+      description = ''
+        Absolute runtime path to a JSON list of recurring jobs. Each entry has
+        a stable id, name, schedule, deliver (matrix:ROOM_ID), and prompt.
+        Use a sops-nix secret to keep all fields out of the Nix store.
+        Jobs are reconciled before gateway startup; an empty list removes
+        managed jobs while leaving jobs created interactively untouched.
+        See docs/hermes-cron-jobs.md for the schema and SOPS configuration.
+      '';
+    };
+
     settings = lib.mkOption {
       type = lib.types.attrsOf lib.types.anything;
       default = { };
@@ -95,15 +109,30 @@ in
         assertion = cfg.environmentFile != null;
         message = "homelab.services.hermes.environmentFile must be set when Hermes is enabled";
       }
+      {
+        assertion = cfg.cronJobsFile == null || lib.hasPrefix "/" cfg.cronJobsFile;
+        message = "homelab.services.hermes-agent.cronJobsFile must be an absolute runtime path";
+      }
+      {
+        assertion = cfg.cronJobsFile == null || !config.services.hermes-agent.container.enable;
+        message = "homelab.services.hermes-agent.cronJobsFile requires native service mode";
+      }
     ];
 
     # See options in: https://github.com/NousResearch/hermes-agent/blob/main/nix/nixosModules.nix
     services.hermes-agent = {
       enable = true;
-      addToSystemPackages = cfg.addToSystemPackages;
-      backend = cfg.backend;
+      inherit (cfg) addToSystemPackages backend package stateDir settings;
       environmentFiles = [ cfg.environmentFile ];
-      settings = cfg.settings;
+    };
+
+    systemd.services.hermes-agent = lib.mkIf (cfg.cronJobsFile != null) {
+      after = [ "sops-install-secrets.service" ];
+      serviceConfig.UMask = lib.mkForce "0077";
+      preStart = lib.mkAfter ''
+        ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
+          ${./reconcile-cron-jobs.py} ${lib.escapeShellArg cfg.cronJobsFile}
+      '';
     };
   };
 }
