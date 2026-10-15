@@ -22,13 +22,6 @@ in
     "acme/environment-file" = {
       sopsFile = "${secretsPath}/secrets/shared.yaml";
     };
-    "hermes/env-file" = lib.mkIf config.homelab.services.hermes-agent.enable {
-      sopsFile = "${secretsPath}/secrets/shared.yaml";
-      owner = "hermes";
-      group = "hermes";
-      mode = "0400";
-      restartUnits = [ "hermes-agent.service" ];
-    };
   };
 
   hardware.graphics = {

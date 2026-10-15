@@ -38,6 +38,13 @@ in
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
   sops.secrets."slskd/env-file" = { };
+  sops.secrets."hermes/env-file" = {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+    owner = "hermes";
+    group = "hermes";
+    mode = "0400";
+    restartUnits = [ "hermes-agent.service" ];
+  };
   sops.secrets."wireguard-netns/config" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
@@ -104,6 +111,17 @@ in
       bazarr.enable = true;
       deluge.enable = false;
       fail2ban.enable = true;
+      hermes-agent = {
+        enable = true;
+        addToSystemPackages = true;
+        environmentFile = config.sops.secrets."hermes/env-file".path;
+        # Select either configurations based on using opencode-go or openai-codex (needs manual auth) as main provider
+        # settings.model.default = "opencode-go/qwen3.7-plus";
+        settings.model = {
+          provider = "openai-codex";
+          default = "gpt-6-luna";
+        };
+      };
       homeassistant.enable = true;
       homepage.enable = true;
       immich.enable = false;
