@@ -97,6 +97,7 @@ in
         # NFS changes can bypass the native watcher. Check for newly imported
         # beets files regularly so they become playable without a manual scan.
         Scanner.Schedule = lib.mkDefault "@every 1m";
+        Transcoding.MaxConcurrent = 3;
       };
     };
     services.nginx = {
