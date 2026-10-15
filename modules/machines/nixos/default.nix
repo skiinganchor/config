@@ -31,7 +31,11 @@ in
     };
   };
 
-  hardware.graphics.enable = true;
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = lib.mkForce false;
+  };
+
   # only accepted from Turing architecture
   # Nvidia configs
   services.xserver.videoDrivers = [ "nvidia" ];
