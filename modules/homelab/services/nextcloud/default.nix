@@ -121,8 +121,7 @@ in
 
     services.${service} = {
       enable = true;
-      # TODO: remove packages master when 35.0.1 is on stable
-      package = pkgs.pkgs-master.nextcloud35;
+      package = pkgs.nextcloud35;
       hostName = cfg.url;
       https = true;
 
