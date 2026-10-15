@@ -19,6 +19,30 @@ in
       '';
     };
 
+    # none is recommended to keep only configuration as code
+    backend = lib.mkOption {
+      type = lib.types.submodule {
+        options = {
+          mode = lib.mkOption {
+            type = lib.types.enum [ "none" "serve" "dashboard" ];
+            default = "none";
+          };
+
+          host = lib.mkOption {
+            type = lib.types.str;
+            default = "127.0.0.1";
+          };
+
+          port = lib.mkOption {
+            type = lib.types.port;
+            default = 9119;
+          };
+        };
+      };
+      default = { };
+      description = "Hermes API and dashboard backend configuration";
+    };
+
     package = lib.mkOption {
       type = lib.types.package;
       default = hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
@@ -73,6 +97,7 @@ in
     services.hermes-agent = {
       enable = true;
       addToSystemPackages = cfg.addToSystemPackages;
+      backend = cfg.backend;
       environmentFiles = [ cfg.environmentFile ];
       settings = cfg.settings;
     };
