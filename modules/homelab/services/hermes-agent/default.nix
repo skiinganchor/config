@@ -43,6 +43,12 @@ in
       description = "Hermes API and dashboard backend configuration";
     };
 
+    monitoredServices = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ];
+      description = "Systemd services to show in the MOTD status list";
+    };
+
     package = lib.mkOption {
       type = lib.types.package;
       default = hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
