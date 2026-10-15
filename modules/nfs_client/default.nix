@@ -6,9 +6,7 @@ let
 in
 {
   options.homelab.nfs_client = {
-    enable = lib.mkEnableOption {
-      description = "Enable declarative NFS mounts for the homelab";
-    };
+    enable = lib.mkEnableOption "declarative NFS mounts for the homelab";
 
     mounts = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule {

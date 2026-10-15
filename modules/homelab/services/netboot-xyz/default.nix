@@ -6,9 +6,7 @@ let
 in
 {
   options.homelab.services.${service} = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
   };
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [ podman git ];

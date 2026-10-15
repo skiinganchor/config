@@ -9,9 +9,7 @@ let
 in
 {
   options.homelab.services.wireguard-netns = {
-    enable = lib.mkEnableOption {
-      description = "Enable Wireguard client network namespace";
-    };
+    enable = lib.mkEnableOption "Wireguard client network namespace";
     namespace = lib.mkOption {
       type = lib.types.str;
       description = "Network namespace to be created";

@@ -12,9 +12,7 @@ let
 in
 {
   options.homelab.services.${service} = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
     listenAddress = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";

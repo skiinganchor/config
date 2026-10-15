@@ -7,9 +7,7 @@ let
 in
 {
   options.homelab.services.${service} = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
     url = lib.mkOption {
       type = lib.types.str;
       default = "ntfy.${hl.baseDomain}";

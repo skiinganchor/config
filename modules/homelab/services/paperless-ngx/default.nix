@@ -6,9 +6,7 @@ let
 in
 {
   options.homelab.services.${service} = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
     mediaDir = lib.mkOption {
       type = lib.types.str;
       default = "${homelab.mounts.fast}/Documents/Paperless/Documents";

@@ -9,9 +9,7 @@ let
 in
 {
   options.homelab.services.homepage = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
     monitoredServices = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [

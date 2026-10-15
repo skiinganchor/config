@@ -5,9 +5,7 @@ let
 in
 {
   options.homelab.services.${service} = {
-    enable = lib.mkEnableOption {
-      description = "Enable ${service}";
-    };
+    enable = lib.mkEnableOption service;
 
     addToSystemPackages = lib.mkOption {
       type = lib.types.bool;

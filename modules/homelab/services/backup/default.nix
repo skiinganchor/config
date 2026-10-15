@@ -10,9 +10,7 @@ in
 
 {
   options.homelab.services.backup = {
-    enable = lib.mkEnableOption {
-      description = "Enable backups for application state folders and/or Paperless documents";
-    };
+    enable = lib.mkEnableOption "backups for application state folders and/or Paperless documents";
     state.enable = lib.mkOption {
       description = "Enable backups for application state folders";
       type = lib.types.bool;
