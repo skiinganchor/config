@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   service = "vaultwarden";
   cfg = config.homelab.services.${service};
@@ -45,6 +45,7 @@ in
       type = lib.types.str;
       default = "Services";
     };
+    package = lib.mkPackageOption pkgs "vaultwarden" { };
   };
   config = lib.mkIf cfg.enable {
     services = {
@@ -58,6 +59,7 @@ in
       };
       ${service} = {
         enable = true;
+        package = cfg.package;
         config = {
           DOMAIN = "https://${cfg.url}";
           SIGNUPS_ALLOWED = false;
