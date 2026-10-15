@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.homelab.services.immich;
   homelab = config.homelab;
@@ -35,6 +35,7 @@ in
       type = lib.types.str;
       default = "photos.${homelab.baseDomain}";
     };
+    package = lib.mkPackageOption pkgs "immich" { };
     homepage.name = lib.mkOption {
       type = lib.types.str;
       default = "Immich";
@@ -59,6 +60,7 @@ in
       "render"
     ];
     services.immich = {
+      package = cfg.package;
       group = homelab.group;
       enable = true;
       port = 2283;
