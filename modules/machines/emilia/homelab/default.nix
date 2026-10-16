@@ -57,6 +57,14 @@ in
     mode = "0400";
     restartUnits = [ "hermes-agent.service" ];
   };
+  sops.secrets."hermes/garmin-tokens" = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+    owner = config.services.hermes-agent.user;
+    group = config.services.hermes-agent.group;
+    mode = "0400";
+    restartUnits = [ "hermes-agent.service" ]
+      ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
+  };
   sops.secrets."wireguard-netns/config" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
@@ -128,6 +136,10 @@ in
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
         cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
+        # Optional MCP integrations; setup and credentials: docs/hermes-mcp.md.
+        # mcp.garmin.enable = true;
+        mcp.garmin.tokensFile = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable
+          config.sops.secrets."hermes/garmin-tokens".path;
         # Select either configurations based on using opencode-go or openai-codex (needs manual auth) as main provider
         # settings.model.default = "opencode-go/qwen3.7-plus";
         settings.model = {
@@ -182,6 +194,7 @@ in
       netboot-xyz.enable = false;
       nextcloud = {
         enable = true;
+        contextAgent.enable = true;
         adminUser = mainUserName;
         adminPassFile = config.sops.secrets."nextcloud/admin-password".path;
         dbUser = "ncadmin";

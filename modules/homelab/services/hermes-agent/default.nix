@@ -2,6 +2,28 @@
 let
   service = "hermes-agent";
   cfg = config.homelab.services.${service};
+  garminArgs = [
+    "--python"
+    "${pkgs.python312}/bin/python3"
+    "--from"
+    "git+https://github.com/Taxuspt/garmin_mcp@${cfg.mcp.garmin.revision}"
+  ];
+  garminAuth = pkgs.writeShellScriptBin "hermes-garmin-auth" ''
+    set -eu
+    umask 0077
+    export GARMINTOKENS=${lib.escapeShellArg "${cfg.stateDir}/.garminconnect"}
+    export PATH=${lib.makeBinPath [ pkgs.git ]}:"$PATH"
+    exec ${pkgs.uv}/bin/uvx ${lib.escapeShellArgs garminArgs} garmin-mcp-auth "$@"
+  '';
+  garminTokenSetup = lib.optionalString (cfg.mcp.garmin.tokensFile != null) ''
+    tokenDir=${lib.escapeShellArg "${cfg.stateDir}/.garminconnect"}
+    install -d -m 0700 "$tokenDir"
+    tokenTemp=$(mktemp "$tokenDir/.sops-tokens.XXXXXX")
+    trap 'rm -f "$tokenTemp"' EXIT
+    install -m 0600 ${lib.escapeShellArg cfg.mcp.garmin.tokensFile} "$tokenTemp"
+    mv -f "$tokenTemp" "$tokenDir/garmin_tokens.json"
+    trap - EXIT
+  '';
 in
 {
   options.homelab.services.${service} = {
@@ -96,6 +118,28 @@ in
       '';
     };
 
+    mcp = {
+      garmin = {
+        enable = lib.mkEnableOption "Garmin Connect MCP";
+        tokensFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = lib.literalExpression ''config.sops.secrets."hermes/garmin-tokens".path'';
+          description = ''
+            Absolute runtime path to a secret containing garmin_tokens.json.
+            Copied into the writable Garmin token directory before startup.
+            Use sops-nix to keep tokens out of the Nix store. Each startup
+            restores this secret; publish renewed tokens to SOPS when needed.
+          '';
+        };
+        revision = lib.mkOption {
+          type = lib.types.str;
+          default = "202913fde53c9d15890d661fc9748dc6d0d5af52";
+          description = "Taxuspt/garmin_mcp Git revision used for both MCP and interactive authentication.";
+        };
+      };
+    };
+
     settings = lib.mkOption {
       type = lib.types.attrsOf lib.types.anything;
       default = { };
@@ -117,6 +161,14 @@ in
         assertion = cfg.cronJobsFile == null || !config.services.hermes-agent.container.enable;
         message = "homelab.services.hermes-agent.cronJobsFile requires native service mode";
       }
+      {
+        assertion = !cfg.mcp.garmin.enable || !config.services.hermes-agent.container.enable;
+        message = "homelab.services.hermes-agent.mcp integrations require native service mode";
+      }
+      {
+        assertion = cfg.mcp.garmin.tokensFile == null || lib.hasPrefix "/" cfg.mcp.garmin.tokensFile;
+        message = "homelab.services.hermes-agent.mcp.garmin.tokensFile must be an absolute runtime path";
+      }
     ];
 
     # See options in: https://github.com/NousResearch/hermes-agent/blob/main/nix/nixosModules.nix
@@ -124,15 +176,35 @@ in
       enable = true;
       inherit (cfg) addToSystemPackages backend package stateDir settings;
       environmentFiles = [ cfg.environmentFile ];
+      extraPackages = lib.optionals cfg.mcp.garmin.enable [ pkgs.uv pkgs.python312 ];
+      mcpServers = lib.optionalAttrs cfg.mcp.garmin.enable {
+        garmin = {
+          command = "${pkgs.uv}/bin/uvx";
+          args = garminArgs ++ [ "garmin-mcp" ];
+          connect_timeout = 180;
+          env.GARMINTOKENS = "${cfg.stateDir}/.garminconnect";
+        };
+      };
     };
 
-    systemd.services.hermes-agent = lib.mkIf (cfg.cronJobsFile != null) {
-      after = [ "sops-install-secrets.service" ];
-      serviceConfig.UMask = lib.mkForce "0077";
-      preStart = lib.mkAfter ''
-        ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
-          ${./reconcile-cron-jobs.py} ${lib.escapeShellArg cfg.cronJobsFile}
-      '';
-    };
+    environment.systemPackages = lib.optionals cfg.mcp.garmin.enable [ garminAuth ];
+
+    systemd.services = lib.mkMerge [
+      (lib.mkIf (cfg.mcp.garmin.enable && cfg.mcp.garmin.tokensFile != null)
+        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
+          after = [ "sops-install-secrets.service" ];
+          preStart = lib.mkBefore garminTokenSetup;
+        })))
+      {
+        hermes-agent = lib.mkIf (cfg.cronJobsFile != null) {
+          after = [ "sops-install-secrets.service" ];
+          serviceConfig.UMask = lib.mkForce "0077";
+          preStart = lib.mkAfter ''
+            ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
+              ${./reconcile-cron-jobs.py} ${lib.escapeShellArg cfg.cronJobsFile}
+          '';
+        };
+      }
+    ];
   };
 }

@@ -9,6 +9,8 @@ let
   homelab = config.homelab;
 in
 {
+  imports = [ ./context-agent.nix ];
+
   options.homelab.services.${service} = {
     enable = lib.mkEnableOption service;
     adminPassFile = lib.mkOption {
@@ -163,7 +165,7 @@ in
       secretFile = cfg.secretsJsonFile;
 
       settings = {
-        "app_api.enabled" = false;
+        "app_api.enabled" = cfg.contextAgent.enable;
         datadirectory = "${homelab.services.nextcloud.dataDir}";
         default_phone_region = "NL";
         overwriteprotocol = "https";
