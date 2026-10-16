@@ -119,6 +119,14 @@ in
     };
 
     mcp = {
+      nextcloud = {
+        enable = lib.mkEnableOption "the remote Nextcloud Context Agent MCP connection";
+        url = lib.mkOption {
+          type = lib.types.str;
+          default = "https://${config.homelab.services.nextcloud.url}/index.php/apps/app_api/proxy/context_agent/mcp/";
+          description = "Shared Context Agent endpoint; NEXTCLOUD_APP_PASSWORD is resolved from each Hermes profile's runtime environment.";
+        };
+      };
       garmin = {
         enable = lib.mkEnableOption "Garmin Connect MCP";
         tokensFile = lib.mkOption {
@@ -177,7 +185,13 @@ in
       inherit (cfg) addToSystemPackages backend package stateDir settings;
       environmentFiles = [ cfg.environmentFile ];
       extraPackages = lib.optionals cfg.mcp.garmin.enable [ pkgs.uv pkgs.python312 ];
-      mcpServers = lib.optionalAttrs cfg.mcp.garmin.enable {
+      mcpServers = lib.optionalAttrs cfg.mcp.nextcloud.enable
+        {
+          nextcloud = {
+            inherit (cfg.mcp.nextcloud) url;
+            headers.Authorization = "Bearer \${NEXTCLOUD_APP_PASSWORD}";
+          };
+        } // lib.optionalAttrs cfg.mcp.garmin.enable {
         garmin = {
           command = "${pkgs.uv}/bin/uvx";
           args = garminArgs ++ [ "garmin-mcp" ];

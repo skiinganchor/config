@@ -14,10 +14,16 @@ and proxying at:
 https://cloud.example.com/index.php/apps/app_api/proxy/context_agent/mcp/
 ```
 
-Replace `cloud.example.com` with the configured Nextcloud hostname. This is one
-shared server for all users. Each request authenticates the Nextcloud user from
-its app password, and tools act with that user's access. Each Hermes profile
-should contain its own configuration:
+emilia also enables `homelab.services.hermes-agent.mcp.nextcloud.enable`. This
+adds the remote `nextcloud` server to the Nix-managed Hermes service profile's
+`mcp_servers`, using the configured Nextcloud hostname and a literal
+`${NEXTCLOUD_APP_PASSWORD}` reference. The password is resolved at runtime.
+On other hosts, enable the same option and override `mcp.nextcloud.url` if needed.
+
+This is one shared server for all users. Each request authenticates the Nextcloud
+user from its app password, and tools act with that user's access. For additional
+Hermes profiles, add the following to each profile's `config.yaml`, replacing
+`cloud.example.com` with the configured Nextcloud hostname:
 
 ```yaml
 mcp_servers:
@@ -30,7 +36,13 @@ mcp_servers:
 Create a separate app password for each user in Nextcloud's personal security
 settings. Put `NEXTCLOUD_APP_PASSWORD` in that Hermes profile's private runtime
 environment (`.env`), not in Nix or a shared profile's configuration. For a single
-service profile, the existing SOPS `hermes/env-file` can supply the variable.
+service profile on emilia, add the variable to the existing private SOPS
+`hermes/env-file` before restarting Hermes:
+
+```dotenv
+NEXTCLOUD_APP_PASSWORD=your-nextcloud-app-password
+```
+
 Do not reuse one user's credential for other users' profiles. Profile isolation
 is separate from routing multiple chat users into a single Hermes profile.
 

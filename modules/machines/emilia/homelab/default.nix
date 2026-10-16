@@ -136,6 +136,7 @@ in
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
         cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
+        mcp.nextcloud.enable = true;
         # Optional MCP integrations; setup and credentials: docs/hermes-mcp.md.
         # mcp.garmin.enable = true;
         mcp.garmin.tokensFile = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable
