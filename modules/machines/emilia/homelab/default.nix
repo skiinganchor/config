@@ -50,6 +50,13 @@ in
     mode = "0400";
     restartUnits = [ "hermes-agent.service" ];
   };
+  sops.secrets."hermes/cron-jobs" = {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+    owner = "hermes";
+    group = "hermes";
+    mode = "0400";
+    restartUnits = [ "hermes-agent.service" ];
+  };
   sops.secrets."wireguard-netns/config" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
   };
@@ -120,6 +127,7 @@ in
         enable = true;
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
+        cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
         # Select either configurations based on using opencode-go or openai-codex (needs manual auth) as main provider
         # settings.model.default = "opencode-go/qwen3.7-plus";
         settings.model = {
