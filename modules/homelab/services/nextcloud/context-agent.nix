@@ -87,6 +87,9 @@ in
           User = "nextcloud";
           Group = "nextcloud";
           EnvironmentFile = environmentFile;
+          # Match Nextcloud's native OCC services. The wrapper uses these
+          # credentials directly instead of trying an unprivileged systemd-run.
+          LoadCredential = config.systemd.services.nextcloud-cron.serviceConfig.LoadCredential or [ ];
           UMask = "0077";
           Restart = "on-failure";
           RestartSec = "15s";

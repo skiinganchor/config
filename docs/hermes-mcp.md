@@ -75,6 +75,23 @@ verify that each sees only its own accessible data. Also check that a missing or
 invalid password is rejected. These live checks are required to verify the
 shared endpoint after deployment.
 
+The registration unit loads the same systemd credentials as `nextcloud-cron`.
+These let `nextcloud-occ` read Nextcloud's database password and secret file
+while running as `nextcloud`, without starting a privileged transient unit.
+If an older deployment logs `systemd-run: Access denied`, rebuild emilia with
+this configuration, then retry registration:
+
+```sh
+sudo systemctl restart nextcloud-context-agent-register
+sudo journalctl -u nextcloud-context-agent-register -n 100 --no-pager
+sudo nextcloud-occ app_api:app:list
+```
+
+The `app_api:*` commands are unavailable while AppAPI is disabled. Registration
+enables the bundled `app_api` app before using those commands, so a failure on
+its first OCC invocation also leaves those namespaces unavailable. A successful
+backend `/heartbeat` alone does not confirm AppAPI registration.
+
 ## Enabling Garmin
 
 ```nix
