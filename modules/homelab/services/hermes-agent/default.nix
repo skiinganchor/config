@@ -83,11 +83,9 @@ in
 
     environmentFile = lib.mkOption {
       type = lib.types.path;
-      description = "Environment file containing Matrix and provider secrets";
+      description = "Environment file containing Matrix and integration secrets; use providersFile for model providers";
       example = lib.literalExpression ''
         pkgs.writeText "hermes-env" '''
-          # Model provider configs, eg. OpenAI or OpenCode Go
-          OPENCODE_GO_API_KEY=secret-api-key
           # Matrix configs
           MATRIX_E2EE_MODE=required|optional|off
           MATRIX_HOMESERVER=https://matrix.some.domain
@@ -148,6 +146,19 @@ in
       };
     };
 
+    providersFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = lib.literalExpression ''config.sops.secrets."hermes/providers".path'';
+      description = ''
+        Absolute runtime path to a private JSON list of providers and credentials.
+        Supports openai-codex, opencode-go and zai. The first entry selects the
+        default provider and model. Reconciled before gateway/backend startup;
+        Codex token refreshes survive restarts until the declared tokens change.
+        See docs/hermes-providers.md for the schema and SOPS configuration.
+      '';
+    };
+
     settings = lib.mkOption {
       type = lib.types.attrsOf lib.types.anything;
       default = { };
@@ -157,6 +168,23 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
+      {
+        assertion = cfg.providersFile == null || lib.hasPrefix "/" cfg.providersFile;
+        message = "homelab.services.hermes-agent.providersFile must be an absolute runtime path";
+      }
+      {
+        assertion = cfg.providersFile == null || !config.services.hermes-agent.container.enable;
+        message = "homelab.services.hermes-agent.providersFile requires native service mode";
+      }
+      {
+        assertion = cfg.providersFile == null || !(lib.any (key: builtins.hasAttr key (cfg.settings.model or { }))
+          [ "provider" "default" "base_url" "api_key" "key_env" "api_mode" ]);
+        message = "With providersFile, declare model routing in hermes/providers, not settings.model";
+      }
+      {
+        assertion = cfg.providersFile == null || config.services.hermes-agent.authFile == null;
+        message = "providersFile manages authentication and cannot be combined with services.hermes-agent.authFile";
+      }
       {
         assertion = cfg.environmentFile != null;
         message = "homelab.services.hermes.environmentFile must be set when Hermes is enabled";
@@ -204,6 +232,15 @@ in
     environment.systemPackages = lib.optionals cfg.mcp.garmin.enable [ garminAuth ];
 
     systemd.services = lib.mkMerge [
+      (lib.mkIf (cfg.providersFile != null)
+        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
+          after = [ "sops-install-secrets.service" ];
+          serviceConfig.UMask = lib.mkForce "0077";
+          preStart = lib.mkBefore ''
+            ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
+              ${./reconcile-providers.py} ${lib.escapeShellArg cfg.providersFile} ${lib.escapeShellArg (toString cfg.environmentFile)}
+          '';
+        })))
       (lib.mkIf (cfg.mcp.garmin.enable && cfg.mcp.garmin.tokensFile != null)
         (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
           after = [ "sops-install-secrets.service" ];

@@ -57,6 +57,14 @@ in
     mode = "0400";
     restartUnits = [ "hermes-agent.service" ];
   };
+  sops.secrets."hermes/providers" = {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+    owner = config.services.hermes-agent.user;
+    group = config.services.hermes-agent.group;
+    mode = "0400";
+    restartUnits = [ "hermes-agent.service" ]
+      ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
+  };
   sops.secrets."hermes/garmin-tokens" = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
     owner = config.services.hermes-agent.user;
@@ -136,17 +144,13 @@ in
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
         cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
+        providersFile = config.sops.secrets."hermes/providers".path;
         mcp.nextcloud.enable = true;
         # Optional MCP integrations; setup and credentials: docs/hermes-mcp.md.
         # mcp.garmin.enable = true;
         mcp.garmin.tokensFile = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable
           config.sops.secrets."hermes/garmin-tokens".path;
-        # Select either configurations based on using opencode-go or openai-codex (needs manual auth) as main provider
-        # settings.model.default = "opencode-go/qwen3.7-plus";
-        settings.model = {
-          provider = "openai-codex";
-          default = "gpt-6-luna";
-        };
+        # Provider selection, models and authentication: docs/hermes-providers.md.
       };
       homeassistant.enable = true;
       homepage.enable = true;
