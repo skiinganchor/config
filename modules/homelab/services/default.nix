@@ -15,7 +15,6 @@ in
     ./arr/sonarr
     ./audiobookshelf
     ./backup
-    ./beets
     ./deluge
     ./fail2ban
     ./hermes-agent

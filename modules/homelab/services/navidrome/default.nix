@@ -17,7 +17,7 @@ in
     };
     musicDir = lib.mkOption {
       type = lib.types.str;
-      default = homelab.services.beets.libraryDir;
+      default = "/mnt/media/music/library";
     };
     url = lib.mkOption {
       type = lib.types.str;
@@ -93,7 +93,7 @@ in
         LyricsPriority = ".ttml,.yaml,.yml,.elrc,.srt,nd-lyrics,embedded,.lrc,.txt";
         MusicFolder = "${cfg.musicDir}";
         # NFS changes can bypass the native watcher. Check for newly imported
-        # beets files regularly so they become playable without a manual scan.
+        # music files regularly so they become playable without a manual scan.
         Scanner.Schedule = lib.mkDefault "@every 1m";
         Transcoding.MaxConcurrent = 3;
       };

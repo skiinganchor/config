@@ -8,7 +8,6 @@ let
   inherit (config) homelab;
   cfg = homelab.services.${service};
   ns = homelab.services.wireguard-netns.namespace;
-  beets = homelab.services.beets;
 in
 {
   options.homelab.services.${service} = {
@@ -28,15 +27,6 @@ in
     url = lib.mkOption {
       type = lib.types.str;
       default = "slskd.${homelab.baseDomain}";
-    };
-    autoImport = lib.mkOption {
-      type = lib.types.bool;
-      default = beets.enable && !(homelab.services.aurral.enable || homelab.services.lidarr.enable);
-      description = ''
-        Import completed slskd directories through the shared beets command.
-        Enable only when no application needs to approve or consume those files.
-        The slskd completion event does not identify the requesting application.
-      '';
     };
     environmentFile = lib.mkOption {
       description = ''
@@ -74,16 +64,6 @@ in
       cfg.downloadDir
       cfg.incompleteDownloadDir
     ];
-    assertions = [
-      {
-        assertion = !cfg.autoImport || beets.enable;
-        message = "slskd.autoImport requires homelab.services.beets.enable.";
-      }
-      {
-        assertion = !cfg.autoImport || !(homelab.services.aurral.enable || homelab.services.lidarr.enable);
-        message = "slskd.autoImport cannot run before Aurral approval or race Lidarr's download handling; see docs/music-workflow.md.";
-      }
-    ];
     services.${service} = {
       enable = true;
       user = homelab.mainUser.name;
@@ -93,33 +73,15 @@ in
       settings = {
         # Browser auth is handled by oauth2-proxy + Keycloak at the nginx
         # layer; slskd's built-in login is disabled to avoid a second prompt.
-        # Loopback API access (beets, monitoring) stays open because the
+        # Loopback API access (application clients, monitoring) stays open because the
         # systemd-socket-proxyd / netns plumbing keeps the listener on 127.0.0.1.
         web.authentication.disabled = true;
-        # This hook only adapts slskd's native event to the common importer.
-        integration.scripts.slskd-import-files = lib.mkIf cfg.autoImport {
-          on = [ "DownloadDirectoryComplete" ];
-          run = {
-            executable = toString (pkgs.writeShellScript "slskd-beets-import" ''
-              set -euo pipefail
-              directory="$(${lib.getExe pkgs.jq} -er '.localDirectoryName | select(type == "string" and length > 0)' <<< "$SLSKD_SCRIPT_DATA")"
-              root="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- ${lib.escapeShellArg cfg.downloadDir})"
-              if [[ "$directory" != /* ]]; then directory="$root/$directory"; fi
-              directory="$(${lib.getExe' pkgs.coreutils "realpath"} -e -- "$directory")"
-              case "$directory" in
-                "$root"/*) ;;
-                *) echo "Completed directory is outside the slskd download folder" >&2; exit 1 ;;
-              esac
-              exec ${beets.importCommand} -q "$directory"
-            '');
-          };
-        };
         directories = {
           downloads = cfg.downloadDir;
           incomplete = cfg.incompleteDownloadDir;
         };
         shares = {
-          directories = [ beets.libraryDir ];
+          directories = [ homelab.services.navidrome.musicDir ];
           filters = [
             "\.ini$"
             "Thumbs.db$"

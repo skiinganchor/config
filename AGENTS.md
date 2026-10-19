@@ -87,16 +87,16 @@ If upgrading that dashboard, verify its UID and `ds_prometheus`, `job`,
 
 ## Music workflow
 
-Before changing Aurral, slskd, Lidarr/Tubifarry, beets, or Navidrome, read
+Before changing Aurral, slskd, Lidarr/Tubifarry, or Navidrome, read
 [docs/music-workflow.md](docs/music-workflow.md).
 
-- slskd is the only music downloader. Keep beets configuration, paths, database,
-  and import locking in `modules/homelab/services/beets/default.nix`.
+- slskd is the only music downloader. Aurral and Lidarr own their respective
+  imports; Navidrome indexes the finished library and provides lyrics.
 - Prefer native application settings and NixOS modules. Do not add per-application
   importers, application source patches, database polling workers, or receipt caches.
 - Preserve Aurral approval before import. A slskd completion event is earlier than
   approval and does not identify the requesting application.
 - Do not run two movers on a download. Do not move files tracked by Aurral or Lidarr
   without a supported way for the owner to accept their final paths.
-- Automatic handoff for the three shared-client routes is an upstream integration
-  gap, documented in the workflow. Do not claim that a path option fixes it.
+- Keep download staging outside Navidrome's scanned library. Aurral-managed files
+  are not automatically included in that library; see the workflow before changing paths.

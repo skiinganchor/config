@@ -133,9 +133,6 @@ in
         enable = true;
         openFirewall = true;
       };
-      # One shared importer and library for every music acquisition route.
-      # Managed download handoff currently needs upstream support; see docs/music-workflow.md.
-      beets.enable = true;
       bazarr.enable = true;
       deluge.enable = false;
       fail2ban.enable = true;
@@ -226,8 +223,6 @@ in
       seerr.enable = true;
       slskd = {
         enable = true;
-        # Completion happens before Aurral approval and Lidarr consumption.
-        autoImport = false;
         environmentFile = config.sops.secrets."slskd/env-file".path;
       };
       sonarr.enable = true;
