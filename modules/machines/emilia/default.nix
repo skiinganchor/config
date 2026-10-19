@@ -24,7 +24,10 @@ in
     mode = "0400";
   };
 
-  services.openssh.authorizedKeysFiles = lib.mkAfter [ "/run/secrets/ssh/%u" ];
+  services = {
+    openssh.authorizedKeysFiles = lib.mkAfter [ "/run/secrets/ssh/%u" ];
+    qemuGuest.enable = true;
+  };
 
   networking = {
     firewall.enable = false;
