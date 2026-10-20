@@ -24,6 +24,9 @@ in
     mode = "0400";
   };
 
+  # TODO: remove temporary workaround for https://github.com/NixOS/nixpkgs/issues/499166
+  documentation.doc.enable = false;
+
   services = {
     openssh.authorizedKeysFiles = lib.mkAfter [ "/run/secrets/ssh/%u" ];
     qemuGuest.enable = true;

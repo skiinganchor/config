@@ -144,7 +144,7 @@ in
         providersFile = config.sops.secrets."hermes/providers".path;
         mcp.nextcloud.enable = true;
         # Optional MCP integrations; setup and credentials: docs/hermes-mcp.md.
-        # mcp.garmin.enable = true;
+        mcp.garmin.enable = true;
         mcp.garmin.tokensFile = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable
           config.sops.secrets."hermes/garmin-tokens".path;
         # Provider selection, models and authentication: docs/hermes-providers.md.
