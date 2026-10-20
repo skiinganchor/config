@@ -14,7 +14,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hermes-agent = {
-      url = "github:NousResearch/hermes-agent";
+      # TODO: return to NousResearch/hermes-agent when https://github.com/NousResearch/hermes-agent/pull/141957 is merged
+      url = "github:staticdev/hermes-agent/fix/nix-runtime-dependency-health";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     my-secrets = {

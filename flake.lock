@@ -76,15 +76,16 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1792448127,
-        "narHash": "sha256-6SZYH145pq4N4kClMxvAbghgzoGkOULLyBdHmRUossQ=",
-        "owner": "NousResearch",
+        "lastModified": 1792494338,
+        "narHash": "sha256-56hTrl6hWZTgW42sqEE96BaBEAnRI5uwNedOKFWZoXI=",
+        "owner": "staticdev",
         "repo": "hermes-agent",
-        "rev": "9cb34e9e285dadd0c6d2463e9b094052530fc365",
+        "rev": "f4eeaf109bfc27aa677084b55a1832fa286147ba",
         "type": "github"
       },
       "original": {
-        "owner": "NousResearch",
+        "owner": "staticdev",
+        "ref": "fix/nix-runtime-dependency-health",
         "repo": "hermes-agent",
         "type": "github"
       }
@@ -156,10 +157,10 @@
     "my-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1792258544,
-        "narHash": "sha256-JEDxMeF/FA0XBE+MxB+puhcfmUAeXSOjwtiRZcOngEQ=",
+        "lastModified": 1792495159,
+        "narHash": "sha256-fDLBf8u7DqOkXH/lDSGlMEzXQQjTXONdX9PVErBWDp0=",
         "ref": "main",
-        "rev": "a729381149be84b270bc6ee3bddc6f7d6e80a87e",
+        "rev": "bdb6dab8b4af3ad1ef2740329a3324f729628f8e",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/skiinganchor/config-private.git"
@@ -189,11 +190,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1792457102,
-        "narHash": "sha256-hYMZzUnkJNvlhESyC92Hg+XSRUAPMTW+F/Sr++hGq7c=",
+        "lastModified": 1792494702,
+        "narHash": "sha256-yKJynoxz8hnW47vhfYmAJru2HHIdNld2z88njUFgJt8=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "44996b093797fa764400fb618fb076c841d6842a",
+        "rev": "ee43be70912af0f310ded0f0b2685322ccc2d938",
         "type": "github"
       },
       "original": {
