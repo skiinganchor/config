@@ -158,7 +158,7 @@ password, and access to your MFA code if your account uses MFA.
    downloads the pinned Garmin package and its dependencies, so it needs
    outbound internet access.
 
-2. Choose a private token directory outside this Git repository:
+1. Choose a private token directory outside this Git repository:
 
    ```sh
    umask 077
@@ -171,7 +171,7 @@ password, and access to your MFA code if your account uses MFA.
    `GARMINTOKENS` is a directory, not the path to the JSON file. The helper also
    writes a base64 copy; that copy is not used by this NixOS configuration.
 
-3. Run the authentication command at the same revision as the Nix module:
+1. Run the authentication command at the same revision as the Nix module:
 
    ```sh
    uvx --python python3.12 \
@@ -192,7 +192,7 @@ password, and access to your MFA code if your account uses MFA.
    The flags and file-writing behavior are defined by the
    [pinned authentication helper](https://github.com/Taxuspt/garmin_mcp/blob/202913fde53c9d15890d661fc9748dc6d0d5af52/src/garmin_mcp/auth_cli.py).
 
-4. Display the complete JSON so you can copy it into SOPS:
+1. Display the complete JSON so you can copy it into SOPS:
 
    ```sh
    jq . "$GARMINTOKENS/garmin_tokens.json"
@@ -203,7 +203,7 @@ password, and access to your MFA code if your account uses MFA.
    not `garmin_tokens.base64`, your Garmin password, or just one field from the
    JSON object.
 
-5. In your checkout of the private `config-private` repository, open the
+1. In your checkout of the private `config-private` repository, open the
    encrypted secrets file:
 
    ```sh
@@ -225,7 +225,7 @@ password, and access to your MFA code if your account uses MFA.
    encrypts the value on save. Commit and push the encrypted `secrets/shared.yaml`
    in the private repository.
 
-6. In this configuration repository, update the pinned private input so the
+1. In this configuration repository, update the pinned private input so the
    rebuild can see the new secret:
 
    ```sh
@@ -238,7 +238,7 @@ password, and access to your MFA code if your account uses MFA.
    usual deployment command. The secret must be present in the pinned private
    input before the first rebuild with Garmin enabled.
 
-7. On emilia, confirm the deployed tokens authenticate:
+1. On emilia, confirm the deployed tokens authenticate:
 
    ```sh
    sudo -Hu hermes hermes-garmin-auth --verify
