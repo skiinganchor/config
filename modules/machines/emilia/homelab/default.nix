@@ -130,7 +130,7 @@ in
       enable = true;
       audiobookshelf.enable = false;
       aurral = {
-        enable = false;
+        enable = true;
         openFirewall = true;
       };
       bazarr.enable = true;

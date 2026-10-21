@@ -7,19 +7,6 @@ let
     pkgs-master = import nixpkgs-master {
       inherit (prev.stdenv) system;
       inherit (overlayConfig) config;
-      overlays = [
-        (_final: masterPrev: {
-          pythonPackagesExtensions = masterPrev.pythonPackagesExtensions ++ [
-            (python-final: python-prev: {
-              pyzmq = python-prev.pyzmq.overridePythonAttrs (old: {
-                disabledTests = (old.disabledTests or [ ]) ++ [
-                  "test_recv_json_cancelled"
-                ];
-              });
-            })
-          ];
-        })
-      ];
     };
   };
   pkgs-unstable = _: prev: {
