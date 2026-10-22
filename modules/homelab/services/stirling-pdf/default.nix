@@ -31,7 +31,7 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
-      # TODO: remove unstable to stable reaches 3.1.0
+      # TODO: remove unstable when changing to 26.11
       package = pkgs.pkgs-unstable.stirling-pdf;
       environment = {
         SERVER_PORT = 8888;
