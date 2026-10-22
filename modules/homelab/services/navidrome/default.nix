@@ -75,11 +75,9 @@ in
       enable = true;
       # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
       package = pkgs.pkgs-master.navidrome;
+      withPlugins = p: [ p.lyrics-plugin ];
       user = homelab.mainUser.name;
       group = homelab.mainUser.group;
-      # TODO: Remove master after upgrading nixpkgs to 26.11, where this module is included.
-
-      plugins = [ pkgs.pkgs-master.pkgsCross.wasi32.navidromePlugins.lyrics-plugin ];
       settings = {
         DefaultDownsamplingFormat = "aac";
         ExtAuth = {

@@ -110,6 +110,10 @@
                 disko.nixosModules.disko
                 # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
                 (import "${nixpkgs-master}/nixos/modules/services/matrix/matrix-authentication-service.nix")
+                # Keep the Navidrome module compatible with the master package.
+                # TODO: Remove this replacement after upgrading nixpkgs to 26.11.
+                { disabledModules = [ "services/audio/navidrome.nix" ]; }
+                (import "${nixpkgs-master}/nixos/modules/services/audio/navidrome.nix")
                 (import "${self}/modules/machines/emilia")
               ]
               ++ defaultModules;
