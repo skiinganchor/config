@@ -38,6 +38,20 @@
           home-manager.nixosModules.home-manager
           hermes-agent.nixosModules.default
           nixvim.nixosModules.nixvim
+          # Keep the Navidrome module compatible with the master package on all hosts.
+          # Disabled service definitions must also use options known to the module.
+          # TODO: Remove this replacement after upgrading nixpkgs to 26.11.
+          { disabledModules = [ "services/audio/navidrome.nix" ]; }
+          ({ config, lib, pkgs, ... }:
+            let
+              navidromeModule = import "${nixpkgs-master}/nixos/modules/services/audio/navidrome.nix" {
+                inherit config lib pkgs;
+              };
+            in
+            navidromeModule // {
+              # The new chapter's anchors are absent from the 26.05 manual redirect map.
+              meta = builtins.removeAttrs navidromeModule.meta [ "doc" ];
+            })
           (import "${self}/pkgs/overlays.nix" inputs)
           (import "${self}/modules/machines/_common")
           (import "${self}/modules")
@@ -110,10 +124,6 @@
                 disko.nixosModules.disko
                 # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
                 (import "${nixpkgs-master}/nixos/modules/services/matrix/matrix-authentication-service.nix")
-                # Keep the Navidrome module compatible with the master package.
-                # TODO: Remove this replacement after upgrading nixpkgs to 26.11.
-                { disabledModules = [ "services/audio/navidrome.nix" ]; }
-                (import "${nixpkgs-master}/nixos/modules/services/audio/navidrome.nix")
                 (import "${self}/modules/machines/emilia")
               ]
               ++ defaultModules;
