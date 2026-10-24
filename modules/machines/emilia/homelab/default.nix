@@ -65,6 +65,14 @@ in
     restartUnits = [ "hermes-agent.service" ]
       ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
   };
+  sops.secrets."hermes/skills" = {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+    owner = config.services.hermes-agent.user;
+    group = config.services.hermes-agent.group;
+    mode = "0400";
+    restartUnits = [ "hermes-agent.service" ]
+      ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
+  };
   sops.secrets."hermes/garmin-tokens" = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
     owner = config.services.hermes-agent.user;
@@ -142,6 +150,8 @@ in
         environmentFile = config.sops.secrets."hermes/env-file".path;
         cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
         providersFile = config.sops.secrets."hermes/providers".path;
+        skillsFile = config.sops.secrets."hermes/skills".path;
+        # Optional private declarative skills: docs/hermes-skills.md.
         mcp.nextcloud.enable = true;
         # Optional MCP integrations; setup and credentials: docs/hermes-mcp.md.
         mcp.garmin.enable = true;

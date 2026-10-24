@@ -116,6 +116,19 @@ in
       '';
     };
 
+    skillsFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = lib.literalExpression ''config.sops.secrets."hermes/skills".path'';
+      description = ''
+        Absolute runtime path to a private JSON object mapping skill names to
+        objects of relative filenames and text contents. Reconciled under
+        skills/nixos before gateway/backend startup, preserving other skills.
+        Use a sops-nix secret to keep contents out of the Nix store.
+        See docs/hermes-skills.md for the schema and SOPS configuration.
+      '';
+    };
+
     mcp = {
       nextcloud = {
         enable = lib.mkEnableOption "the remote Nextcloud Context Agent MCP connection";
@@ -198,6 +211,14 @@ in
         message = "homelab.services.hermes-agent.cronJobsFile requires native service mode";
       }
       {
+        assertion = cfg.skillsFile == null || lib.hasPrefix "/" cfg.skillsFile;
+        message = "homelab.services.hermes-agent.skillsFile must be an absolute runtime path";
+      }
+      {
+        assertion = cfg.skillsFile == null || !config.services.hermes-agent.container.enable;
+        message = "homelab.services.hermes-agent.skillsFile requires native service mode";
+      }
+      {
         assertion = !cfg.mcp.garmin.enable || !config.services.hermes-agent.container.enable;
         message = "homelab.services.hermes-agent.mcp integrations require native service mode";
       }
@@ -232,6 +253,15 @@ in
     environment.systemPackages = lib.optionals cfg.mcp.garmin.enable [ garminAuth ];
 
     systemd.services = lib.mkMerge [
+      (lib.mkIf (cfg.skillsFile != null)
+        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
+          after = [ "sops-install-secrets.service" ];
+          serviceConfig.UMask = lib.mkForce "0077";
+          preStart = lib.mkBefore ''
+            ${pkgs.python3}/bin/python3 \
+              ${./reconcile-skills.py} ${lib.escapeShellArg cfg.skillsFile}
+          '';
+        })))
       (lib.mkIf (cfg.providersFile != null)
         (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
           after = [ "sops-install-secrets.service" ];
