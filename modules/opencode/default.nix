@@ -1,7 +1,7 @@
 { config, lib, osConfig, pkgs ? { }, ... }:
 let
   useOpencodeGo = lib.attrByPath [ "homelab" "opencode" "useOpencodeGo" ] false osConfig;
-  omoVersion = "5.1.45";
+  omoVersion = "5.1.47";
   omoPlugin = "oh-my-openagent@${omoVersion}";
   openaiAuthPlugin = "@cortexkit/opencode-openai-auth@1.5.0";
 
