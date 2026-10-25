@@ -121,9 +121,9 @@ in
       default = null;
       example = lib.literalExpression ''config.sops.secrets."hermes/skills".path'';
       description = ''
-        Absolute runtime path to a private JSON object mapping skill names to
-        objects of relative filenames and text contents. Reconciled under
-        skills/nixos before gateway/backend startup, preserving other skills.
+        Absolute runtime path to a private JSON object containing a skills map.
+        Each skill declares its category and relative filenames with text
+        contents. Reconciled under skills/<category> before startup.
         Use a sops-nix secret to keep contents out of the Nix store.
         See docs/hermes-skills.md for the schema and SOPS configuration.
       '';
