@@ -4,6 +4,16 @@ let
   cfg = config.homelab.services.${service};
   inherit (config) homelab;
   sqlString = value: "'" + lib.replaceStrings [ "'" ] [ "''" ] value + "'";
+  navidromeIgnoreFile = pkgs.writeText "aurral-library.ndignore" ''
+    # Temporary Aurral content is not part of the finished music library.
+    _fallback/
+    _flows/
+    _playlists/
+    _staging/
+    aurral-weekly-flow/
+    .aurral-*
+    *.tmp
+  '';
 
 in
 {
@@ -15,10 +25,11 @@ in
     };
     downloadDir = lib.mkOption {
       type = lib.types.externalPath;
-      default = "/mnt/media/music/aurral";
+      default = "/mnt/media/music/library";
       description = ''
-        Aurral's managed download folder. Enforced on service startup, including
-        installations with a different path saved in the web UI.
+        The shared finished music library. Aurral writes permanent tracks into
+        the same flat artist/album tree that Lidarr manages. Enforced on service
+        startup, including installations with a different path saved in the web UI.
         Existing files are not moved when this option changes.
       '';
     };
@@ -91,6 +102,7 @@ in
       unitConfig.RequiresMountsFor = lib.unique (cfg.directories ++ [ cfg.downloadDir ]);
       preStart = ''
         ${lib.getExe' pkgs.coreutils "install"} -d -m 0770 -- ${lib.escapeShellArg cfg.downloadDir}
+        ${lib.getExe' pkgs.coreutils "install"} -m 0644 -- ${navidromeIgnoreFile} ${lib.escapeShellArg "${cfg.downloadDir}/.ndignore"}
         database=${lib.escapeShellArg (cfg.environment.AURRAL_DB_PATH or "${cfg.configDir}/aurral.db")}
         if [ -f "$database" ]; then
           saved="$(${lib.getExe pkgs.sqlite} -cmd '.timeout 5000' "$database" "SELECT value FROM settings WHERE key='downloadFolderPath';")"

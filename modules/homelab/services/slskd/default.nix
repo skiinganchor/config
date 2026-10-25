@@ -86,6 +86,13 @@ in
             "\.ini$"
             "Thumbs.db$"
             "\.DS_Store$"
+            "(^|/)_fallback(/|$)"
+            "(^|/)_flows(/|$)"
+            "(^|/)_playlists(/|$)"
+            "(^|/)_staging(/|$)"
+            "(^|/)aurral-weekly-flow(/|$)"
+            "(^|/)\\.aurral-"
+            "\\.tmp$"
           ];
         };
       };
