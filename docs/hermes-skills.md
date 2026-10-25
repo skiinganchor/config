@@ -22,59 +22,57 @@ homelab.services.hermes-agent.skillsFile =
 ```
 
 In the private repository's `secrets/shared.yaml`, add `skills` alongside the
-other `hermes` keys as a multiline string containing a JSON object. Give each
-skill its category and its file map. For example, this declares one skill in
-`devops` and one in `productivity`:
+other `hermes` keys as a multiline string containing a JSON list. Each entry
+has a `name`, `category`, and `files` field. For example, this declares one
+skill in `devops` and one in `productivity`:
 
 ```yaml
 hermes:
     skills: |
-      {
-        "skills": {
-          "deploy-helper": {
-            "category": "devops",
-            "files": {
-              "SKILL.md": "---\nname: deploy-helper\ndescription: Help deploy my services.\n---\n\nFollow the deployment runbook.\n"
-            }
-          },
-          "daily-review": {
-            "category": "productivity",
-            "files": {
-              "SKILL.md": "---\nname: daily-review\ndescription: Prepare a daily review using my private workflow.\n---\n\nRead references/workflow.md and prepare the review.\n",
-              "references/workflow.md": "Review my calendar and outstanding tasks. Ask before changing anything.\n"
-            }
+      [
+        {
+          "name": "deploy-helper",
+          "category": "devops",
+          "files": {
+            "SKILL.md": "---\nname: deploy-helper\ndescription: Help deploy my services.\n---\n\nFollow the deployment runbook.\n"
+          }
+        },
+        {
+          "name": "daily-review",
+          "category": "productivity",
+          "files": {
+            "SKILL.md": "---\nname: daily-review\ndescription: Prepare a daily review using my private workflow.\n---\n\nRead references/workflow.md and prepare the review.\n",
+            "references/workflow.md": "Review my calendar and outstanding tasks. Ask before changing anything.\n"
           }
         }
-      }
+      ]
 ```
 
-Encrypt before committing. Each `category` and skill directory name uses
-lowercase letters, digits, and single separating hyphens. The category selects
-the directory under `skills/`. Each skill's `files` map contains relative file
-paths and UTF-8 text, including a required nonempty `SKILL.md`. Use Hermes's
+Encrypt before committing. Each `name` and `category` uses lowercase letters,
+digits, and single separating hyphens. `name` is the skill directory name. The
+category selects the directory under `skills/`. Each skill's `files` map
+contains relative file paths and UTF-8 text, including a required nonempty
+`SKILL.md`. Use Hermes's
 normal YAML frontmatter (`name`, `description`) and Markdown instructions.
 Companion files such as `references/`, `templates/`, and `scripts/` are supported;
 files under `scripts/` are executable. Binary files and nested skills are not
 supported. Absolute paths, traversal, duplicate JSON keys, and conflicting file
 paths are rejected before publishing changes.
 
-For backward compatibility, the previous single-category format
-(`category` beside a `skills` map of file maps) is still accepted; it assigns
-that category to every skill. The original flat skill map is also accepted and
-defaults to `nixos`.
-
 Before gateway or backend startup, the module publishes a complete generation
 in `$HERMES_HOME/.nixos-skills/` and atomically switches the
 `$HERMES_HOME/skills/<category>` symlink for each declared category. The pinned
 Hermes skill discovery follows these symlinks and discovers each `SKILL.md`.
-Each declared category is reserved for these declarations: an existing
-directory or unrelated symlink causes startup to fail rather than overwrite
-it. Removed categories are cleaned up after the new generations are published.
-Other installed, bundled, and interactively created skills are preserved. Use
-unique frontmatter names to avoid collisions with those skills.
+Existing category directories are adopted: unrelated entries are copied into
+the new generation, and declared skill directories are replaced by their
+declarations. Unrelated symlinks in an existing category cause startup to fail
+rather than follow them. When a category is removed, managed skills are removed
+and unrelated entries are restored as a normal directory. Other installed,
+bundled, and interactively created skills are preserved. Use unique frontmatter
+names to avoid collisions with those skills.
 
 Changes and removals are applied on startup; edits to managed runtime files
-are replaced. Declare `{"skills":{}}` and restart to remove all managed skills before
+are replaced. Declare `[]` and restart to remove all managed skills before
 unsetting `skillsFile`. Unsetting the option alone leaves the last generation
 in place. SOPS secret changes restart both configured services via
 `restartUnits`; a lock serializes their reconciliation.

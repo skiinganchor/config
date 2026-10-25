@@ -31,14 +31,18 @@ hermes:
           "name": "Morning summary",
           "schedule": "0 9 * * *",
           "deliver": "matrix:!room-id:example.org",
-          "prompt": "Prepare my morning summary."
+          "prompt": "Prepare my morning summary.",
+          "skills": ["morning-briefing", "weather"]
         }
       ]
 ```
 
 Encrypt this value before committing it. Keep `id` stable when changing the
-name, schedule, delivery room, or prompt. All five fields are required nonempty
-strings; IDs must be unique. Schedules support Hermes recurring cron expressions
+name, schedule, delivery room, prompt, or skills. The `id`, `name`, `schedule`,
+`deliver`, and `prompt` fields are required nonempty strings; `skills` is an
+optional list of nonempty, unique skill names (default `[]`). Skills must already
+be installed in Hermes and are loaded in the listed order. IDs must be unique.
+Schedules support Hermes recurring cron expressions
 and intervals such as `every 2h`; one-shot schedules are rejected. Times use
 Hermes's configured timezone (`settings.timezone`, for example
 `"Europe/Amsterdam"`). Delivery uses an explicit Matrix room ID. The gateway

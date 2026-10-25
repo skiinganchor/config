@@ -23,12 +23,21 @@ def reconcile(path):
     # Validate the entire input before changing any stored jobs.
     desired = {}
     for declaration in declarations:
-        fields = {"id", "name", "schedule", "deliver", "prompt"}
-        if not isinstance(declaration, dict) or set(declaration) != fields:
+        fields = {"id", "name", "schedule", "deliver", "prompt", "skills"}
+        legacy_fields = fields - {"skills"}
+        if (not isinstance(declaration, dict)
+                or frozenset(declaration) not in {frozenset(fields), frozenset(legacy_fields)}):
             raise ValueError("Invalid fields")
-        if any(not isinstance(value, str) or not value.strip()
-               for value in declaration.values()):
+        declaration.setdefault("skills", [])
+        if any(not isinstance(declaration[field], str) or not declaration[field].strip()
+               for field in ("id", "name", "schedule", "deliver", "prompt")):
             raise ValueError("Expected nonempty strings")
+        if (not isinstance(declaration["skills"], list)
+                or any(not isinstance(skill, str) or not skill.strip()
+                       for skill in declaration["skills"])):
+            raise ValueError("Expected a list of nonempty skill names")
+        if len(set(declaration["skills"])) != len(declaration["skills"]):
+            raise ValueError("Duplicate skill name")
         key = declaration["id"]
         if key in desired:
             raise ValueError("Duplicate id")
@@ -55,13 +64,13 @@ def reconcile(path):
         if job is None:
             job = jobs.create_job(**{
                 field: declaration[field]
-                for field in ("name", "schedule", "deliver", "prompt")
+                for field in ("name", "schedule", "deliver", "prompt", "skills")
             })
             jobs.update_job(job["id"], {MARKER: key})
             continue
         updates = {
             field: declaration[field]
-            for field in ("name", "deliver", "prompt")
+            for field in ("name", "deliver", "prompt", "skills")
             if job.get(field) != declaration[field]
         }
         # Unchanged schedules retain next_run_at, so restarts cannot postpone

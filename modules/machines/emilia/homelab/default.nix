@@ -146,7 +146,7 @@ in
       fail2ban.enable = true;
       hermes-agent = {
         enable = true;
-        backend.mode = "dashboard";
+        #backend.mode = "dashboard";
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
         cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;

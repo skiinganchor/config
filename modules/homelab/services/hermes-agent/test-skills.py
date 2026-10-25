@@ -32,7 +32,8 @@ class SkillsTest(unittest.TestCase):
         unmanaged = self.home / "skills" / "interactive" / "SKILL.md"
         unmanaged.parent.mkdir(parents=True)
         unmanaged.write_text("Keep me")
-        self.publish({"review": {"SKILL.md": "Original", "scripts/run.sh": "#!/bin/sh\n"}})
+        self.publish([{"name": "review", "category": "nixos", "files": {
+            "SKILL.md": "Original", "scripts/run.sh": "#!/bin/sh\n"}}])
         target = self.home / "skills" / "nixos"
         original = target.resolve()
         self.assertEqual((target / "review" / "SKILL.md").read_text(), "Original")
@@ -43,43 +44,64 @@ class SkillsTest(unittest.TestCase):
         discovered = [Path(root) / "SKILL.md" for root, _, files in
                       os.walk(self.home / "skills", followlinks=True) if "SKILL.md" in files]
         self.assertIn(target / "review" / "SKILL.md", discovered)
-        self.publish({"review": {"SKILL.md": "Updated"}})
+        self.publish([{"name": "review", "category": "nixos", "files": {"SKILL.md": "Updated"}}])
         self.assertFalse(original.exists())
         self.assertEqual((target / "review" / "SKILL.md").read_text(), "Updated")
         self.assertFalse((target / "review" / "scripts").exists())
-        self.publish({})
-        self.assertEqual(list(target.iterdir()), [])
+        self.publish([])
+        self.assertFalse(target.exists())
         self.assertEqual(unmanaged.read_text(), "Keep me")
 
     def test_invalid_declarations_preserve_published_generation(self):
-        self.publish({"review": {"SKILL.md": "Keep me"}})
+        self.publish([{"name": "review", "category": "nixos", "files": {"SKILL.md": "Keep me"}}])
         target = self.home / "skills" / "nixos"
         original = target.resolve()
-        invalid = [[], {"../escape": {"SKILL.md": "x"}}, {"review": {}},
-                   {"review": {"SKILL.md": "x", "../escape": "x"}},
-                   {"review": {"SKILL.md": "x", "/absolute": "x"}},
-                   {"review": {"SKILL.md": "x", "a": "x", "a/b": "x"}},
-                   {"review": {"SKILL.md": "x", "a//b": "x"}},
-                   {"review": {"SKILL.md": "x", "a/SKILL.md": "x"}},
-                   {"review": {"SKILL.md": 42}}]
+        invalid = [
+            {"review": {"SKILL.md": "x"}},
+            [{"name": "../escape", "category": "nixos", "files": {"SKILL.md": "x"}}],
+            [{"name": "review", "category": "nixos", "files": {}}],
+            [{"name": "review", "category": "nixos", "files": {
+                "SKILL.md": "x", "../escape": "x"}}],
+            [{"name": "review", "category": "nixos", "files": {
+                "SKILL.md": "x", "/absolute": "x"}}],
+            [{"name": "review", "category": "nixos", "files": {
+                "SKILL.md": "x", "a": "x", "a/b": "x"}}],
+            [{"name": "review", "category": "nixos", "files": {
+                "SKILL.md": "x", "a//b": "x"}}],
+            [{"name": "review", "category": "nixos", "files": {
+                "SKILL.md": "x", "a/SKILL.md": "x"}}],
+            [{"name": "review", "category": "nixos", "files": {"SKILL.md": 42}}],
+            [{"name": "review", "category": "nixos", "files": {"SKILL.md": "x"},
+              "extra": True}],
+            [{"name": "review", "category": "nixos", "files": {"SKILL.md": "x"}},
+             {"name": "review", "category": "productivity", "files": {"SKILL.md": "x"}}],
+        ]
         for declaration in invalid:
             with self.subTest(declaration=declaration), self.assertRaises(ValueError):
                 self.publish(declaration)
             self.assertEqual(target.resolve(), original)
         self.assertEqual((target / "review" / "SKILL.md").read_text(), "Keep me")
 
-    def test_namespace_collision(self):
+    def test_adopt_existing_category_and_reject_unrelated_symlink(self):
         target = self.home / "skills" / "nixos"
         target.mkdir(parents=True)
-        with self.assertRaises(ValueError):
-            self.publish({})
-        target.rmdir()
+        unmanaged = target / "interactive" / "SKILL.md"
+        unmanaged.parent.mkdir()
+        unmanaged.write_text("Keep me")
+        self.publish([{"name": "review", "category": "nixos", "files": {
+            "SKILL.md": "Managed"}}])
+        self.assertTrue(target.is_symlink())
+        self.assertEqual((target / "review" / "SKILL.md").read_text(), "Managed")
+        self.assertEqual((target / "interactive" / "SKILL.md").read_text(), "Keep me")
+
+        target.unlink()
         target.symlink_to(self.root)
         with self.assertRaises(ValueError):
-            self.publish({})
+            self.publish([])
 
     def test_duplicate_keys_and_private_errors(self):
-        self.source.write_text('{"private-secret": {}, "private-secret": {}}')
+        self.source.write_text('[{"name":"private-secret","category":"nixos","files":{},'
+                               '"name":"private-secret"}]')
         result = subprocess.run([sys.executable, str(SCRIPT), str(self.source)],
                                 env={**os.environ, "HERMES_HOME": str(self.home)},
                                 capture_output=True, text=True)
@@ -90,7 +112,8 @@ class SkillsTest(unittest.TestCase):
         self.assertFalse(self.home.exists())
 
     def test_concurrent_service_startup(self):
-        self.source.write_text(json.dumps({"review": {"SKILL.md": "Shared"}}))
+        self.source.write_text(json.dumps([{"name": "review", "category": "nixos",
+                                            "files": {"SKILL.md": "Shared"}}]))
         processes = [subprocess.Popen(
             [sys.executable, str(SCRIPT), str(self.source)],
             env={**os.environ, "HERMES_HOME": str(self.home)},
