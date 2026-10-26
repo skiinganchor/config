@@ -177,6 +177,16 @@ in
       default = { };
       description = "Generic Hermes Agent settings passed to the upstream module";
     };
+
+    configFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Runtime path to a complete Hermes config.yaml. When set, this replaces
+        settings; use a SOPS secret path for private configuration.
+      '';
+      example = lib.literalExpression ''config.sops.secrets."hermes/config-file".path'';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -231,7 +241,7 @@ in
     # See options in: https://github.com/NousResearch/hermes-agent/blob/main/nix/nixosModules.nix
     services.hermes-agent = {
       enable = true;
-      inherit (cfg) addToSystemPackages backend package stateDir settings;
+      inherit (cfg) addToSystemPackages backend configFile package stateDir settings;
       environmentFiles = [ cfg.environmentFile ];
       extraPackages = lib.optionals cfg.mcp.garmin.enable [ pkgs.uv pkgs.python312 ];
       mcpServers = lib.optionalAttrs cfg.mcp.nextcloud.enable

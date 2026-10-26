@@ -57,6 +57,13 @@ in
     mode = "0400";
     restartUnits = [ "hermes-agent.service" ];
   };
+  sops.secrets."hermes/config-file" = {
+    sopsFile = "${secretsPath}/secrets/shared.yaml";
+    owner = config.services.hermes-agent.user;
+    group = config.services.hermes-agent.group;
+    mode = "0400";
+    restartUnits = [ "hermes-backend.service" ];
+  };
   sops.secrets."hermes/providers" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
     owner = config.services.hermes-agent.user;
@@ -146,7 +153,11 @@ in
       fail2ban.enable = true;
       hermes-agent = {
         enable = true;
-        #backend.mode = "dashboard";
+        backend = {
+          mode = "dashboard";
+          host = "0.0.0.0";
+        };
+        configFile = config.sops.secrets."hermes/config-file".path;
         addToSystemPackages = true;
         environmentFile = config.sops.secrets."hermes/env-file".path;
         cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
