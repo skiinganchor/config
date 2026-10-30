@@ -39,7 +39,7 @@ sops.secrets."hermes/config-file" = {
   owner = config.services.hermes-agent.user;
   group = config.services.hermes-agent.group;
   mode = "0400";
-  restartUnits = [ "hermes-backend.service" ];
+  restartUnits = [ "hermes-agent.service" "hermes-backend.service" ];
 };
 
 homelab.services.hermes-agent.configFile =
@@ -48,6 +48,17 @@ homelab.services.hermes-agent.configFile =
 
 The `configFile` option replaces Nix-generated Hermes settings entirely; do
 not use it unless the complete Hermes config is represented in the secret.
+In particular, enabled Nix `mcpServers` are not automatically included: copy
+their definitions into the secret's `mcp_servers` mapping. On Emilia, inspect
+the Nix-generated definitions with:
+
+```sh
+nix eval --json .#nixosConfigurations.emilia.config.services.hermes-agent.mcpServers
+```
+
+JSON is valid YAML, so the resulting object can be used as the value of
+`mcp_servers` in the secret. Re-copy the definitions when their Nix settings or
+store paths change. Do not paste credentials into the Nix configuration.
 The decrypted file is copied into Hermes's runtime state on activation, and
 the password does not enter the Nix store.
 

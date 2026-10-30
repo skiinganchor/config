@@ -62,7 +62,7 @@ in
     owner = config.services.hermes-agent.user;
     group = config.services.hermes-agent.group;
     mode = "0400";
-    restartUnits = [ "hermes-backend.service" ];
+    restartUnits = [ "hermes-agent.service" "hermes-backend.service" ];
   };
   sops.secrets."hermes/providers" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";

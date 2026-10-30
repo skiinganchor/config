@@ -15,9 +15,10 @@ https://cloud.example.com/index.php/apps/app_api/proxy/context_agent/mcp/
 ```
 
 emilia also enables `homelab.services.hermes-agent.mcp.nextcloud.enable`. This
-adds the remote `nextcloud` server to the Nix-managed Hermes service profile's
-`mcp_servers`, using the configured Nextcloud hostname and a literal
+declares the remote `nextcloud` server using the configured Nextcloud hostname and a literal
 `${NEXTCLOUD_APP_PASSWORD}` reference. The password is resolved at runtime.
+When a complete `configFile` is configured, its `mcp_servers` must include the
+server explicitly; see [dashboard authentication](hermes-dashboard-auth.md).
 On other hosts, enable the same option and override `mcp.nextcloud.url` if needed.
 
 This is one shared server for all users. Each request authenticates the Nextcloud
