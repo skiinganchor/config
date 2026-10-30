@@ -34,6 +34,8 @@ jobs:
   tests:
     name: Flake Test
     runs-on: ubuntu-latest
+    env:
+      FLAKE_FOLDER: flakes
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7
@@ -46,8 +48,6 @@ jobs:
         run: |
           # Replace with your repository details
           DEFAULT_URL="github:skiinganchor/config"
-          FLAKE_FOLDER="flakes"
-
           FLAKE_FILE="${FLAKE_FOLDER}/flake.nix"
 
           # Default to the current repo and branch (for pushes)
