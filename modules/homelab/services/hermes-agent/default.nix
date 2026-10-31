@@ -6,6 +6,15 @@ let
     ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
       ${./reconcile-providers.py} ${lib.escapeShellArg cfg.providersFile} ${lib.escapeShellArg (toString cfg.environmentFile)}
   '';
+  # Upstream normalizes mcpServers into settings.mcp_servers, but configFile
+  # bypasses its generated settings file. Only overlay the MCP definitions.
+  mcpServers = config.services.hermes-agent.settings.mcp_servers or { };
+  mergeMcpConfig = cfg.configFile != null && mcpServers != { };
+  mcpConfig = pkgs.writeText "hermes-mcp-servers.json" (builtins.toJSON mcpServers);
+  mergeMcp = ''
+    ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
+      ${./merge-mcp-config.py} ${mcpConfig}
+  '';
   garminArgs = [
     "--python"
     "${pkgs.python312}/bin/python3"
@@ -189,7 +198,9 @@ in
       default = null;
       description = ''
         Runtime path to a complete Hermes config.yaml. When set, this replaces
-        settings; use a SOPS secret path for private configuration.
+        settings; use a SOPS secret path for private configuration. Nix MCP
+        definitions are merged into the runtime file after activation and
+        before native service startup, replacing entries with the same names.
       '';
       example = lib.literalExpression ''config.sops.secrets."hermes/config-file".path'';
     };
@@ -197,6 +208,10 @@ in
 
   config = lib.mkIf cfg.enable {
     assertions = [
+      {
+        assertion = !mergeMcpConfig || !config.services.hermes-agent.container.enable;
+        message = "Combining configFile with Nix MCP definitions requires native service mode";
+      }
       {
         assertion = cfg.providersFile == null || lib.hasPrefix "/" cfg.providersFile;
         message = "homelab.services.hermes-agent.providersFile must be an absolute runtime path";
@@ -268,6 +283,13 @@ in
 
     environment.systemPackages = lib.optionals cfg.mcp.garmin.enable [ garminAuth ];
 
+    system.activationScripts.hermes-agent-mcp = lib.mkIf mergeMcpConfig
+      (lib.stringAfter [ "hermes-agent-setup" ] ''
+        ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg config.services.hermes-agent.user} -- \
+          ${pkgs.coreutils}/bin/env HERMES_HOME=${lib.escapeShellArg "${config.services.hermes-agent.stateDir}/.hermes"} \
+          ${mergeMcp}
+      '');
+
     # Upstream copies configFile on every activation. A service restart is not
     # guaranteed when the unit and secret contents are unchanged, so preStart
     # alone can leave a running gateway without its provider/model routing.
@@ -279,6 +301,12 @@ in
       '');
 
     systemd.services = lib.mkMerge [
+      (lib.mkIf mergeMcpConfig
+        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
+          after = [ "sops-install-secrets.service" ];
+          serviceConfig.UMask = lib.mkForce "0077";
+          preStart = lib.mkBefore mergeMcp;
+        })))
       (lib.mkIf (cfg.skillsFile != null)
         (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
           after = [ "sops-install-secrets.service" ];

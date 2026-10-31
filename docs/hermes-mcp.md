@@ -17,8 +17,9 @@ https://cloud.example.com/index.php/apps/app_api/proxy/context_agent/mcp/
 emilia also enables `homelab.services.hermes-agent.mcp.nextcloud.enable`. This
 declares the remote `nextcloud` server using the configured Nextcloud hostname and a literal
 `${NEXTCLOUD_APP_PASSWORD}` reference. The password is resolved at runtime.
-When a complete `configFile` is configured, its `mcp_servers` must include the
-server explicitly; see [dashboard authentication](hermes-dashboard-auth.md).
+The module installs this definition even when a private `configFile` is used;
+see [dashboard authentication](hermes-dashboard-auth.md). Nix definitions replace
+secret entries with the same server names; other private servers are preserved.
 On other hosts, enable the same option and override `mcp.nextcloud.url` if needed.
 
 This is one shared server for all users. Each request authenticates the Nextcloud
@@ -276,6 +277,20 @@ first-time desktop procedure intentionally uses a separate local directory.
 ## Applying and checking
 
 Rebuild emilia after enabling Garmin and updating the private secret.
+The module merges Nix MCP definitions into a private `configFile` after
+activation and before each gateway/backend start. A restart alone cannot apply
+this fix on older deployments: deploy the updated module first. Verify the
+service profile explicitly, since `sudo` can reset `HERMES_HOME`:
+
+```sh
+sudo -u hermes env HERMES_HOME=/var/lib/hermes/.hermes hermes mcp list
+```
+
+Expect `nextcloud` and `garmin` on Emilia. This lists configured servers; it
+does not test connectivity or authentication. Adjust the path if using a custom
+`stateDir`. Remove previously copied definitions from the private config; Nix
+now maintains their command paths, arguments, endpoint and credential references.
+
 On first use, uv downloads the pinned Garmin source and its Python dependencies
 as the Hermes user. The host needs outbound network access and writable caches
 under Hermes's state directory.
@@ -289,3 +304,10 @@ The initial connection timeout is 180 seconds to allow first-run installation.
 Additional servers and tool filters can be configured through
 `services.hermes-agent.mcpServers` using the
 [upstream MCP configuration](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/mcp.md).
+
+Run the private-config merge regression tests with the pinned package's
+`hermesVenv/bin/python3`:
+
+```sh
+python3 modules/homelab/services/hermes-agent/test-mcp-config.py
+```

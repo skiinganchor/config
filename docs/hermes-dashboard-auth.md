@@ -46,21 +46,23 @@ homelab.services.hermes-agent.configFile =
   config.sops.secrets."hermes/config-file".path;
 ```
 
-The `configFile` option replaces Nix-generated Hermes settings entirely; do
-not use it unless the complete Hermes config is represented in the secret.
-In particular, enabled Nix `mcpServers` are not automatically included: copy
-their definitions into the secret's `mcp_servers` mapping. On Emilia, inspect
-the Nix-generated definitions with:
+The `configFile` option supplies the base configuration instead of Nix
+`settings`. The homelab module merges Nix MCP definitions into its runtime copy
+after activation and before gateway/backend startup. This includes Nextcloud,
+Garmin, and additional `services.hermes-agent.mcpServers`. These combinations
+require native service mode. Nix owns each declared server's complete entry;
+its definition replaces a secret entry with the same name. Servers with other
+names in the secret's `mcp_servers` mapping are preserved.
 
-```sh
-nix eval --json .#nixosConfigurations.emilia.config.services.hermes-agent.mcpServers
-```
-
-JSON is valid YAML, so the resulting object can be used as the value of
-`mcp_servers` in the secret. Re-copy the definitions when their Nix settings or
-store paths change. Do not paste credentials into the Nix configuration.
+Do not copy the Nix MCP definitions or their store paths into SOPS. Remove any
+previously copied `nextcloud` and `garmin` entries, so disabling them in Nix also
+removes them after activation. Keep credential references such as
+`${NEXTCLOUD_APP_PASSWORD}` in Nix and their values in `hermes/env-file`.
+With `providersFile`, provider reconciliation also supplies the global model;
+see [providers](hermes-providers.md). Other settings belong in the secret.
 The decrypted file is copied into Hermes's runtime state on activation, and
-the password does not enter the Nix store.
+the merges write a private, atomic runtime copy; the password does not enter
+the Nix store.
 
 Set `homelab.services.hermes-agent.backend.host` to Emilia's LAN IP address,
 and browse to `http://<that-same-ip>:9119`. Hermes validates the request
