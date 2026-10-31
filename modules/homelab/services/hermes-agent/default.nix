@@ -2,6 +2,10 @@
 let
   service = "hermes-agent";
   cfg = config.homelab.services.${service};
+  reconcileProviders = ''
+    ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
+      ${./reconcile-providers.py} ${lib.escapeShellArg cfg.providersFile} ${lib.escapeShellArg (toString cfg.environmentFile)}
+  '';
   garminArgs = [
     "--python"
     "${pkgs.python312}/bin/python3"
@@ -167,6 +171,8 @@ in
         Absolute runtime path to a private JSON list of providers and credentials.
         Supports openai-codex, opencode-go and zai. The first entry selects the
         default provider and model. Reconciled before gateway/backend startup;
+        also reconciled after activation installs config.yaml, even when the
+        services remain running, so configFile cannot erase the global model.
         Codex token refreshes survive restarts until the declared tokens change.
         See docs/hermes-providers.md for the schema and SOPS configuration.
       '';
@@ -262,6 +268,16 @@ in
 
     environment.systemPackages = lib.optionals cfg.mcp.garmin.enable [ garminAuth ];
 
+    # Upstream copies configFile on every activation. A service restart is not
+    # guaranteed when the unit and secret contents are unchanged, so preStart
+    # alone can leave a running gateway without its provider/model routing.
+    system.activationScripts.hermes-agent-providers = lib.mkIf (cfg.providersFile != null)
+      (lib.stringAfter [ "hermes-agent-setup" ] ''
+        ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg config.services.hermes-agent.user} -- \
+          ${pkgs.coreutils}/bin/env HERMES_HOME=${lib.escapeShellArg "${config.services.hermes-agent.stateDir}/.hermes"} \
+          ${reconcileProviders}
+      '');
+
     systemd.services = lib.mkMerge [
       (lib.mkIf (cfg.skillsFile != null)
         (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
@@ -276,10 +292,7 @@ in
         (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
           after = [ "sops-install-secrets.service" ];
           serviceConfig.UMask = lib.mkForce "0077";
-          preStart = lib.mkBefore ''
-            ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
-              ${./reconcile-providers.py} ${lib.escapeShellArg cfg.providersFile} ${lib.escapeShellArg (toString cfg.environmentFile)}
-          '';
+          preStart = lib.mkBefore reconcileProviders;
         })))
       (lib.mkIf (cfg.mcp.garmin.enable && cfg.mcp.garmin.tokensFile != null)
         (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {

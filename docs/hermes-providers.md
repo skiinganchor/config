@@ -42,7 +42,24 @@ environment keys in the rendered `.env`.
 
 The list must contain at least one entry, with no duplicate providers. Supported
 IDs are `openai-codex`, `opencode-go` and `zai`. The **first entry** selects the
-default provider and model; reorder the list to change it. Every entry requires
+global provider and model; reorder the list to change it. In the example above,
+the global choice is `openai-codex` / `gpt-6-luna`. For a Codex default of
+`gpt-6.1-sol`, put that model on the first entry. To use `opencode-go` /
+`qwen3.7-plus` globally instead, move its entire entry to the top. Restart the
+gateway and backend after changing the secret (configure `restartUnits` for
+both services when both are enabled).
+
+The reconciler writes the first entry to `model.provider` and `model.default`
+in the runtime `config.yaml` at service startup and after NixOS activation
+installs the configuration. Cron jobs created by
+`cronJobsFile` have no model pin and use this global choice, provided there is
+no separate `cron.model` / `cron.model_provider` override in the Hermes config.
+Existing jobs with interactive model, provider or endpoint overrides retain
+them. `hermes cron edit <job-id> --unpin` clears model and provider pins;
+it does not clear a separate endpoint override.
+See [cron jobs](hermes-cron-jobs.md) for details.
+
+Every entry requires
 a stable credential `id`, an unprefixed native model ID and credentials. This
 `id` becomes the entry ID inside `credential_pool[provider]` for all providers.
 Use existing pool IDs when adopting runtime credentials. An optional HTTPS
@@ -84,7 +101,8 @@ transferring it: refresh tokens rotate and must not be shared between
 independently running agents. Provisioning credentials still requires
 a real login; Nix cannot create an OAuth grant.
 
-Before each gateway or backend start, the entire list is validated, credentials
+After NixOS activation installs `config.yaml`, and before each gateway or
+backend start, the entire list is validated, credentials
 are reconciled into `credential_pool` for all three providers, and
 `config.yaml`'s model routing is updated. Malformed declarations or missing
 credential fields prevent startup; validation errors omit private values. Token
@@ -117,7 +135,28 @@ homelab.services.hermes-agent.providersFile =
 ```
 
 Native service mode is required. Do not combine `providersFile` with upstream
-`authFile`, or model routing fields in `settings.model`; keep tuning such as
-reasoning settings in Nix. Unsetting `providersFile` stops reconciliation and
-leaves the last runtime configuration in place. Verify the reconciler against
-the pinned Hermes auth API when upgrading the flake input.
+`authFile`, or model routing fields in `settings.model`. The module rejects
+these combinations. If using `configFile`, remove model routing fields there
+as well: reconciliation replaces them after activation and at startup. Keep
+tuning such as reasoning settings in the active configuration source (`settings`
+or `configFile`). Unsetting `providersFile` stops reconciliation without removing
+runtime credentials; subsequent activations still apply `settings` or
+`configFile`. Verify the reconciler against the pinned Hermes auth API when
+upgrading the flake input.
+
+Older versions only reconciled providers at service startup. With `configFile`,
+an otherwise unrelated rebuild could replace the runtime config without
+restarting Hermes, erasing `model.default` and causing cron's "no model
+configured" error. Restart both services to restore routing immediately:
+
+```sh
+sudo systemctl restart hermes-agent hermes-backend
+```
+
+Omit `hermes-backend` when it is disabled. Deploy the activation hook in this
+module to preserve the global model across subsequent rebuilds. Run the provider
+regression tests with the pinned package's `hermesVenv/bin/python3`:
+
+```sh
+python3 modules/homelab/services/hermes-agent/test-providers.py
+```

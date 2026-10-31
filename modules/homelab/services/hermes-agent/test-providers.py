@@ -133,6 +133,40 @@ assert resolve_provider() == 'zai'
 assert get_api_key_provider_status('zai')['logged_in']
 """)
 
+    def test_cron_recovers_after_activation_replaces_config(self):
+        self.reconcile()
+        # Upstream installs a complete configFile on every activation, including
+        # rebuilds that leave the gateway running. Exercise cron's real reader
+        # in one process to cover its effective-config cache as well.
+        config_file = self.root / "config-file.yaml"
+        config_file.write_text(yaml.safe_dump({"model": {"reasoning_effort": "low"}}))
+        self.run_python(f"""
+import subprocess
+import sys
+from cron.scheduler import _load_cron_job_config
+
+def read_model():
+    return _load_cron_job_config({{'model': None}}, 'test-job', 'test job')
+
+assert read_model().model == 'gpt-6-luna'
+subprocess.run(['install', '-m', '0600', {str(config_file)!r},
+                {str(self.home / 'config.yaml')!r}], check=True)
+try:
+    read_model()
+except RuntimeError as exc:
+    assert 'no model configured' in str(exc)
+else:
+    raise AssertionError('expected activation to erase the global model')
+
+# The post-activation hook must reconcile again without a service restart.
+subprocess.run([sys.executable, {str(SCRIPT)!r}, {str(self.secret)!r},
+                {str(self.environment_file)!r}], check=True)
+resolved = read_model()
+assert resolved.model == 'gpt-6-luna'
+assert resolved.model_cfg['provider'] == 'openai-codex'
+assert resolved.model_cfg['reasoning_effort'] == 'low'
+""")
+
     def test_api_key_rotation_keeps_id_and_resets_status(self):
         self.reconcile()
         store = self.store()
