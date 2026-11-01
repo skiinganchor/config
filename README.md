@@ -46,6 +46,8 @@ provisioning disables UI edits.
 
 ## GitHub Actions secrets
 
+Can be edited at https://github.com/skiinganchor/config/settings/secrets/actions
+
 ### `GH_TOKEN_FOR_UPDATES`
 
 The [`update-flake-lock`](.github/workflows/update-flake-lock.yml) workflow uses this token to push the updated lock-file branch and open a pull request. The final merge step also uses it with `gh pr merge --admin`, so the token owner must be a repository admin.
