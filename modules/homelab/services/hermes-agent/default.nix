@@ -29,13 +29,8 @@ let
     exec ${pkgs.uv}/bin/uvx ${lib.escapeShellArgs garminArgs} garmin-mcp-auth "$@"
   '';
   garminTokenSetup = lib.optionalString (cfg.mcp.garmin.tokensFile != null) ''
-    tokenDir=${lib.escapeShellArg "${cfg.stateDir}/.garminconnect"}
-    install -d -m 0700 "$tokenDir"
-    tokenTemp=$(mktemp "$tokenDir/.sops-tokens.XXXXXX")
-    trap 'rm -f "$tokenTemp"' EXIT
-    install -m 0600 ${lib.escapeShellArg cfg.mcp.garmin.tokensFile} "$tokenTemp"
-    mv -f "$tokenTemp" "$tokenDir/garmin_tokens.json"
-    trap - EXIT
+    ${pkgs.python3}/bin/python3 ${./reconcile-garmin-tokens.py} \
+      ${lib.escapeShellArg cfg.mcp.garmin.tokensFile} ${lib.escapeShellArg "${cfg.stateDir}/.garminconnect"}
   '';
 in
 {
@@ -159,9 +154,9 @@ in
           example = lib.literalExpression ''config.sops.secrets."hermes/garmin-tokens".path'';
           description = ''
             Absolute runtime path to a secret containing garmin_tokens.json.
-            Copied into the writable Garmin token directory before startup.
-            Use sops-nix to keep tokens out of the Nix store. Each startup
-            restores this secret; publish renewed tokens to SOPS when needed.
+            Seeds the writable Garmin token directory and applies changes to
+            the secret without overwriting runtime changes on every startup.
+            Use sops-nix to keep tokens out of the Nix store.
           '';
         };
         revision = lib.mkOption {

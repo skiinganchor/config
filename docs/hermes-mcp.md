@@ -137,11 +137,17 @@ homelab.services.hermes-agent.mcp.garmin.tokensFile =
   config.sops.secrets."hermes/garmin-tokens".path;
 ```
 
-At startup the secret is copied atomically to
+On first startup the secret seeds
 `/var/lib/hermes/.garminconnect/garmin_tokens.json`, with directory mode `0700`
-and file mode `0600`. Garmin gets a writable copy so it can refresh tokens;
-the SOPS secret remains unchanged. Every service startup restores the declared
-tokens. Update SOPS with renewed tokens before the declared tokens expire.
+and file mode `0600`. Subsequent starts preserve the writable runtime file.
+An intentional change to the SOPS secret replaces the runtime file on the next
+service start. A private digest records which secret was last applied; the SOPS
+secret itself is not updated when runtime tokens change. Back up valid renewed
+credentials in SOPS when needed, because a new host starts from that secret.
+
+When upgrading from the previous always-copy behavior, an existing runtime file
+is preserved and the current secret is recorded as the baseline. Deploy this
+change before changing the SOPS secret, so the next secret update is detected.
 
 ### First-time setup: generate the JSON before enabling Garmin
 
@@ -252,20 +258,23 @@ password, and access to your MFA code if your account uses MFA.
 
 ### Renewing tokens after deployment
 
-On emilia, stop the gateway before replacing its tokens (also stop
-`hermes-backend` if enabled), then authenticate as the Hermes service user:
+First deploy the token reconciliation change above. On emilia, stop the gateway
+and backend before replacing tokens, then authenticate as the Hermes user:
 
 ```sh
-sudo systemctl stop hermes-agent
+sudo systemctl stop hermes-agent hermes-backend
 sudo -Hu hermes hermes-garmin-auth --force-reauth
-sudo -Hu hermes cat /var/lib/hermes/.garminconnect/garmin_tokens.json
+sudo -Hu hermes hermes-garmin-auth --verify
 ```
 
-Copy the complete JSON into the private SOPS key again, publish it, update
-`my-secrets`, and rebuild emilia as in steps 5–6. Start the gateway again after
-the updated secret has been deployed (`sudo systemctl start hermes-agent`; also
-start `hermes-backend` if you stopped it). Do not restart with the old SOPS value:
-every startup restores the declared secret over the writable token file.
+If authentication and verification succeed, start the services with
+`sudo systemctl start hermes-agent hermes-backend`. The runtime token survives
+restarts after the reconciliation change is deployed. To preserve a recovery
+copy, securely copy the complete JSON into the private SOPS key, publish it,
+update `my-secrets`, and rebuild emilia as in steps 5–6. Updating the secret
+will also replace the runtime token on the next service start. If authentication
+fails, leave the services stopped until a valid session is available or start
+them knowing Garmin calls will continue to fail.
 Alternatively, generate renewed tokens on your desktop using steps 1–6, adding
 `--force-reauth` to the login command in step 3.
 
