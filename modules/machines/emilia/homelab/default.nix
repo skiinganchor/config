@@ -43,6 +43,9 @@ in
   sops.secrets."nextcloud/admin-password" = { };
   sops.secrets."nextcloud/secrets" = { };
   sops.secrets."slskd/env-file" = { };
+  sops.secrets."stirling-pdf/env-file" = {
+    restartUnits = [ "stirling-pdf.service" ];
+  };
   sops.secrets."hermes/env-file" = {
     sopsFile = "${secretsPath}/secrets/shared.yaml";
     owner = "hermes";
@@ -248,7 +251,10 @@ in
         environmentFile = config.sops.secrets."slskd/env-file".path;
       };
       sonarr.enable = true;
-      stirling-pdf.enable = true;
+      stirling-pdf = {
+        enable = true;
+        environmentFile = config.sops.secrets."stirling-pdf/env-file".path;
+      };
       uptime-kuma.enable = false;
       vaultwarden.enable = false;
       wireguard-netns = {

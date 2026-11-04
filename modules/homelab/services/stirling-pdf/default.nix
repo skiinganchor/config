@@ -11,6 +11,10 @@ in
       type = lib.types.str;
       default = "pdf.${homelab.baseDomain}";
     };
+    environmentFile = lib.mkOption {
+      type = lib.types.path;
+      description = "Environment file containing the Stirling PDF Keycloak client secret and initial admin credentials.";
+    };
     homepage.name = lib.mkOption {
       type = lib.types.str;
       default = "Stirling PDF";
@@ -35,7 +39,19 @@ in
       package = pkgs.pkgs-unstable.stirling-pdf;
       environment = {
         SERVER_PORT = 8888;
+        SERVER_ADDRESS = "127.0.0.1";
+        SERVER_FORWARDHEADERSSTRATEGY = "framework";
+        SECURITY_ENABLELOGIN = true;
+        SECURITY_LOGINMETHOD = "all";
+        SECURITY_OAUTH2_ENABLED = true;
+        SECURITY_OAUTH2_AUTOCREATEUSER = true;
+        SECURITY_OAUTH2_BLOCKREGISTRATION = false;
+        SECURITY_OAUTH2_CLIENT_KEYCLOAK_ISSUER = "https://${homelab.services.keycloak.url}/realms/sacred";
+        SECURITY_OAUTH2_CLIENT_KEYCLOAK_CLIENTID = "stirling-pdf";
+        SECURITY_OAUTH2_CLIENT_KEYCLOAK_SCOPES = "openid, profile, email";
+        SECURITY_OAUTH2_CLIENT_KEYCLOAK_USEASUSERNAME = "preferred_username";
       };
+      environmentFiles = [ cfg.environmentFile ];
     };
 
     services.nginx = {
@@ -55,19 +71,9 @@ in
         '';
         locations = {
           "/" = {
-            # proxyPass attribute (not inline proxy_pass) so NixOS auto-includes
-            # recommendedProxyConfig — otherwise the proxy_set_header below would
-            # suppress the inherited Host/X-Forwarded-* headers.
             proxyPass = "http://127.0.0.1:8888";
             extraConfig = ''
-              auth_request /oauth2/auth;
-              error_page 401 = /oauth2/sign_in;
-              auth_request_set $user  $upstream_http_x_auth_request_user;
-              auth_request_set $email $upstream_http_x_auth_request_email;
-              proxy_set_header X-User  $user;
-              proxy_set_header X-Email $email;
-              auth_request_set $auth_cookie $upstream_http_set_cookie;
-              add_header Set-Cookie $auth_cookie;
+              proxy_set_header X-Forwarded-Port 443;
               # Add HSTS header to force HTTPS
               add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
 
@@ -78,24 +84,6 @@ in
               proxy_connect_timeout 600s;
               proxy_send_timeout    600s;
               proxy_read_timeout    600s;
-            '';
-          };
-          "/oauth2/" = {
-            proxyPass = "http://127.0.0.1:4192";
-            extraConfig = ''
-              proxy_set_header X-Auth-Request-Redirect $request_uri;
-              # Increase size of nginx buffer size to send more roles
-              # TODO: find a more efficient solution for checking roles
-              proxy_buffer_size 16k;
-              proxy_buffers 4 32k;
-              proxy_busy_buffers_size 32k;
-            '';
-          };
-          "= /oauth2/auth" = {
-            proxyPass = "http://127.0.0.1:4192";
-            extraConfig = ''
-              proxy_set_header Content-Length "";
-              proxy_pass_request_body off;
             '';
           };
         };
