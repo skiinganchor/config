@@ -1,5 +1,6 @@
 { config
 , lib
+, pkgs
 , ...
 }:
 let
@@ -10,6 +11,10 @@ in
 {
   options.homelab.services.homepage = {
     enable = lib.mkEnableOption service;
+    environmentFile = lib.mkOption {
+      type = lib.types.path;
+      description = "Environment file containing the Homepage OIDC client secret and authentication secret.";
+    };
     monitoredServices = lib.mkOption {
       type = lib.types.listOf lib.types.str;
       default = [
@@ -42,10 +47,16 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
+    assertions = [{
+      assertion = lib.versionAtLeast config.services.${service}.package.version "2.0.0";
+      message = "Homepage's built-in OIDC authentication requires homepage-dashboard 2.0 or newer.";
+    }];
     services.glances.enable = true;
     services.${service} = {
       enable = true;
-      environmentFiles = [ (builtins.toFile "homepage.env" "HOMEPAGE_ALLOWED_HOSTS=homepage.${homelab.baseDomain}") ];
+      package = pkgs.pkgs-unstable.homepage-dashboard;
+      allowedHosts = "homepage.${homelab.baseDomain}";
+      environmentFiles = [ cfg.environmentFile ];
       customCSS = ''
         body, html {
           font-family: SF Pro Display, Helvetica, Arial, sans-serif !important;
@@ -197,6 +208,16 @@ in
         ];
     };
 
+    systemd.services.${service}.environment = {
+      HOSTNAME = "127.0.0.1";
+      HOMEPAGE_AUTH_ENABLED = "true";
+      HOMEPAGE_EXTERNAL_URL = "https://homepage.${homelab.baseDomain}";
+      HOMEPAGE_OIDC_ISSUER = "https://${homelab.services.keycloak.url}/realms/sacred";
+      HOMEPAGE_OIDC_CLIENT_ID = "homepage";
+      HOMEPAGE_OIDC_NAME = "Keycloak";
+      HOMEPAGE_OIDC_AUTO_LOGIN = "true";
+    };
+
     services.nginx = {
       virtualHosts."homepage.${homelab.baseDomain}" = {
         forceSSL = true;
@@ -213,32 +234,11 @@ in
           "/" = {
             proxyPass = "http://127.0.0.1:${toString config.services.${service}.listenPort}";
             extraConfig = ''
-              auth_request /oauth2/auth;
-              error_page 401 = /oauth2/sign_in;
-              auth_request_set $auth_cookie $upstream_http_set_cookie;
-              add_header Set-Cookie $auth_cookie;
               # add_header in a location drops the server-level headers,
               # so the HSTS/XSS headers must be repeated here (gixy
               # rejects the config otherwise)
               add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
               add_header X-XSS-Protection "1; mode=block" always;
-            '';
-          };
-          "/oauth2/" = {
-            proxyPass = "http://127.0.0.1:4192";
-            extraConfig = ''
-              proxy_set_header X-Auth-Request-Redirect $request_uri;
-              # Increase size of nginx buffer size to send more roles
-              proxy_buffer_size 16k;
-              proxy_buffers 4 32k;
-              proxy_busy_buffers_size 32k;
-            '';
-          };
-          "= /oauth2/auth" = {
-            proxyPass = "http://127.0.0.1:4192";
-            extraConfig = ''
-              proxy_set_header Content-Length "";
-              proxy_pass_request_body off;
             '';
           };
         };

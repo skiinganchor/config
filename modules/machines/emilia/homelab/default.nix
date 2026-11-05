@@ -20,6 +20,9 @@ in
   };
   sops.secrets."keycloak/db-password" = { };
   sops.secrets."keycloak/oauth2-proxy-env-file" = { };
+  sops.secrets."homepage/env-file" = {
+    restartUnits = [ "homepage-dashboard.service" ];
+  };
   sops.secrets."matrix/registration-secret" = {
     owner = "matrix-synapse";
   };
@@ -175,7 +178,10 @@ in
         # Provider selection, models and authentication: docs/hermes-providers.md.
       };
       homeassistant.enable = true;
-      homepage.enable = true;
+      homepage = {
+        enable = true;
+        environmentFile = config.sops.secrets."homepage/env-file".path;
+      };
       immich.enable = false;
       jellyfin.enable = false;
       keycloak = {
