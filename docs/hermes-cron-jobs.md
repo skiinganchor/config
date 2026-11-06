@@ -32,7 +32,8 @@ hermes:
           "schedule": "0 9 * * *",
           "deliver": "matrix:!room-id:example.org",
           "prompt": "Prepare my morning summary.",
-          "skills": ["morning-briefing", "weather"]
+          "skills": ["morning-briefing", "weather"],
+          "enabled": true
         }
       ]
 ```
@@ -40,8 +41,13 @@ hermes:
 Encrypt this value before committing it. Keep `id` stable when changing the
 name, schedule, delivery room, prompt, or skills. The `id`, `name`, `schedule`,
 `deliver`, and `prompt` fields are required nonempty strings; `skills` is an
-optional list of nonempty, unique skill names (default `[]`). Skills must already
-be installed in Hermes and are loaded in the listed order. IDs must be unique.
+optional list of nonempty, unique skill names (default `[]`), and `enabled` is an
+optional boolean. New jobs are enabled by default. Set `enabled` to `false` to
+pause a declared job, or `true` to resume it. When omitted on an existing job,
+its current enabled state is preserved, including an interactive pause. When
+declared, the private configuration reapplies the enabled state on each restart.
+Skills must already be installed in Hermes and are loaded in the listed order.
+IDs must be unique.
 Schedules support Hermes recurring cron expressions
 and intervals such as `every 2h`; one-shot schedules are rejected. Times use
 Hermes's configured timezone (`settings.timezone`, for example

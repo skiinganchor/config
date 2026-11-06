@@ -23,12 +23,15 @@ def reconcile(path):
     # Validate the entire input before changing any stored jobs.
     desired = {}
     for declaration in declarations:
-        fields = {"id", "name", "schedule", "deliver", "prompt", "skills"}
-        legacy_fields = fields - {"skills"}
+        required_fields = {"id", "name", "schedule", "deliver", "prompt"}
+        allowed_fields = required_fields | {"skills", "enabled"}
         if (not isinstance(declaration, dict)
-                or frozenset(declaration) not in {frozenset(fields), frozenset(legacy_fields)}):
+                or not required_fields.issubset(declaration)
+                or declaration.keys() - allowed_fields):
             raise ValueError("Invalid fields")
         declaration.setdefault("skills", [])
+        if "enabled" in declaration and not isinstance(declaration["enabled"], bool):
+            raise ValueError("Expected enabled to be a boolean")
         if any(not isinstance(declaration[field], str) or not declaration[field].strip()
                for field in ("id", "name", "schedule", "deliver", "prompt")):
             raise ValueError("Expected nonempty strings")
@@ -67,6 +70,8 @@ def reconcile(path):
                 for field in ("name", "schedule", "deliver", "prompt", "skills")
             })
             jobs.update_job(job["id"], {MARKER: key})
+            if declaration.get("enabled") is False:
+                jobs.pause_job(job["id"])
             continue
         updates = {
             field: declaration[field]
@@ -78,7 +83,16 @@ def reconcile(path):
         if job["schedule"] != schedule:
             updates["schedule"] = schedule
         if updates:
-            jobs.update_job(job["id"], updates)
+            job = jobs.update_job(job["id"], updates)
+        # Use the lifecycle API to keep enabled, state and pause metadata in
+        # sync, including records disabled by older reconciliation versions.
+        # An omitted field preserves an interactive pause.
+        if declaration.get("enabled") is False:
+            if job.get("enabled", True) or job.get("state") != "paused":
+                jobs.pause_job(job["id"])
+        elif declaration.get("enabled") is True:
+            if not job.get("enabled", True) or job.get("state") == "paused" or job.get("paused_at"):
+                jobs.resume_job(job["id"])
 
     for key, job in existing.items():
         if key not in desired:
