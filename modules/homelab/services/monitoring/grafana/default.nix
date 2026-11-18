@@ -29,6 +29,15 @@ in
         default = "http://${cfg.listenAddress}:${toString config.services.grafana.settings.server.http_port}";
         description = "URL of the Grafana backend served by the reverse proxy.";
       };
+      upstream-config-file = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = ''
+          Runtime Nginx http-context configuration file defining the upstream.
+          The caller must install it before Nginx starts and reload Nginx when
+          it changes. Only the path is included in the generated configuration.
+        '';
+      };
     };
     url = lib.mkOption {
       type = lib.types.str;
@@ -129,6 +138,9 @@ in
     })
     (lib.mkIf cfg.proxy.enable {
       services.nginx = {
+        appendHttpConfig = lib.mkIf (cfg.proxy.upstream-config-file != null) ''
+          include ${cfg.proxy.upstream-config-file};
+        '';
         virtualHosts."${cfg.url}" = {
           forceSSL = true;
           # uses security.acme instead

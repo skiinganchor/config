@@ -13,6 +13,18 @@ in
   ];
 
   sops.secrets."db-password" = { };
+  sops.secrets."alertson-ip" = { };
+  sops.templates."grafana-upstream.conf" = {
+    owner = "root";
+    group = config.services.nginx.group;
+    mode = "0440";
+    reloadUnits = [ "nginx.service" ];
+    content = ''
+      upstream grafana_backend {
+        server ${config.sops.placeholder."alertson-ip"}:3000;
+      }
+    '';
+  };
   sops.secrets."fail2ban/ignoreip" = {
     owner = "root";
     mode = "0400";
@@ -99,6 +111,12 @@ in
   };
 
   systemd.services = {
+    # Otherwise setupSecrets installs the template during activation, before
+    # services start. Keep the same ordering if systemd activation is enabled.
+    nginx = {
+      requires = lib.optionals config.sops.useSystemdActivation [ "sops-install-secrets.service" ];
+      after = lib.optionals config.sops.useSystemdActivation [ "sops-install-secrets.service" ];
+    };
     slskd.restartTriggers = [ config.sops.secrets."wireguard-netns/config".sopsFileHash ];
     wg_client.restartTriggers = [ config.sops.secrets."wireguard-netns/config".sopsFileHash ];
   };
@@ -237,7 +255,8 @@ in
       };
       grafana.proxy = {
         enable = true;
-        upstream = "http://alertson:3000";
+        upstream = "http://grafana_backend";
+        upstream-config-file = config.sops.templates."grafana-upstream.conf".path;
       };
       nginx.enable = true;
       ntfy = {
