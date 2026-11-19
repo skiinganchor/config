@@ -107,6 +107,11 @@ in
     };
     systemd.services = {
       slskd = {
+        # TODO: remove workaround for .NET mutex regression; remove once fixed upstream.
+        # https://github.com/NixOS/nixpkgs/issues/588861
+        serviceConfig.RuntimeDirectory = "slskd";
+        serviceConfig.Environment = [ "XDG_RUNTIME_DIR=/run/slskd" ];
+
         # Fix for namespace error with NFS mount forcefully disable the conflicting upstream sandboxing potentially added.
         serviceConfig.PrivateMounts = lib.mkForce false;
         serviceConfig.ProtectHome = lib.mkForce false;
