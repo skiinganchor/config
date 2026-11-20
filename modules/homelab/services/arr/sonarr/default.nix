@@ -58,6 +58,26 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations = {
+          "= /ping" = {
+            proxyPass = config.services.nginx.virtualHosts."${cfg.url}".locations."/".proxyPass;
+            extraConfig = ''
+              auth_request off;
+              ${lib.optionalString (homelab.services.slskd.healthCheckAllowFile != null) "include ${homelab.services.slskd.healthCheckAllowFile};"}
+              deny all;
+              proxy_set_header X-User "";
+              proxy_set_header X-Email "";
+              proxy_set_header X-Remote-User "";
+              proxy_set_header X-Forwarded-User "";
+              proxy_set_header X-Forwarded-Email "";
+              proxy_set_header X-Auth-Request-User "";
+              proxy_set_header X-Auth-Request-Email "";
+              proxy_cache off;
+              proxy_intercept_errors off;
+              add_header Cache-Control "no-store" always;
+              add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+            '';
+          };
           "/" = {
             # proxy_pass MUST be set via this attribute (not inline in
             # extraConfig) so NixOS auto-includes recommendedProxyConfig,

@@ -52,6 +52,26 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations = {
+          "= /api/system/ping" = {
+            proxyPass = "http://127.0.0.1:${toString config.services.${service}.listenPort}";
+            extraConfig = ''
+              auth_request off;
+              ${lib.optionalString (homelab.services.slskd.healthCheckAllowFile != null) "include ${homelab.services.slskd.healthCheckAllowFile};"}
+              deny all;
+              proxy_set_header X-User "";
+              proxy_set_header X-Email "";
+              proxy_set_header X-Remote-User "";
+              proxy_set_header X-Forwarded-User "";
+              proxy_set_header X-Forwarded-Email "";
+              proxy_set_header X-Auth-Request-User "";
+              proxy_set_header X-Auth-Request-Email "";
+              proxy_cache off;
+              proxy_intercept_errors off;
+              add_header Cache-Control "no-store" always;
+              add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+            '';
+          };
           "/" = {
             # proxyPass attribute (not inline proxy_pass) so NixOS auto-includes
             # recommendedProxyConfig — otherwise the proxy_set_header below would
