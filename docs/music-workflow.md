@@ -98,6 +98,12 @@ completion can bypass approval or remove files before Lidarr consumes them.
 
 ## Maintenance rules
 
+Uptime Kuma on Alertson monitors slskd through the exact `/health` route on
+`https://slskd.tapirus.cc`, bypassing SSO only for the source IP in Emilia's
+`alertson-ip` secret. Private DNS must resolve that name directly to Emilia;
+the monitor accepts only HTTP 200 with redirects disabled to avoid OAuth2/Keycloak
+login-page false positives. The unauthenticated backend port stays on loopback.
+
 - Use native application settings and NixOS modules. Do not add application source
   patches, database polling workers, receipt caches, or competing importers.
 - Preserve one owner for each download and its final paths. Aurral and Lidarr

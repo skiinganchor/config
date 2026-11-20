@@ -28,6 +28,14 @@ in
       type = lib.types.str;
       default = "slskd.${homelab.baseDomain}";
     };
+    healthCheckAllowFile = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = ''
+        Nginx include containing an allow rule for the monitoring host's
+        verified source IP. Without it, the health route denies all clients.
+      '';
+    };
     environmentFile = lib.mkOption {
       description = ''
         File with slskd credentials. Only Soulseek-network credentials are
@@ -101,7 +109,7 @@ in
       "slskd-web-proxy" = {
         enable = true;
         description = "Socket for Proxy to slskd WebUI";
-        listenStreams = [ (toString config.services.${service}.settings.web.port) ];
+        listenStreams = [ "127.0.0.1:${toString config.services.${service}.settings.web.port}" ];
         wantedBy = [ "sockets.target" ];
       };
     };
@@ -137,23 +145,26 @@ in
       "slskd-web-proxy" = lib.attrsets.optionalAttrs homelab.services.wireguard-netns.enable {
         enable = true;
         description = "Proxy to slskd WebUI in Network Namespace";
+        # Health requests must fail while slskd is stopped, rather than
+        # starting it again through socket activation.
         requires = [
-          "slskd.service"
           "slskd-web-proxy.socket"
+          "${ns}.service"
         ];
         after = [
           "slskd.service"
           "slskd-web-proxy.socket"
+          "${ns}.service"
         ];
-        unitConfig = {
-          JoinsNamespaceOf = "slskd.service";
-        };
         serviceConfig = {
           User = config.services.slskd.user;
           Group = config.services.slskd.group;
           ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd --exit-idle-time=5min 127.0.0.1:${
             toString config.services.${service}.settings.web.port
           }";
+          # Join the persistent WireGuard namespace directly so the proxy
+          # can return backend failures throughout a slskd stop/restart.
+          NetworkNamespacePath = "/var/run/netns/${ns}";
           PrivateNetwork = "yes";
         };
       };
@@ -172,6 +183,19 @@ in
           add_header X-XSS-Protection "1; mode=block" always;
         '';
         locations = {
+          "= /health" = {
+            proxyPass = "http://127.0.0.1:${toString config.services.${service}.settings.web.port}";
+            extraConfig = ''
+              auth_request off;
+              ${lib.optionalString (cfg.healthCheckAllowFile != null) "include ${cfg.healthCheckAllowFile};"}
+              deny all;
+              proxy_cache off;
+              proxy_intercept_errors off;
+              add_header Cache-Control "no-store" always;
+              add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+              add_header X-XSS-Protection "1; mode=block" always;
+            '';
+          };
           "/" = {
             extraConfig = ''
               auth_request /oauth2/auth;

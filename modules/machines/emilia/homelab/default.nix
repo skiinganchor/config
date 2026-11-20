@@ -12,102 +12,117 @@ in
     sops-nix.nixosModules.sops
   ];
 
-  sops.secrets."db-password" = { };
-  sops.secrets."alertson-ip" = { };
-  sops.templates."grafana-upstream.conf" = {
-    owner = "root";
-    group = config.services.nginx.group;
-    mode = "0440";
-    reloadUnits = [ "nginx.service" ];
-    content = ''
-      upstream grafana_backend {
-        server ${config.sops.placeholder."alertson-ip"}:3000;
-      }
-    '';
-  };
-  sops.secrets."fail2ban/ignoreip" = {
-    owner = "root";
-    mode = "0400";
-    restartUnits = [ "fail2ban.service" ];
-  };
-  sops.secrets."keycloak/db-password" = { };
-  sops.secrets."keycloak/oauth2-proxy-env-file" = { };
-  sops.secrets."homepage/env-file" = {
-    restartUnits = [ "homepage-dashboard.service" ];
-  };
-  sops.secrets."matrix/registration-secret" = {
-    owner = "matrix-synapse";
-  };
-  sops.secrets."matrix/mas/encryption" = { };
-  sops.secrets."matrix/mas/signing-key-rsa" = { };
-  sops.secrets."matrix/mas/signing-key-ec-1" = { };
-  sops.secrets."matrix/mas/signing-key-ec-2" = { };
-  sops.secrets."matrix/mas/signing-key-ec-3" = { };
-  sops.secrets."matrix/mas/synapse-shared-secret" = {
-    owner = "matrix-synapse";
-  };
-  sops.secrets."matrix/oidc-client-secret" = { };
-  sops.secrets."navidrome/env-file" = { };
-  sops.secrets."ntfy/env-file" = { };
-  sops.secrets."nextcloud/db-password" = {
-    key = "db-password";
-    owner = "nextcloud";
-    group = "nextcloud";
-    mode = "0440";
-  };
-  sops.secrets."nextcloud/admin-password" = { };
-  sops.secrets."nextcloud/secrets" = { };
-  sops.secrets."slskd/env-file" = { };
-  sops.secrets."stirling-pdf/env-file" = {
-    restartUnits = [ "stirling-pdf.service" ];
-  };
-  sops.secrets."hermes/env-file" = {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
-    owner = "hermes";
-    group = "hermes";
-    mode = "0400";
-    restartUnits = [ "hermes-agent.service" ];
-  };
-  sops.secrets."hermes/cron-jobs" = {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
-    owner = "hermes";
-    group = "hermes";
-    mode = "0400";
-    restartUnits = [ "hermes-agent.service" ];
-  };
-  sops.secrets."hermes/config-file" = {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
-    owner = config.services.hermes-agent.user;
-    group = config.services.hermes-agent.group;
-    mode = "0400";
-    restartUnits = [ "hermes-agent.service" "hermes-backend.service" ];
-  };
-  sops.secrets."hermes/providers" = {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
-    owner = config.services.hermes-agent.user;
-    group = config.services.hermes-agent.group;
-    mode = "0400";
-    restartUnits = [ "hermes-agent.service" ]
-      ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
-  };
-  sops.secrets."hermes/skills" = {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
-    owner = config.services.hermes-agent.user;
-    group = config.services.hermes-agent.group;
-    mode = "0400";
-    restartUnits = [ "hermes-agent.service" ]
-      ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
-  };
-  sops.secrets."hermes/garmin-tokens" = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
-    owner = config.services.hermes-agent.user;
-    group = config.services.hermes-agent.group;
-    mode = "0400";
-    restartUnits = [ "hermes-agent.service" ]
-      ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
-  };
-  sops.secrets."wireguard-netns/config" = {
-    sopsFile = "${secretsPath}/secrets/shared.yaml";
+  sops = {
+    secrets = {
+      "alertson-ip" = { };
+      "db-password" = { };
+      "fail2ban/ignoreip" = {
+        owner = "root";
+        mode = "0400";
+        restartUnits = [ "fail2ban.service" ];
+      };
+      "hermes/config-file" = {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+        owner = config.services.hermes-agent.user;
+        group = config.services.hermes-agent.group;
+        mode = "0400";
+        restartUnits = [ "hermes-agent.service" "hermes-backend.service" ];
+      };
+      "hermes/cron-jobs" = {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+        owner = "hermes";
+        group = "hermes";
+        mode = "0400";
+        restartUnits = [ "hermes-agent.service" ];
+      };
+      "hermes/env-file" = {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+        owner = "hermes";
+        group = "hermes";
+        mode = "0400";
+        restartUnits = [ "hermes-agent.service" ];
+      };
+      "hermes/garmin-tokens" = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+        owner = config.services.hermes-agent.user;
+        group = config.services.hermes-agent.group;
+        mode = "0400";
+        restartUnits = [ "hermes-agent.service" ]
+          ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
+      };
+      "hermes/providers" = {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+        owner = config.services.hermes-agent.user;
+        group = config.services.hermes-agent.group;
+        mode = "0400";
+        restartUnits = [ "hermes-agent.service" ]
+          ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
+      };
+      "hermes/skills" = {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+        owner = config.services.hermes-agent.user;
+        group = config.services.hermes-agent.group;
+        mode = "0400";
+        restartUnits = [ "hermes-agent.service" ]
+          ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
+      };
+      "homepage/env-file" = {
+        restartUnits = [ "homepage-dashboard.service" ];
+      };
+      "keycloak/db-password" = { };
+      "keycloak/oauth2-proxy-env-file" = { };
+      "matrix/mas/encryption" = { };
+      "matrix/mas/signing-key-ec-1" = { };
+      "matrix/mas/signing-key-ec-2" = { };
+      "matrix/mas/signing-key-ec-3" = { };
+      "matrix/mas/signing-key-rsa" = { };
+      "matrix/mas/synapse-shared-secret" = {
+        owner = "matrix-synapse";
+      };
+      "matrix/oidc-client-secret" = { };
+      "matrix/registration-secret" = {
+        owner = "matrix-synapse";
+      };
+      "navidrome/env-file" = { };
+      "nextcloud/admin-password" = { };
+      "nextcloud/db-password" = {
+        key = "db-password";
+        owner = "nextcloud";
+        group = "nextcloud";
+        mode = "0440";
+      };
+      "nextcloud/secrets" = { };
+      "ntfy/env-file" = { };
+      "slskd/env-file" = { };
+      "stirling-pdf/env-file" = {
+        restartUnits = [ "stirling-pdf.service" ];
+      };
+      "wireguard-netns/config" = {
+        sopsFile = "${secretsPath}/secrets/shared.yaml";
+      };
+    };
+    templates = {
+      "grafana-upstream.conf" = {
+        owner = "root";
+        group = config.services.nginx.group;
+        mode = "0440";
+        reloadUnits = [ "nginx.service" ];
+        content = ''
+          upstream grafana_backend {
+            server ${config.sops.placeholder."alertson-ip"}:3000;
+          }
+        '';
+      };
+      "slskd-health-allow.conf" = {
+        owner = "root";
+        group = config.services.nginx.group;
+        mode = "0440";
+        reloadUnits = [ "nginx.service" ];
+        content = ''
+          allow ${config.sops.placeholder."alertson-ip"};
+        '';
+      };
+    };
   };
 
   systemd.services = {
@@ -273,6 +288,7 @@ in
       seerr.enable = true;
       slskd = {
         enable = true;
+        healthCheckAllowFile = config.sops.templates."slskd-health-allow.conf".path;
         environmentFile = config.sops.secrets."slskd/env-file".path;
       };
       sonarr.enable = true;
