@@ -83,8 +83,7 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
-      # Revert to stable while 2.13.0 is not merged and 2.12.0 is broken https://github.com/NixOS/nixpkgs/pull/583128
-      package = pkgs.aurral;
+      package = pkgs.pkgs-unstable.aurral;
       inherit (cfg) port openFirewall directories environmentFile;
       environment = cfg.environment // {
         DOWNLOAD_FOLDER = cfg.downloadDir;
