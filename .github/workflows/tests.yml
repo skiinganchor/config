@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: cachix/install-nix-action@v31
+      - uses: cachix/install-nix-action@v32
       - name: Install devenv.sh
         run: nix profile add nixpkgs#devenv
       - name: Output devenv version
@@ -40,7 +40,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v7
 
-      - uses: cachix/install-nix-action@v31
+      - uses: cachix/install-nix-action@v32
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
