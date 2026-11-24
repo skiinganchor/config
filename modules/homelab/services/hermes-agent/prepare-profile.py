@@ -33,22 +33,6 @@ def hermes_state_dir(path):
     private_dir(path)
 
 
-def migrate_profile_home(home, legacy_home):
-    if legacy_home == home:
-        return
-    private_dir(home.parent)
-    if legacy_home.is_symlink():
-        if legacy_home.readlink() == home and home.is_dir() and not home.is_symlink():
-            return
-        raise ValueError("Unexpected legacy profile link")
-    if legacy_home.exists():
-        if home.exists() or home.is_symlink() or not legacy_home.is_dir():
-            raise ValueError("Cannot migrate conflicting Hermes profile directories")
-        legacy_home.rename(home)
-    private_dir(home)
-    legacy_home.symlink_to(home, target_is_directory=True)
-
-
 def regular_bytes(path):
     if path.is_symlink():
         raise ValueError("Unexpected state symlink")
@@ -246,6 +230,8 @@ def prepare(args):
     home = Path(os.environ["HERMES_HOME"])
     state_directory = args.state_directory or home.parent
     args.phase = "opening profile state"
+    if home != state_directory / ".hermes":
+        private_dir(home.parent)
     private_dir(home)
     lock = home / ".profile-prepare.lock"
     with os.fdopen(os.open(lock, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600), "r+b") as handle:
@@ -280,7 +266,7 @@ def prepare(args):
             config_data = safe_dump(config, sort_keys=False).encode()
 
         cron = None
-        if args.cron:
+        if args.reconcile_cron or args.cron:
             import reconcile_cron
 
             cron = reconcile_cron.read_declarations(args.cron)
@@ -308,27 +294,19 @@ def prepare(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--state-directory", type=Path)
-    parser.add_argument("--migrate-only", action="store_true")
+    parser.add_argument("--reconcile-cron", action="store_true")
     for name in ("config", "env"):
-        parser.add_argument(f"--{name}", type=Path)
+        parser.add_argument(f"--{name}", type=Path, required=True)
     for name in ("auth", "garmin", "skills-base64", "cron", "legacyProviders", "legacySkills", "model"):
         parser.add_argument(f"--{name}", type=Path)
     args = parser.parse_args()
-    if args.migrate_only and args.state_directory is None:
-        parser.error("--migrate-only requires --state-directory")
-    if not args.migrate_only and (args.config is None or args.env is None):
-        parser.error("preparation requires --config and --env")
     os.umask(0o077)
     logging.disable(logging.CRITICAL)
     home = Path(os.environ["HERMES_HOME"])
     args.phase = "loading preparation dependencies"
     try:
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            if args.migrate_only:
-                args.phase = "moving the legacy profile home"
-                migrate_profile_home(home, args.state_directory / ".hermes")
-            else:
-                prepare(args)
+            prepare(args)
     except Exception as exc:
         detail = errno.errorcode.get(exc.errno) if isinstance(exc, OSError) else None
         print(f"Hermes profile {home}: failed while {args.phase} ({detail or type(exc).__name__}).",

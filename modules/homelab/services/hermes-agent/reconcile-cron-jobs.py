@@ -13,7 +13,7 @@ def read_declarations(source):
     from cron.job_definition import JOB_DEFINITION_FIELDS
     from cron.lifecycle_guard import check_gateway_lifecycle
 
-    value = json.loads(source.read_bytes())
+    value = json.loads(source.read_bytes()) if source is not None else {"jobs": []}
     legacy = isinstance(value, list)
     declarations = value if legacy else value["jobs"]
     if not isinstance(declarations, list):

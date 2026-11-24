@@ -76,24 +76,17 @@ class ProfilesTest(unittest.TestCase):
         self.run_profile(roots[0], ok=False)
         self.assertIn("synthetic-rotated", one.read_text())
 
-    def test_migrated_profile_is_discoverable_from_default(self):
+    def test_named_profile_is_discoverable_from_default(self):
         default = self.profile()
         named = self.profile()
         self.run_profile(default)
-        self.run_profile(named)
-        legacy_home = named / ".hermes"
-        (legacy_home / "sessions" / "existing").write_text("preserved")
         profile_home = default / ".hermes" / "profiles" / "fixture"
-        env = {**self.environment(named), "HERMES_HOME": str(profile_home)}
-        for command in (
-            [sys.executable, "-B", str(self.scripts / "prepare.py"),
-             "--migrate-only", "--state-directory", str(named)],
+        result = subprocess.run(
             self.command(named, "--state-directory", named),
-        ):
-            result = subprocess.run(command, env=env, capture_output=True, text=True, timeout=30)
-            self.assertEqual((result.returncode, result.stderr), (0, ""))
-        self.assertEqual(legacy_home.readlink(), profile_home)
-        self.assertEqual((profile_home / "sessions" / "existing").read_text(), "preserved")
+            env={**self.environment(named), "HERMES_HOME": str(profile_home)},
+            capture_output=True, text=True, timeout=30,
+        )
+        self.assertEqual((result.returncode, result.stderr), (0, ""))
         result = subprocess.run(
             [sys.executable, "-B", "-c", "from hermes_cli.profiles import list_profile_names; "
              "assert list_profile_names() == ['default', 'fixture']"],
@@ -207,8 +200,9 @@ class ProfilesTest(unittest.TestCase):
         unchanged = store.stat().st_ino
         self.run_profile(root, "--cron", source)
         self.assertEqual(store.stat().st_ino, unchanged)
-        source.write_text('{"jobs": []}')
-        self.run_profile(root, "--cron", source)
+        self.run_profile(root)
+        self.assertEqual(store.stat().st_ino, unchanged)
+        self.run_profile(root, "--reconcile-cron")
         self.assertEqual(json.loads(store.read_text())["jobs"], [unmanaged])
 
     def test_legacy_inputs_and_skill_migration(self):

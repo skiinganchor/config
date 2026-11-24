@@ -12,7 +12,7 @@ The separate [PR #141957](https://github.com/NousResearch/hermes-agent/pull/1419
 
 ## Configure a host
 
-Set `enable`, `addToSystemPackages`, and `backend` under `homelab.services.hermes-agent` in the machine module. Point `profilesFile` to its SOPS-encrypted YAML file in `config-private`. The backend uses the only profile when there is one. With several profiles, the backend uses the reserved default profile. The shared gateway and dashboard discover named profiles under `/var/lib/hermes/.hermes/profiles`. The services share the `hermes` account, so dashboard access covers every profile. Existing named profile homes move into the native layout at service startup. Their old paths remain as links.
+Set `enable`, `addToSystemPackages`, and `backend` under `homelab.services.hermes-agent` in the machine module. Point `profilesFile` to its SOPS-encrypted YAML file in `config-private`. The backend uses the only profile when there is one. With several profiles, the backend uses the reserved default profile. The shared gateway and dashboard discover named profiles under `/var/lib/hermes/.hermes/profiles`. The services share the `hermes` account, so dashboard access covers every profile.
 
 In the SOPS editor, put the profile records under `hermes` → `profiles` and use the chosen profile ID as the key for each record. Nix reads the keys of the encrypted YAML to generate the account, systemd units, and SOPS entries. sops-nix decrypts the individual values at activation. Keep service switches, listener addresses, and ports in Nix.
 
@@ -95,7 +95,7 @@ Set the private `cron` value to a JSON string with a native `jobs` list. Keep ID
 }
 ```
 
-The gateway updates managed definitions using the Hermes cron store and lock. Unchanged schedules retain their next run and existing jobs keep their runtime IDs and history. `enabled` is an optional declaration override. Omit it to preserve an existing pause. Existing interactive jobs remain in the store. To remove all managed definitions, apply `{"jobs": []}` before removing the key. Jobs can pin a provider or inherit `cron.model` and `cron.model_provider` from `config.yaml`, with the main profile model as the default. The gateway account has lingering enabled for Hermes's restart-safe cron workers. [Hermes cron](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)
+The gateway updates managed definitions using the Hermes cron store and lock. Unchanged schedules retain their next run and existing jobs keep their runtime IDs and history. `enabled` is an optional declaration override. Omit it to preserve an existing pause. Existing interactive jobs remain in the store. Omit the `cron` field or set it to `{"jobs": []}` to remove all managed jobs on the next gateway start. Jobs can pin a provider or inherit `cron.model` and `cron.model_provider` from `config.yaml`, with the main profile model as the default. The gateway account has lingering enabled for Hermes's restart-safe cron workers. [Hermes cron](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)
 
 ## Example with a shared model
 

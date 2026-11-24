@@ -105,6 +105,7 @@ let
     [ "--config" (secretPath name "config") "--env" (secretPath name "env") ]
     ++ lib.concatMap (key: lib.optionals (builtins.hasAttr key profile.secretKeys) [ "--${key}" (secretPath name key) ])
       ([ "auth" "garmin" "legacyProviders" "legacySkills" "model" ] ++ lib.optional isGateway "cron")
+    ++ lib.optional isGateway "--reconcile-cron"
     ++ lib.optionals (profile.secretKeys ? skills) [ "--skills-base64" (secretPath name "skills") ];
   # Keep imports together in the store so the single entry point can load the
   # compatibility adapter while a profile still uses legacy inputs.
@@ -115,32 +116,6 @@ let
     cp ${./reconcile-skills.py} "$out/legacy_skills.py"
   '';
   stateDirectories = map (profile: profile.stateDirectory) (builtins.attrValues profiles);
-  legacyGateways = map (name: "${gateway name}.service") (lib.remove backendProfile names);
-  layoutDependency = lib.optional (legacyGateways != [ ]) "hermes-profile-layout.service";
-  layoutService = {
-    description = "Migrate Hermes profile directories";
-    conflicts = legacyGateways;
-    after = legacyGateways;
-    serviceConfig = {
-      Type = "oneshot";
-      User = account;
-      Group = account;
-      StateDirectory = stateDirectories;
-      StateDirectoryMode = "0700";
-      UMask = "0077";
-      NoNewPrivileges = true;
-    };
-    # ProtectSystem in the consumers mounts the state paths separately, which
-    # prevents rename between them. Migrate as the service user without those mounts.
-    script = lib.concatMapStringsSep "\n"
-      (name:
-        let profile = profiles.${name}; in ''
-          HERMES_HOME=${lib.escapeShellArg (profileHome name profile)} \
-            ${cfg.package.hermesVenv}/bin/python3 ${prepare}/prepare-profile.py \
-            --migrate-only --state-directory ${lib.escapeShellArg (state profile)}
-        '')
-      (lib.remove backendProfile names);
-  };
   prepareProfiles = isGateway: pkgs.writeShellScript "hermes-prepare-profiles" ''
     set -eu
     exec 9>${state profiles.${backendProfile}}/.profile-layout.lock
@@ -165,12 +140,10 @@ let
       description = "Hermes ${if isGateway then "gateway" else "backend"} (${name})";
       wantedBy = [ "multi-user.target" ];
       wants = [ "network-online.target" ] ++ lib.optional isGateway "linger-users.service";
-      requires = layoutDependency ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
+      requires = lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
       after = [ "network-online.target" ] ++ lib.optional isGateway "linger-users.service"
-        ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service"
-        ++ layoutDependency ++ legacyGateways;
+        ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
       environment = profileEnvironment name profile;
-      conflicts = legacyGateways;
       path = runtimePath profile;
       preStart = ''
         ${prepareProfiles isGateway}
@@ -278,9 +251,7 @@ in
     users.groups.${account} = { };
     users.users.${account} = profileUser;
     sops.secrets = lib.concatMapAttrs secrets profiles;
-    systemd.services = lib.concatMapAttrs profileUnits profiles // lib.optionalAttrs (layoutDependency != [ ]) {
-      hermes-profile-layout = layoutService;
-    };
+    systemd.services = lib.concatMapAttrs profileUnits profiles;
     environment.systemPackages = lib.optionals cfg.addToSystemPackages (lib.mapAttrsToList profileCli profiles);
     assertions = [
       {
