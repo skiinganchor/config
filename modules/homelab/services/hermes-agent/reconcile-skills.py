@@ -140,7 +140,7 @@ def reconcile(source, home):
             target = skills / category
             if target.is_symlink():
                 generation = Path(os.readlink(target))
-                if (generation.parent != store
+                if (generation.parent.resolve() != store.resolve()
                         or not generation.name.startswith("generation-")
                         or generation.is_symlink()):
                     raise ValueError("Unexpected namespace target")

@@ -41,27 +41,31 @@ let
     else null;
   profiles = lib.mapAttrs
     (name: fields: {
-      stateDirectory = account name;
-      inherit (cfg) gateway garmin;
+      stateDirectory = "hermes${suffix name}";
+      inherit (cfg) garmin;
       backend = cfg.backend // lib.optionalAttrs (name != backendProfile) { mode = "none"; };
       secretKeys = lib.mapAttrs (key: _: "hermes/profiles/${name}/${key}") fields
         // lib.optionalAttrs (profileData ? default.model) { model = "hermes/profiles/default/model"; };
     })
     profileData;
   suffix = name: lib.optionalString (name != "default") "-${name}";
-  account = name: "hermes${suffix name}";
+  account = "hermes";
   gateway = name: "hermes-agent${suffix name}";
   backend = name: "hermes-backend${suffix name}";
-  units = name: profile:
-    lib.optional profile.gateway.enable (gateway name)
-    ++ lib.optional (profile.backend.mode != "none") (backend name);
+  units = lib.optional cfg.gateway.enable (gateway backendProfile)
+    ++ lib.optional (cfg.backend.mode != "none") (backend backendProfile);
   secretName = name: key: "hermes-profiles/${name}/${key}";
   secretPath = name: key: config.sops.secrets.${secretName name key}.path;
   hermes = "${cfg.package}/bin/hermes";
   garminLauncher = command: pkgs.writeShellScriptBin command ''
     set -eu
     umask 077
-    export GARMINTOKENS="''${HERMES_HOME:?Set HERMES_HOME}/../.garminconnect"
+    case "''${HERMES_HOME:?Set HERMES_HOME}" in
+      /var/lib/hermes/.hermes/profiles/*)
+        export GARMINTOKENS="/var/lib/hermes-''${HERMES_HOME##*/}/.garminconnect"
+        ;;
+      *) export GARMINTOKENS="$HERMES_HOME/../.garminconnect" ;;
+    esac
     export PATH=${lib.makeBinPath [ pkgs.git ]}:"$PATH"
     exec ${pkgs.uv}/bin/uvx --python ${pkgs.python312}/bin/python3 \
       --from git+https://github.com/Taxuspt/garmin_mcp@202913fde53c9d15890d661fc9748dc6d0d5af52 ${command} "$@"
@@ -70,20 +74,23 @@ let
   runtimePath = profile: [ cfg.package pkgs.bash pkgs.coreutils pkgs.git pkgs.systemd ]
     ++ lib.optionals profile.garmin.enable garminPackages;
   state = profile: "/var/lib/${profile.stateDirectory}";
-  profileEnvironment = profile: {
+  profileHome = name: profile:
+    if name == "default" || !(profileData ? default) then "${state profile}/.hermes"
+    else "/var/lib/hermes/.hermes/profiles/${name}";
+  profileEnvironment = name: profile: {
     HOME = state profile;
-    HERMES_HOME = "${state profile}/.hermes";
+    HERMES_HOME = profileHome name profile;
     HERMES_MANAGED = "NixOS";
   };
   secrets = name: profile:
     let
       common = key: {
-        owner = account name;
-        group = account name;
+        owner = account;
+        group = account;
         mode = "0400";
         restartUnits = map (unit: "${unit}.service") (
-          if key == "cron" then lib.optional profile.gateway.enable (gateway name)
-          else units name profile
+          if key == "cron" then lib.optional cfg.gateway.enable (gateway backendProfile)
+          else units
         );
       };
     in
@@ -107,6 +114,44 @@ let
     cp ${./reconcile-cron-jobs.py} "$out/reconcile_cron.py"
     cp ${./reconcile-skills.py} "$out/legacy_skills.py"
   '';
+  stateDirectories = map (profile: profile.stateDirectory) (builtins.attrValues profiles);
+  legacyGateways = map (name: "${gateway name}.service") (lib.remove backendProfile names);
+  layoutDependency = lib.optional (legacyGateways != [ ]) "hermes-profile-layout.service";
+  layoutService = {
+    description = "Migrate Hermes profile directories";
+    conflicts = legacyGateways;
+    after = legacyGateways;
+    serviceConfig = {
+      Type = "oneshot";
+      User = account;
+      Group = account;
+      StateDirectory = stateDirectories;
+      StateDirectoryMode = "0700";
+      UMask = "0077";
+      NoNewPrivileges = true;
+    };
+    # ProtectSystem in the consumers mounts the state paths separately, which
+    # prevents rename between them. Migrate as the service user without those mounts.
+    script = lib.concatMapStringsSep "\n"
+      (name:
+        let profile = profiles.${name}; in ''
+          HERMES_HOME=${lib.escapeShellArg (profileHome name profile)} \
+            ${cfg.package.hermesVenv}/bin/python3 ${prepare}/prepare-profile.py \
+            --migrate-only --state-directory ${lib.escapeShellArg (state profile)}
+        '')
+      (lib.remove backendProfile names);
+  };
+  prepareProfiles = isGateway: pkgs.writeShellScript "hermes-prepare-profiles" ''
+    set -eu
+    exec 9>${state profiles.${backendProfile}}/.profile-layout.lock
+    ${pkgs.util-linux}/bin/flock 9
+    ${lib.concatMapStringsSep "\n" (name:
+      let profile = profiles.${name}; in ''
+        HOME=${lib.escapeShellArg (state profile)} HERMES_HOME=${lib.escapeShellArg (profileHome name profile)} \
+          ${cfg.package.hermesVenv}/bin/python3 ${prepare}/prepare-profile.py \
+          ${lib.escapeShellArgs ([ "--state-directory" (state profile) ] ++ prepareArgs name profile isGateway)}
+      '') ([ backendProfile ] ++ lib.remove backendProfile names)}
+  '';
   service = name: profile: isGateway: args:
     let
       unit = if isGateway then gateway name else backend name;
@@ -120,13 +165,15 @@ let
       description = "Hermes ${if isGateway then "gateway" else "backend"} (${name})";
       wantedBy = [ "multi-user.target" ];
       wants = [ "network-online.target" ] ++ lib.optional isGateway "linger-users.service";
-      requires = lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
+      requires = layoutDependency ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
       after = [ "network-online.target" ] ++ lib.optional isGateway "linger-users.service"
-        ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
-      environment = profileEnvironment profile;
+        ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service"
+        ++ layoutDependency ++ legacyGateways;
+      environment = profileEnvironment name profile;
+      conflicts = legacyGateways;
       path = runtimePath profile;
       preStart = ''
-        ${cfg.package.hermesVenv}/bin/python3 ${prepare}/prepare-profile.py ${lib.escapeShellArgs (prepareArgs name profile isGateway)}
+        ${prepareProfiles isGateway}
       '' + lib.optionalString isGateway ''
         for _ in $(seq 1 50); do
           [ -S "/run/user/$(id -u)/bus" ] && exit 0
@@ -135,9 +182,9 @@ let
         echo "Hermes gateway found no user bus for restart-safe cron dispatch" >&2
       '';
       serviceConfig = {
-        User = account name;
-        Group = account name;
-        StateDirectory = profile.stateDirectory;
+        User = account;
+        Group = account;
+        StateDirectory = stateDirectories;
         StateDirectoryMode = "0700";
         UMask = "0077";
         ExecStart = start;
@@ -150,15 +197,15 @@ let
         PrivateTmp = true;
       };
     };
-  profileUser = name: profile: {
+  profileUser = {
     isSystemUser = true;
-    group = account name;
-    home = state profile;
+    group = account;
+    home = "/var/lib/hermes";
     shell = pkgs.bashInteractive;
-    linger = profile.gateway.enable;
-    packages = lib.optionals profile.garmin.enable garminPackages;
+    linger = cfg.gateway.enable;
+    packages = lib.optionals cfg.garmin.enable garminPackages;
   };
-  profileUnits = name: profile: lib.optionalAttrs profile.gateway.enable
+  profileUnits = name: profile: lib.optionalAttrs (name == backendProfile && cfg.gateway.enable)
     {
       ${gateway name} = service name profile true [ "gateway" ];
     } // lib.optionalAttrs (profile.backend.mode != "none") {
@@ -175,14 +222,14 @@ let
     pkgs.writeShellScriptBin "hermes${suffix name}" ''
       set -eu
       umask 077
-      if [ "$(id -un)" != ${lib.escapeShellArg (account name)} ]; then
+      if [ "$(id -un)" != ${lib.escapeShellArg (account)} ]; then
         if [ "$(id -u)" != 0 ]; then
           echo "Run sudo hermes${suffix name} to use this system profile." >&2
           exit 1
         fi
-        exec ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg (account name)} -- "$0" "$@"
+        exec ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg (account)} -- "$0" "$@"
       fi
-      export ${lib.escapeShellArgs (lib.mapAttrsToList (key: value: "${key}=${value}") (profileEnvironment profile))}
+      export ${lib.escapeShellArgs (lib.mapAttrsToList (key: value: "${key}=${value}") (profileEnvironment name profile))}
       export PATH=${lib.makeBinPath (runtimePath profile)}:"$PATH"
       cd ${lib.escapeShellArg "${state profile}/workspace"}
       exec ${hermes} "$@"
@@ -201,7 +248,7 @@ in
       type = types.str;
       description = "Absolute path to the SOPS YAML file containing hermes.profiles.";
     };
-    gateway.enable = mkEnableOption "the Hermes gateway for each profile" // { default = true; };
+    gateway.enable = mkEnableOption "the shared Hermes gateway" // { default = true; };
     garmin.enable = mkEnableOption "the pinned Garmin MCP launcher and login helper";
     backend = {
       mode = mkOption {
@@ -222,16 +269,18 @@ in
     };
     monitoredServices = mkOption {
       type = types.listOf types.str;
-      default = lib.concatLists (lib.mapAttrsToList units profiles);
+      default = lib.optionals (backendProfile != null) units;
       description = "Hermes units shown in the MOTD.";
     };
   };
 
   config = mkIf cfg.enable {
-    users.groups = lib.mapAttrs' (name: _: lib.nameValuePair (account name) { }) profiles;
-    users.users = lib.mapAttrs' (name: profile: lib.nameValuePair (account name) (profileUser name profile)) profiles;
+    users.groups.${account} = { };
+    users.users.${account} = profileUser;
     sops.secrets = lib.concatMapAttrs secrets profiles;
-    systemd.services = lib.concatMapAttrs profileUnits profiles;
+    systemd.services = lib.concatMapAttrs profileUnits profiles // lib.optionalAttrs (layoutDependency != [ ]) {
+      hermes-profile-layout = layoutService;
+    };
     environment.systemPackages = lib.optionals cfg.addToSystemPackages (lib.mapAttrsToList profileCli profiles);
     assertions = [
       {
@@ -239,13 +288,13 @@ in
         message = "The Hermes profile file must use an absolute path.";
       }
       {
-        assertion = cfg.backend.mode == "none" || backendProfile != null;
-        message = "The Hermes backend needs a primary profile. With multiple profiles, the default profile is primary.";
+        assertion = backendProfile != null;
+        message = "Multiple Hermes profiles require the default profile.";
       }
     ] ++ lib.concatLists (lib.mapAttrsToList
       (name: profile: [
         {
-          assertion = units name profile != [ ];
+          assertion = cfg.gateway.enable || cfg.backend.mode != "none";
           message = "Hermes profile ${name} must enable a gateway or a backend.";
         }
         {

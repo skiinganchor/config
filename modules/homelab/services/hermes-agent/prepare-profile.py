@@ -3,6 +3,7 @@
 import argparse
 import base64
 import contextlib
+import errno
 import fcntl
 import hashlib
 import io
@@ -30,6 +31,22 @@ def hermes_state_dir(path):
             raise ValueError("Unavailable state directory link")
         return
     private_dir(path)
+
+
+def migrate_profile_home(home, legacy_home):
+    if legacy_home == home:
+        return
+    private_dir(home.parent)
+    if legacy_home.is_symlink():
+        if legacy_home.readlink() == home and home.is_dir() and not home.is_symlink():
+            return
+        raise ValueError("Unexpected legacy profile link")
+    if legacy_home.exists():
+        if home.exists() or home.is_symlink() or not legacy_home.is_dir():
+            raise ValueError("Cannot migrate conflicting Hermes profile directories")
+        legacy_home.rename(home)
+    private_dir(home)
+    legacy_home.symlink_to(home, target_is_directory=True)
 
 
 def regular_bytes(path):
@@ -166,7 +183,7 @@ def skill_archive(home, data):
     previous = None
     if link.is_symlink():
         previous = Path(os.readlink(link))
-        if previous.parent != store or not re.fullmatch(r"[0-9a-f]{64}", previous.name) or previous.is_symlink():
+        if previous.parent.resolve() != store.resolve() or not re.fullmatch(r"[0-9a-f]{64}", previous.name) or previous.is_symlink():
             raise ValueError("Unexpected managed skills target")
     elif link.exists():
         raise ValueError("Managed skills path already in use")
@@ -227,10 +244,13 @@ def prepare(args):
     from hermes_yaml import safe_dump, safe_load
 
     home = Path(os.environ["HERMES_HOME"])
+    state_directory = args.state_directory or home.parent
+    args.phase = "opening profile state"
     private_dir(home)
     lock = home / ".profile-prepare.lock"
     with os.fdopen(os.open(lock, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600), "r+b") as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
+        args.phase = "reading and validating private inputs"
         config_data = args.config.read_bytes()
         config = safe_load(config_data)
         env_data = args.env.read_bytes()
@@ -264,17 +284,19 @@ def prepare(args):
             import reconcile_cron
 
             cron = reconcile_cron.read_declarations(args.cron)
+        args.phase = "writing profile state"
         for directory in ("cron", "sessions", "logs", "memories"):
             hermes_state_dir(home / directory)
-        private_dir(home.parent / "workspace")
+        private_dir(state_directory / "workspace")
         publish_skills(home, archive, args.legacySkills)
         seed_auth(home, auth_data, codex)
         if garmin_data is not None:
-            seed_garmin(home.parent / ".garminconnect", garmin_data)
+            seed_garmin(state_directory / ".garminconnect", garmin_data)
         write_private(home / ".managed", b"nixos\n")
         write_private(home / ".env", env_data)
         write_private(home / "config.yaml", config_data)
         if cron is not None:
+            args.phase = "reconciling cron jobs"
             from hermes_cli.env_loader import load_hermes_dotenv
             from hermes_time import reset_cache
 
@@ -285,18 +307,32 @@ def prepare(args):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--state-directory", type=Path)
+    parser.add_argument("--migrate-only", action="store_true")
     for name in ("config", "env"):
-        parser.add_argument(f"--{name}", type=Path, required=True)
+        parser.add_argument(f"--{name}", type=Path)
     for name in ("auth", "garmin", "skills-base64", "cron", "legacyProviders", "legacySkills", "model"):
         parser.add_argument(f"--{name}", type=Path)
     args = parser.parse_args()
+    if args.migrate_only and args.state_directory is None:
+        parser.error("--migrate-only requires --state-directory")
+    if not args.migrate_only and (args.config is None or args.env is None):
+        parser.error("preparation requires --config and --env")
     os.umask(0o077)
     logging.disable(logging.CRITICAL)
+    home = Path(os.environ["HERMES_HOME"])
+    args.phase = "loading preparation dependencies"
     try:
         with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            prepare(args)
-    except Exception:
-        print("Hermes profile preparation failed. Check its private inputs and state.", file=sys.stderr)
+            if args.migrate_only:
+                args.phase = "moving the legacy profile home"
+                migrate_profile_home(home, args.state_directory / ".hermes")
+            else:
+                prepare(args)
+    except Exception as exc:
+        detail = errno.errorcode.get(exc.errno) if isinstance(exc, OSError) else None
+        print(f"Hermes profile {home}: failed while {args.phase} ({detail or type(exc).__name__}).",
+              file=sys.stderr)
         return 1
     return 0
 

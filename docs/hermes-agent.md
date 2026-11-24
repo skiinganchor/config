@@ -1,6 +1,6 @@
 # Hermes Agent profiles
 
-The Hermes input tracks the upstream default branch. NixOS manages accounts, services, and runtime dependencies. The private `my-secrets` flake supplies encrypted Hermes files. A profile has its own account, home, workspace, credentials, conversations, and scheduler state.
+The Hermes input tracks the upstream default branch. NixOS manages the service account, services, and runtime dependencies. The private `my-secrets` flake supplies encrypted Hermes files. A profile has its own Hermes home, workspace, credentials, conversations, and scheduler state.
 
 ## Update Hermes
 
@@ -12,9 +12,9 @@ The separate [PR #141957](https://github.com/NousResearch/hermes-agent/pull/1419
 
 ## Configure a host
 
-Set `enable`, `addToSystemPackages`, and `backend` under `homelab.services.hermes-agent` in the machine module. Point `profilesFile` to its SOPS-encrypted YAML file in `config-private`. The backend uses the only profile when there is one. With several profiles, the backend uses the reserved default profile. Other profiles get independent gateways and state.
+Set `enable`, `addToSystemPackages`, and `backend` under `homelab.services.hermes-agent` in the machine module. Point `profilesFile` to its SOPS-encrypted YAML file in `config-private`. The backend uses the only profile when there is one. With several profiles, the backend uses the reserved default profile. The shared gateway and dashboard discover named profiles under `/var/lib/hermes/.hermes/profiles`. The services share the `hermes` account, so dashboard access covers every profile. Existing named profile homes move into the native layout at service startup. Their old paths remain as links.
 
-In the SOPS editor, put the profile records under `hermes` → `profiles` and use the chosen profile ID as the key for each record. Nix reads the keys of the encrypted YAML to generate the accounts, systemd units, and SOPS entries. sops-nix decrypts the individual values at activation. Keep service switches, listener addresses, and ports in Nix.
+In the SOPS editor, put the profile records under `hermes` → `profiles` and use the chosen profile ID as the key for each record. Nix reads the keys of the encrypted YAML to generate the account, systemd units, and SOPS entries. sops-nix decrypts the individual values at activation. Keep service switches, listener addresses, and ports in Nix.
 
 | Field | Value |
 | --- | --- |
