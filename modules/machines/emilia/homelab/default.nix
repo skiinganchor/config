@@ -21,51 +21,6 @@ in
         mode = "0400";
         restartUnits = [ "fail2ban.service" ];
       };
-      "hermes/config-file" = {
-        sopsFile = "${secretsPath}/secrets/shared.yaml";
-        owner = config.services.hermes-agent.user;
-        group = config.services.hermes-agent.group;
-        mode = "0400";
-        restartUnits = [ "hermes-agent.service" "hermes-backend.service" ];
-      };
-      "hermes/cron-jobs" = {
-        sopsFile = "${secretsPath}/secrets/shared.yaml";
-        owner = "hermes";
-        group = "hermes";
-        mode = "0400";
-        restartUnits = [ "hermes-agent.service" ];
-      };
-      "hermes/env-file" = {
-        sopsFile = "${secretsPath}/secrets/shared.yaml";
-        owner = "hermes";
-        group = "hermes";
-        mode = "0400";
-        restartUnits = [ "hermes-agent.service" ];
-      };
-      "hermes/garmin-tokens" = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable {
-        sopsFile = "${secretsPath}/secrets/shared.yaml";
-        owner = config.services.hermes-agent.user;
-        group = config.services.hermes-agent.group;
-        mode = "0400";
-        restartUnits = [ "hermes-agent.service" ]
-          ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
-      };
-      "hermes/providers" = {
-        sopsFile = "${secretsPath}/secrets/shared.yaml";
-        owner = config.services.hermes-agent.user;
-        group = config.services.hermes-agent.group;
-        mode = "0400";
-        restartUnits = [ "hermes-agent.service" ]
-          ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
-      };
-      "hermes/skills" = {
-        sopsFile = "${secretsPath}/secrets/shared.yaml";
-        owner = config.services.hermes-agent.user;
-        group = config.services.hermes-agent.group;
-        mode = "0400";
-        restartUnits = [ "hermes-agent.service" ]
-          ++ lib.optionals (config.homelab.services.hermes-agent.backend.mode != "none") [ "hermes-backend.service" ];
-      };
       "homepage/env-file" = {
         restartUnits = [ "homepage-dashboard.service" ];
       };
@@ -192,23 +147,14 @@ in
       fail2ban.enable = true;
       hermes-agent = {
         enable = true;
+        addToSystemPackages = true;
+        profilesFile = "${secretsPath}/secrets/hermes-emilia.yaml";
         backend = {
           mode = "dashboard";
           host = "0.0.0.0";
+          port = 9119;
         };
-        configFile = config.sops.secrets."hermes/config-file".path;
-        addToSystemPackages = true;
-        environmentFile = config.sops.secrets."hermes/env-file".path;
-        cronJobsFile = config.sops.secrets."hermes/cron-jobs".path;
-        providersFile = config.sops.secrets."hermes/providers".path;
-        skillsFile = config.sops.secrets."hermes/skills".path;
-        # Optional private declarative skills: docs/hermes-skills.md.
-        mcp.nextcloud.enable = true;
-        # Optional MCP integrations; setup and credentials: docs/hermes-mcp.md.
-        mcp.garmin.enable = true;
-        mcp.garmin.tokensFile = lib.mkIf config.homelab.services.hermes-agent.mcp.garmin.enable
-          config.sops.secrets."hermes/garmin-tokens".path;
-        # Provider selection, models and authentication: docs/hermes-providers.md.
+        garmin.enable = true;
       };
       homeassistant.enable = true;
       homepage = {

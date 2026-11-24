@@ -22,8 +22,17 @@ jobs:
           pr-title: "chore(flake.lock): update"
           pr-labels: auto-merge
           token: "${{ secrets.GH_TOKEN_FOR_UPDATES }}"
+      - name: Check the proposed Hermes build
+        if: ${{ steps.update.outputs.pull-request-number != '' }}
+        env:
+          PR_NUMBER: ${{ steps.update.outputs.pull-request-number }}
+        run: |
+          git fetch origin "refs/pull/$PR_NUMBER/head"
+          git checkout --detach FETCH_HEAD
+          nix build --no-link .#checks.x86_64-linux.hermes-agent
       - name: Merge
-        run: gh pr merge --admin "${{ steps.update.outputs.pull-request-number }}" --rebase
+        run: gh pr merge --admin "$PR_NUMBER" --rebase --match-head-commit "$(git rev-parse HEAD)"
         env:
           GITHUB_TOKEN: ${{secrets.GH_TOKEN_FOR_UPDATES}}
+          PR_NUMBER: ${{ steps.update.outputs.pull-request-number }}
         if: ${{ steps.update.outputs.pull-request-number != '' }}

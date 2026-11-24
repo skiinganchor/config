@@ -123,7 +123,10 @@ class SkillsTest(unittest.TestCase):
             output, error = process.communicate(timeout=10)
             self.assertEqual((process.returncode, output, error), (0, "", ""))
         self.assertEqual((self.home / "skills/nixos/review/SKILL.md").read_text(), "Shared")
-        self.assertEqual(len(list((self.home / ".nixos-skills").glob("generation-*"))), 1)
+        store = self.home / ".nixos-skills"
+        generations = [path for path in store.glob("generation-*") if path.is_dir()]
+        self.assertEqual(len(generations), 1)
+        self.assertTrue((store / f"{generations[0].name}.skills.json").is_file())
 
 
 if __name__ == "__main__":

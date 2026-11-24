@@ -13,11 +13,7 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hermes-agent = {
-      # TODO: return to NousResearch/hermes-agent when https://github.com/NousResearch/hermes-agent/pull/141957 is merged
-      url = "github:staticdev/hermes-agent/fix/nix-runtime-dependency-health";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    hermes-agent.url = "github:NousResearch/hermes-agent";
     my-secrets = {
       url = "git+ssh://git@github.com/skiinganchor/config-private.git?ref=main&shallow=1";
       flake = false;
@@ -36,7 +32,6 @@
         defaultModules = [
           sops-nix.nixosModules.sops
           home-manager.nixosModules.home-manager
-          hermes-agent.nixosModules.default
           nixvim.nixosModules.nixvim
           # Keep the Navidrome module compatible with the master package on all hosts.
           # Disabled service definitions must also use options known to the module.
@@ -129,6 +124,29 @@
               ++ defaultModules;
             };
         };
+        checks.x86_64-linux.hermes-agent =
+          let
+            pkgs = import nixpkgs { system = "x86_64-linux"; };
+            package = hermes-agent.packages.x86_64-linux.default;
+            shortRev = builtins.substring 0 8 hermes-agent.rev;
+          in
+          pkgs.runCommand "hermes-agent-smoke-test" { } ''
+            export HOME="$TMPDIR/home"
+            export HERMES_HOME="$HOME/.hermes"
+            export HERMES_MANAGED=NixOS
+            mkdir -p "$HERMES_HOME"
+
+            ${package}/bin/hermes --version > version.log
+            grep -F ${shortRev} version.log
+
+            ${package}/bin/hermes update > update.log 2>&1 || true
+            cat update.log
+            grep -Fi 'managed by nixos' update.log
+
+            ${package.hermesVenv}/bin/python3 -B ${./modules/homelab/services/hermes-agent}/test-profiles.py
+            ${package.hermesVenv}/bin/python3 -B ${./modules/homelab/services/hermes-agent}/test-skills.py
+            touch "$out"
+          '';
         devShells = forAllSystems (
           system:
           let

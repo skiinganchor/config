@@ -1,337 +1,263 @@
 { config, hermes-agent, lib, pkgs, ... }:
 let
-  service = "hermes-agent";
-  cfg = config.homelab.services.${service};
-  reconcileProviders = ''
-    ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
-      ${./reconcile-providers.py} ${lib.escapeShellArg cfg.providersFile} ${lib.escapeShellArg (toString cfg.environmentFile)}
-  '';
-  # Upstream normalizes mcpServers into settings.mcp_servers, but configFile
-  # bypasses its generated settings file. Only overlay the MCP definitions.
-  mcpServers = config.services.hermes-agent.settings.mcp_servers or { };
-  mergeMcpConfig = cfg.configFile != null && mcpServers != { };
-  mcpConfig = pkgs.writeText "hermes-mcp-servers.json" (builtins.toJSON mcpServers);
-  mergeMcp = ''
-    ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
-      ${./merge-mcp-config.py} ${mcpConfig}
-  '';
-  garminArgs = [
-    "--python"
-    "${pkgs.python312}/bin/python3"
-    "--from"
-    "git+https://github.com/Taxuspt/garmin_mcp@${cfg.mcp.garmin.revision}"
-  ];
-  garminAuth = pkgs.writeShellScriptBin "hermes-garmin-auth" ''
+  inherit (lib) mkEnableOption mkIf mkOption types;
+  cfg = config.homelab.services.hermes-agent;
+  profileFields = [ "config" "env" "auth" "cron" "garmin" "skills" "legacyProviders" "legacySkills" ];
+  profileData =
+    if !cfg.enable then { }
+    else if !builtins.pathExists cfg.profilesFile then
+      throw "The locked config-private input is missing the Hermes profile file. Update the my-secrets input."
+    else
+      let
+        encryptedJson = pkgs.runCommand "hermes-encrypted-profiles.json" { nativeBuildInputs = [ pkgs.yq-go ]; } ''
+          yq -o=json '.' ${lib.escapeShellArg cfg.profilesFile} > "$out"
+        '';
+        parsed = builtins.tryEval (builtins.fromJSON (builtins.readFile encryptedJson));
+        document = parsed.value;
+        data = document.hermes.profiles or null;
+        validateProfile = name: fields:
+          if builtins.match "[a-z0-9]+(-[a-z0-9]+)*" name == null || builtins.stringLength name > 24 then
+            throw "Invalid Hermes profile name ${name}."
+          else if !builtins.isAttrs fields then
+            throw "Hermes profile ${name} must contain config and env fields; its value is empty or is not a mapping."
+          else if !(fields ? config) || !(fields ? env) then
+            throw "Hermes profile ${name} must contain both config and env fields."
+          else if !(lib.all
+            (key: (lib.elem key profileFields || (name == "default" && key == "model"))
+              && builtins.isString fields.${key}
+              && (lib.hasPrefix "ENC[AES256_GCM," fields.${key}
+              || (key == "env" && fields.${key} == "")))
+            (builtins.attrNames fields)) then
+            throw "Hermes profile ${name} contains an unsupported field or an unencrypted value."
+          else fields;
+      in
+      if !parsed.success || !(document ? sops.mac) || !builtins.isAttrs data || data == { } then
+        throw "The Hermes profile file must contain named, SOPS-encrypted profiles with config and env fields."
+      else lib.mapAttrs validateProfile data;
+  names = builtins.attrNames profileData;
+  backendProfile =
+    if profileData ? default then "default"
+    else if builtins.length names == 1 then builtins.head names
+    else null;
+  profiles = lib.mapAttrs
+    (name: fields: {
+      stateDirectory = account name;
+      inherit (cfg) gateway garmin;
+      backend = cfg.backend // lib.optionalAttrs (name != backendProfile) { mode = "none"; };
+      secretKeys = lib.mapAttrs (key: _: "hermes/profiles/${name}/${key}") fields
+        // lib.optionalAttrs (profileData ? default.model) { model = "hermes/profiles/default/model"; };
+    })
+    profileData;
+  suffix = name: lib.optionalString (name != "default") "-${name}";
+  account = name: "hermes${suffix name}";
+  gateway = name: "hermes-agent${suffix name}";
+  backend = name: "hermes-backend${suffix name}";
+  units = name: profile:
+    lib.optional profile.gateway.enable (gateway name)
+    ++ lib.optional (profile.backend.mode != "none") (backend name);
+  secretName = name: key: "hermes-profiles/${name}/${key}";
+  secretPath = name: key: config.sops.secrets.${secretName name key}.path;
+  hermes = "${cfg.package}/bin/hermes";
+  garminLauncher = command: pkgs.writeShellScriptBin command ''
     set -eu
-    umask 0077
-    export GARMINTOKENS=${lib.escapeShellArg "${cfg.stateDir}/.garminconnect"}
+    umask 077
+    export GARMINTOKENS="''${HERMES_HOME:?Set HERMES_HOME}/../.garminconnect"
     export PATH=${lib.makeBinPath [ pkgs.git ]}:"$PATH"
-    exec ${pkgs.uv}/bin/uvx ${lib.escapeShellArgs garminArgs} garmin-mcp-auth "$@"
+    exec ${pkgs.uv}/bin/uvx --python ${pkgs.python312}/bin/python3 \
+      --from git+https://github.com/Taxuspt/garmin_mcp@202913fde53c9d15890d661fc9748dc6d0d5af52 ${command} "$@"
   '';
-  garminTokenSetup = lib.optionalString (cfg.mcp.garmin.tokensFile != null) ''
-    ${pkgs.python3}/bin/python3 ${./reconcile-garmin-tokens.py} \
-      ${lib.escapeShellArg cfg.mcp.garmin.tokensFile} ${lib.escapeShellArg "${cfg.stateDir}/.garminconnect"}
+  garminPackages = [ (garminLauncher "garmin-mcp") (garminLauncher "garmin-mcp-auth") ];
+  runtimePath = profile: [ cfg.package pkgs.bash pkgs.coreutils pkgs.git pkgs.systemd ]
+    ++ lib.optionals profile.garmin.enable garminPackages;
+  state = profile: "/var/lib/${profile.stateDirectory}";
+  profileEnvironment = profile: {
+    HOME = state profile;
+    HERMES_HOME = "${state profile}/.hermes";
+    HERMES_MANAGED = "NixOS";
+  };
+  secrets = name: profile:
+    let
+      common = key: {
+        owner = account name;
+        group = account name;
+        mode = "0400";
+        restartUnits = map (unit: "${unit}.service") (
+          if key == "cron" then lib.optional profile.gateway.enable (gateway name)
+          else units name profile
+        );
+      };
+    in
+    lib.mapAttrs'
+      (key: value: lib.nameValuePair (secretName name key) (common key // {
+        key = value;
+        sopsFile = cfg.profilesFile;
+        format = "yaml";
+      }))
+      profile.secretKeys;
+  prepareArgs = name: profile: isGateway:
+    [ "--config" (secretPath name "config") "--env" (secretPath name "env") ]
+    ++ lib.concatMap (key: lib.optionals (builtins.hasAttr key profile.secretKeys) [ "--${key}" (secretPath name key) ])
+      ([ "auth" "garmin" "legacyProviders" "legacySkills" "model" ] ++ lib.optional isGateway "cron")
+    ++ lib.optionals (profile.secretKeys ? skills) [ "--skills-base64" (secretPath name "skills") ];
+  # Keep imports together in the store so the single entry point can load the
+  # compatibility adapter while a profile still uses legacy inputs.
+  prepare = pkgs.runCommand "hermes-profile-preparation" { } ''
+    mkdir -p "$out"
+    cp ${./prepare-profile.py} "$out/prepare-profile.py"
+    cp ${./reconcile-cron-jobs.py} "$out/reconcile_cron.py"
+    cp ${./reconcile-skills.py} "$out/legacy_skills.py"
   '';
+  service = name: profile: isGateway: args:
+    let
+      unit = if isGateway then gateway name else backend name;
+      start = pkgs.writeShellScript "${unit}-start" ''
+        set -eu
+        cd ${lib.escapeShellArg "${state profile}/workspace"}
+        exec ${lib.escapeShellArgs ([ hermes ] ++ args)} >> "$HERMES_HOME/logs/${unit}.service.log" 2>&1
+      '';
+    in
+    {
+      description = "Hermes ${if isGateway then "gateway" else "backend"} (${name})";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ] ++ lib.optional isGateway "linger-users.service";
+      requires = lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
+      after = [ "network-online.target" ] ++ lib.optional isGateway "linger-users.service"
+        ++ lib.optional config.sops.useSystemdActivation "sops-install-secrets.service";
+      environment = profileEnvironment profile;
+      path = runtimePath profile;
+      preStart = ''
+        ${cfg.package.hermesVenv}/bin/python3 ${prepare}/prepare-profile.py ${lib.escapeShellArgs (prepareArgs name profile isGateway)}
+      '' + lib.optionalString isGateway ''
+        for _ in $(seq 1 50); do
+          [ -S "/run/user/$(id -u)/bus" ] && exit 0
+          sleep 0.2
+        done
+        echo "Hermes gateway found no user bus for restart-safe cron dispatch" >&2
+      '';
+      serviceConfig = {
+        User = account name;
+        Group = account name;
+        StateDirectory = profile.stateDirectory;
+        StateDirectoryMode = "0700";
+        UMask = "0077";
+        ExecStart = start;
+        Restart = "on-failure";
+        RestartSec = "5s";
+        NoNewPrivileges = true;
+        LimitCORE = 0;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+      };
+    };
+  profileUser = name: profile: {
+    isSystemUser = true;
+    group = account name;
+    home = state profile;
+    shell = pkgs.bashInteractive;
+    linger = profile.gateway.enable;
+    packages = lib.optionals profile.garmin.enable garminPackages;
+  };
+  profileUnits = name: profile: lib.optionalAttrs profile.gateway.enable
+    {
+      ${gateway name} = service name profile true [ "gateway" ];
+    } // lib.optionalAttrs (profile.backend.mode != "none") {
+    ${backend name} = service name profile false [
+      profile.backend.mode
+      "--host"
+      profile.backend.host
+      "--port"
+      (toString profile.backend.port)
+      "--no-open"
+    ];
+  };
+  profileCli = name: profile:
+    pkgs.writeShellScriptBin "hermes${suffix name}" ''
+      set -eu
+      umask 077
+      if [ "$(id -un)" != ${lib.escapeShellArg (account name)} ]; then
+        if [ "$(id -u)" != 0 ]; then
+          echo "Run sudo hermes${suffix name} to use this system profile." >&2
+          exit 1
+        fi
+        exec ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg (account name)} -- "$0" "$@"
+      fi
+      export ${lib.escapeShellArgs (lib.mapAttrsToList (key: value: "${key}=${value}") (profileEnvironment profile))}
+      export PATH=${lib.makeBinPath (runtimePath profile)}:"$PATH"
+      cd ${lib.escapeShellArg "${state profile}/workspace"}
+      exec ${hermes} "$@"
+    '';
 in
 {
-  options.homelab.services.${service} = {
-    enable = lib.mkEnableOption service;
-
-    addToSystemPackages = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = ''
-        Add the hermes CLI to environment.systemPackages and export
-        HERMES_HOME system-wide (via environment.variables) so interactive
-        shells share state with the gateway service.
-      '';
-    };
-
-    # none is recommended to keep only configuration as code
-    backend = lib.mkOption {
-      type = lib.types.submodule {
-        options = {
-          mode = lib.mkOption {
-            type = lib.types.enum [ "none" "serve" "dashboard" ];
-            default = "none";
-          };
-
-          host = lib.mkOption {
-            type = lib.types.str;
-            default = "127.0.0.1";
-          };
-
-          port = lib.mkOption {
-            type = lib.types.port;
-            default = 9119;
-          };
-        };
-      };
-      default = { };
-      description = "Hermes API and dashboard backend configuration";
-    };
-
-    monitoredServices = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ];
-      description = "Systemd services to show in the MOTD status list";
-    };
-
-    package = lib.mkOption {
-      type = lib.types.package;
+  options.homelab.services.hermes-agent = {
+    enable = mkEnableOption "Hermes Agent profiles";
+    addToSystemPackages = mkEnableOption "profile-aware Hermes CLI launchers";
+    package = mkOption {
+      type = types.package;
       default = hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.default;
-      description = "Hermes Agent package to run";
+      description = "Hermes Agent package for all profiles on this machine.";
     };
-
-    stateDir = lib.mkOption {
-      type = lib.types.str;
-      default = "/var/lib/hermes";
-      description = "Persistent state directory for Hermes Agent";
+    profilesFile = mkOption {
+      type = types.str;
+      description = "Absolute path to the SOPS YAML file containing hermes.profiles.";
     };
-
-    environmentFile = lib.mkOption {
-      type = lib.types.path;
-      description = "Environment file containing Matrix and integration secrets; use providersFile for model providers";
-      example = lib.literalExpression ''
-        pkgs.writeText "hermes-env" '''
-          # Matrix configs
-          MATRIX_E2EE_MODE=required|optional|off
-          MATRIX_HOMESERVER=https://matrix.some.domain
-          MATRIX_ACCESS_TOKEN=sometoken
-          MATRIX_DEVICE_ID=someid
-          MATRIX_USER_ID=@hermes:your-server.org
-          # Security: restrict who can interact with the bot
-          MATRIX_ALLOWED_USERS=@alice:matrix.example.org
-          # Optional: restrict which rooms can trigger the bot
-          MATRIX_ALLOWED_ROOMS=!abc123:matrix.example.org
-          # Optional: by default, Hermes requires an @mention to respond
-          MATRIX_REQUIRE_MENTION=false
-        '''
-      '';
-    };
-
-    cronJobsFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      example = lib.literalExpression ''config.sops.secrets."hermes/cron-jobs".path'';
-      description = ''
-        Absolute runtime path to a JSON list of recurring jobs. Each entry has
-        a stable id, name, schedule, deliver (matrix:ROOM_ID), and prompt.
-        Use a sops-nix secret to keep all fields out of the Nix store.
-        Jobs are reconciled before gateway startup; an empty list removes
-        managed jobs while leaving jobs created interactively untouched.
-        See docs/hermes-cron-jobs.md for the schema and SOPS configuration.
-      '';
-    };
-
-    skillsFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      example = lib.literalExpression ''config.sops.secrets."hermes/skills".path'';
-      description = ''
-        Absolute runtime path to a private JSON list of skills. Each entry has
-        a name, category, and map of relative filenames to text contents.
-        Reconciled under skills/<category>/<name> before startup.
-        Use a sops-nix secret to keep contents out of the Nix store.
-        See docs/hermes-skills.md for the schema and SOPS configuration.
-      '';
-    };
-
-    mcp = {
-      nextcloud = {
-        enable = lib.mkEnableOption "the remote Nextcloud Context Agent MCP connection";
-        url = lib.mkOption {
-          type = lib.types.str;
-          default = "https://${config.homelab.services.nextcloud.url}/index.php/apps/app_api/proxy/context_agent/mcp/";
-          description = "Shared Context Agent endpoint; NEXTCLOUD_APP_PASSWORD is resolved from each Hermes profile's runtime environment.";
-        };
+    gateway.enable = mkEnableOption "the Hermes gateway for each profile" // { default = true; };
+    garmin.enable = mkEnableOption "the pinned Garmin MCP launcher and login helper";
+    backend = {
+      mode = mkOption {
+        type = types.enum [ "none" "serve" "dashboard" ];
+        default = "none";
+        description = "Hermes backend command for the primary profile.";
       };
-      garmin = {
-        enable = lib.mkEnableOption "Garmin Connect MCP";
-        tokensFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.str;
-          default = null;
-          example = lib.literalExpression ''config.sops.secrets."hermes/garmin-tokens".path'';
-          description = ''
-            Absolute runtime path to a secret containing garmin_tokens.json.
-            Seeds the writable Garmin token directory and applies changes to
-            the secret without overwriting runtime changes on every startup.
-            Use sops-nix to keep tokens out of the Nix store.
-          '';
-        };
-        revision = lib.mkOption {
-          type = lib.types.str;
-          default = "202913fde53c9d15890d661fc9748dc6d0d5af52";
-          description = "Taxuspt/garmin_mcp Git revision used for both MCP and interactive authentication.";
-        };
+      host = mkOption {
+        type = types.str;
+        default = "127.0.0.1";
+        description = "Hermes backend listen address.";
+      };
+      port = mkOption {
+        type = types.ints.between 1 65535;
+        default = 9119;
+        description = "Hermes backend listen port.";
       };
     };
-
-    providersFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      example = lib.literalExpression ''config.sops.secrets."hermes/providers".path'';
-      description = ''
-        Absolute runtime path to a private JSON list of providers and credentials.
-        Supports openai-codex, opencode-go and zai. The first entry selects the
-        default provider and model. Reconciled before gateway/backend startup;
-        also reconciled after activation installs config.yaml, even when the
-        services remain running, so configFile cannot erase the global model.
-        Codex token refreshes survive restarts until the declared tokens change.
-        See docs/hermes-providers.md for the schema and SOPS configuration.
-      '';
-    };
-
-    settings = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = { };
-      description = "Generic Hermes Agent settings passed to the upstream module";
-    };
-
-    configFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
-      default = null;
-      description = ''
-        Runtime path to a complete Hermes config.yaml. When set, this replaces
-        settings; use a SOPS secret path for private configuration. Nix MCP
-        definitions are merged into the runtime file after activation and
-        before native service startup, replacing entries with the same names.
-      '';
-      example = lib.literalExpression ''config.sops.secrets."hermes/config-file".path'';
+    monitoredServices = mkOption {
+      type = types.listOf types.str;
+      default = lib.concatLists (lib.mapAttrsToList units profiles);
+      description = "Hermes units shown in the MOTD.";
     };
   };
 
-  config = lib.mkIf cfg.enable {
+  config = mkIf cfg.enable {
+    users.groups = lib.mapAttrs' (name: _: lib.nameValuePair (account name) { }) profiles;
+    users.users = lib.mapAttrs' (name: profile: lib.nameValuePair (account name) (profileUser name profile)) profiles;
+    sops.secrets = lib.concatMapAttrs secrets profiles;
+    systemd.services = lib.concatMapAttrs profileUnits profiles;
+    environment.systemPackages = lib.optionals cfg.addToSystemPackages (lib.mapAttrsToList profileCli profiles);
     assertions = [
       {
-        assertion = !mergeMcpConfig || !config.services.hermes-agent.container.enable;
-        message = "Combining configFile with Nix MCP definitions requires native service mode";
+        assertion = lib.hasPrefix "/" cfg.profilesFile;
+        message = "The Hermes profile file must use an absolute path.";
       }
       {
-        assertion = cfg.providersFile == null || lib.hasPrefix "/" cfg.providersFile;
-        message = "homelab.services.hermes-agent.providersFile must be an absolute runtime path";
+        assertion = cfg.backend.mode == "none" || backendProfile != null;
+        message = "The Hermes backend needs a primary profile. With multiple profiles, the default profile is primary.";
       }
-      {
-        assertion = cfg.providersFile == null || !config.services.hermes-agent.container.enable;
-        message = "homelab.services.hermes-agent.providersFile requires native service mode";
-      }
-      {
-        assertion = cfg.providersFile == null || !(lib.any (key: builtins.hasAttr key (cfg.settings.model or { }))
-          [ "provider" "default" "base_url" "api_key" "key_env" "api_mode" ]);
-        message = "With providersFile, declare model routing in hermes/providers, not settings.model";
-      }
-      {
-        assertion = cfg.providersFile == null || config.services.hermes-agent.authFile == null;
-        message = "providersFile manages authentication and cannot be combined with services.hermes-agent.authFile";
-      }
-      {
-        assertion = cfg.environmentFile != null;
-        message = "homelab.services.hermes.environmentFile must be set when Hermes is enabled";
-      }
-      {
-        assertion = cfg.cronJobsFile == null || lib.hasPrefix "/" cfg.cronJobsFile;
-        message = "homelab.services.hermes-agent.cronJobsFile must be an absolute runtime path";
-      }
-      {
-        assertion = cfg.cronJobsFile == null || !config.services.hermes-agent.container.enable;
-        message = "homelab.services.hermes-agent.cronJobsFile requires native service mode";
-      }
-      {
-        assertion = cfg.skillsFile == null || lib.hasPrefix "/" cfg.skillsFile;
-        message = "homelab.services.hermes-agent.skillsFile must be an absolute runtime path";
-      }
-      {
-        assertion = cfg.skillsFile == null || !config.services.hermes-agent.container.enable;
-        message = "homelab.services.hermes-agent.skillsFile requires native service mode";
-      }
-      {
-        assertion = !cfg.mcp.garmin.enable || !config.services.hermes-agent.container.enable;
-        message = "homelab.services.hermes-agent.mcp integrations require native service mode";
-      }
-      {
-        assertion = cfg.mcp.garmin.tokensFile == null || lib.hasPrefix "/" cfg.mcp.garmin.tokensFile;
-        message = "homelab.services.hermes-agent.mcp.garmin.tokensFile must be an absolute runtime path";
-      }
-    ];
-
-    # See options in: https://github.com/NousResearch/hermes-agent/blob/main/nix/nixosModules.nix
-    services.hermes-agent = {
-      enable = true;
-      inherit (cfg) addToSystemPackages backend configFile package stateDir settings;
-      environmentFiles = [ cfg.environmentFile ];
-      extraPackages = lib.optionals cfg.mcp.garmin.enable [ pkgs.uv pkgs.python312 ];
-      mcpServers = lib.optionalAttrs cfg.mcp.nextcloud.enable
+    ] ++ lib.concatLists (lib.mapAttrsToList
+      (name: profile: [
         {
-          nextcloud = {
-            inherit (cfg.mcp.nextcloud) url;
-            headers.Authorization = "Bearer \${NEXTCLOUD_APP_PASSWORD}";
-          };
-        } // lib.optionalAttrs cfg.mcp.garmin.enable {
-        garmin = {
-          command = "${pkgs.uv}/bin/uvx";
-          args = garminArgs ++ [ "garmin-mcp" ];
-          connect_timeout = 180;
-          env.GARMINTOKENS = "${cfg.stateDir}/.garminconnect";
-        };
-      };
-    };
-
-    environment.systemPackages = lib.optionals cfg.mcp.garmin.enable [ garminAuth ];
-
-    system.activationScripts.hermes-agent-mcp = lib.mkIf mergeMcpConfig
-      (lib.stringAfter [ "hermes-agent-setup" ] ''
-        ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg config.services.hermes-agent.user} -- \
-          ${pkgs.coreutils}/bin/env HERMES_HOME=${lib.escapeShellArg "${config.services.hermes-agent.stateDir}/.hermes"} \
-          ${mergeMcp}
-      '');
-
-    # Upstream copies configFile on every activation. A service restart is not
-    # guaranteed when the unit and secret contents are unchanged, so preStart
-    # alone can leave a running gateway without its provider/model routing.
-    system.activationScripts.hermes-agent-providers = lib.mkIf (cfg.providersFile != null)
-      (lib.stringAfter [ "hermes-agent-setup" ] ''
-        ${pkgs.util-linux}/bin/runuser -u ${lib.escapeShellArg config.services.hermes-agent.user} -- \
-          ${pkgs.coreutils}/bin/env HERMES_HOME=${lib.escapeShellArg "${config.services.hermes-agent.stateDir}/.hermes"} \
-          ${reconcileProviders}
-      '');
-
-    systemd.services = lib.mkMerge [
-      (lib.mkIf mergeMcpConfig
-        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
-          after = [ "sops-install-secrets.service" ];
-          serviceConfig.UMask = lib.mkForce "0077";
-          preStart = lib.mkBefore mergeMcp;
-        })))
-      (lib.mkIf (cfg.skillsFile != null)
-        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
-          after = [ "sops-install-secrets.service" ];
-          serviceConfig.UMask = lib.mkForce "0077";
-          preStart = lib.mkBefore ''
-            ${pkgs.python3}/bin/python3 \
-              ${./reconcile-skills.py} ${lib.escapeShellArg cfg.skillsFile}
-          '';
-        })))
-      (lib.mkIf (cfg.providersFile != null)
-        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
-          after = [ "sops-install-secrets.service" ];
-          serviceConfig.UMask = lib.mkForce "0077";
-          preStart = lib.mkBefore reconcileProviders;
-        })))
-      (lib.mkIf (cfg.mcp.garmin.enable && cfg.mcp.garmin.tokensFile != null)
-        (lib.genAttrs ([ "hermes-agent" ] ++ lib.optionals (cfg.backend.mode != "none") [ "hermes-backend" ]) (_: {
-          after = [ "sops-install-secrets.service" ];
-          preStart = lib.mkBefore garminTokenSetup;
-        })))
-      {
-        hermes-agent = lib.mkIf (cfg.cronJobsFile != null) {
-          after = [ "sops-install-secrets.service" ];
-          serviceConfig.UMask = lib.mkForce "0077";
-          preStart = lib.mkAfter ''
-            ${config.services.hermes-agent.package.hermesVenv}/bin/python3 \
-              ${./reconcile-cron-jobs.py} ${lib.escapeShellArg cfg.cronJobsFile}
-          '';
-        };
-      }
-    ];
+          assertion = units name profile != [ ];
+          message = "Hermes profile ${name} must enable a gateway or a backend.";
+        }
+        {
+          assertion = !(profile.secretKeys ? skills && profile.secretKeys ? legacySkills)
+            && !(profile.secretKeys ? auth && profile.secretKeys ? legacyProviders);
+          message = "Hermes profile ${name} must select a single source for skills and OAuth seeds.";
+        }
+        {
+          assertion = !(profile.secretKeys ? garmin) || cfg.garmin.enable;
+          message = "Enable Garmin to use a Garmin seed for Hermes profile ${name}.";
+        }
+      ])
+      profiles);
   };
 }
