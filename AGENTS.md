@@ -90,17 +90,16 @@ If upgrading that dashboard, verify its UID and `ds_prometheus`, `job`,
 Before changing Aurral, slskd, Lidarr/Tubifarry, or Navidrome, read
 [docs/music-workflow.md](docs/music-workflow.md).
 
-- slskd is the only music downloader. Aurral and Lidarr own their respective
-  imports and tracked files in the single flat `/mnt/media/music/library` tree;
-  Navidrome scans that tree and provides lyrics.
+- slskd is the only music downloader. Lidarr owns imports into
+  `/mnt/media/music/library`, which Aurral reads and Navidrome scans. Aurral
+  owns its direct downloads under `/mnt/media/music/aurral`.
 - Prefer native application settings and NixOS modules. Do not add per-application
   importers, application source patches, database polling workers, or receipt caches.
 - Preserve Aurral approval before import. A slskd completion event is earlier than
   approval and does not identify the requesting application.
-- Do not run two movers on a download. Do not move files tracked by Aurral or Lidarr
-  without a supported way for the owner to accept their final paths. Aurral and
-  Lidarr share album directories, so avoid Lidarr operations that can alter
-  Aurral-owned files there.
+- Do not run two movers on a download. Use Lidarr's interactive import on staged
+  copies when promoting an approved Aurral download. Review old Aurral files in
+  the curated library before renaming, replacing, or removing them.
 - Keep download staging outside Navidrome's scanned library. Preserve the
   module-managed `.ndignore` and slskd filters for Aurral temporary content; see
   the workflow before changing paths.

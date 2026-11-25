@@ -117,6 +117,10 @@
               };
               modules = [
                 disko.nixosModules.disko
+                # Use the module that matches Aurral 3.x on nixpkgs-master.
+                # TODO: Remove this replacement after upgrading nixpkgs to 26.11.
+                { disabledModules = [ "services/misc/aurral.nix" ]; }
+                "${nixpkgs-master}/nixos/modules/services/misc/aurral.nix"
                 # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.
                 (import "${nixpkgs-master}/nixos/modules/services/matrix/matrix-authentication-service.nix")
                 (import "${self}/modules/machines/emilia")

@@ -3,17 +3,6 @@ let
   service = "aurral";
   cfg = config.homelab.services.${service};
   inherit (config) homelab;
-  sqlString = value: "'" + lib.replaceStrings [ "'" ] [ "''" ] value + "'";
-  navidromeIgnoreFile = pkgs.writeText "aurral-library.ndignore" ''
-    # Temporary Aurral content is not part of the finished music library.
-    _fallback/
-    _flows/
-    _playlists/
-    _staging/
-    aurral-weekly-flow/
-    .aurral-*
-    *.tmp
-  '';
 
 in
 {
@@ -25,12 +14,10 @@ in
     };
     downloadDir = lib.mkOption {
       type = lib.types.externalPath;
-      default = "/mnt/media/music/library";
+      default = "/mnt/media/music/aurral";
       description = ''
-        The shared finished music library. Aurral writes permanent tracks into
-        the same flat artist/album tree that Lidarr manages. Enforced on service
-        startup, including installations with a different path saved in the web UI.
-        Existing files are not moved when this option changes.
+        Default writable Library folder for Aurral-managed downloads and flows.
+        A saved path in Aurral's web interface takes precedence.
       '';
     };
     url = lib.mkOption {
@@ -86,7 +73,7 @@ in
       package = pkgs.pkgs-master.aurral;
       inherit (cfg) port openFirewall directories environmentFile;
       environment = cfg.environment // {
-        DOWNLOAD_FOLDER = cfg.downloadDir;
+        LIBRARY_FOLDER = cfg.downloadDir;
         FILE_BROWSE_ROOTS = cfg.environment.FILE_BROWSE_ROOTS or
           (lib.concatStringsSep "," (lib.unique (cfg.directories ++ [ cfg.downloadDir ])));
       };
@@ -97,24 +84,13 @@ in
 
     # The confined NFS bind fails with 226/NAMESPACE on Emilia.
     # Use the host mount as Lidarr does while keeping system paths read-only.
+    # Set the curated library read-only in Aurral. A systemd ReadOnlyPaths
+    # rule there also fails because root cannot traverse the NFS share.
     systemd.services.aurral = {
       confinement.enable = lib.mkForce false;
       unitConfig.RequiresMountsFor = lib.unique (cfg.directories ++ [ cfg.downloadDir ]);
       preStart = ''
         ${lib.getExe' pkgs.coreutils "install"} -d -m 0770 -- ${lib.escapeShellArg cfg.downloadDir}
-        ${lib.getExe' pkgs.coreutils "install"} -m 0644 -- ${navidromeIgnoreFile} ${lib.escapeShellArg "${cfg.downloadDir}/.ndignore"}
-        database=${lib.escapeShellArg (cfg.environment.AURRAL_DB_PATH or "${cfg.configDir}/aurral.db")}
-        if [ -f "$database" ]; then
-          saved="$(${lib.getExe pkgs.sqlite} -cmd '.timeout 5000' "$database" "SELECT value FROM settings WHERE key='downloadFolderPath';")"
-          if [ "$saved" != ${lib.escapeShellArg cfg.downloadDir} ]; then
-            ${lib.getExe' pkgs.coreutils "install"} -d -m 0700 -- ${lib.escapeShellArg "${cfg.configDir}/backups"}
-            ${lib.getExe pkgs.sqlite} -cmd '.timeout 5000' "$database" <<'SQL'
-        VACUUM INTO (${sqlString "${cfg.configDir}/backups/before-download-folder-"} || strftime('%Y%m%d%H%M%f', 'now') || '.db');
-        INSERT INTO settings(key, value) VALUES('downloadFolderPath', ${sqlString cfg.downloadDir})
-          ON CONFLICT(key) DO UPDATE SET value=excluded.value;
-        SQL
-          fi
-        fi
       '';
       serviceConfig = {
         BindPaths = lib.mkForce [ ];

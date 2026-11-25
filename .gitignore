@@ -5,6 +5,9 @@
 .devenv*
 devenv.local.nix
 
+# Temporary Aurral library cutover checklist
+/docs/music-workflow-cutover.md
+
 # pre-commit
 .pre-commit-config.yaml
 

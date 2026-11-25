@@ -7,6 +7,16 @@ let
   service = "navidrome";
   inherit (config) homelab;
   cfg = homelab.services.${service};
+  aurralIgnoreFile = pkgs.writeText "aurral-library.ndignore" ''
+    # Temporary Aurral content can remain after separating the libraries.
+    _fallback/
+    _flows/
+    _playlists/
+    _staging/
+    aurral-weekly-flow/
+    .aurral-*
+    *.tmp
+  '';
 in
 {
   options.homelab.services.${service} = {
@@ -71,6 +81,10 @@ in
       BindReadOnlyPaths = lib.mkForce [ ];
     };
     systemd.services.navidrome.path = [ pkgs.ffmpeg-headless ];
+    systemd.services.navidrome.unitConfig.RequiresMountsFor = [ cfg.musicDir ];
+    systemd.services.navidrome.preStart = lib.mkIf homelab.services.aurral.enable ''
+      ${lib.getExe' pkgs.coreutils "install"} -m 0644 -- ${aurralIgnoreFile} ${lib.escapeShellArg "${cfg.musicDir}/.ndignore"}
+    '';
     services.${service} = {
       enable = true;
       # TODO: Remove after upgrading nixpkgs to 26.11, where this module is included.

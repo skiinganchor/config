@@ -12,10 +12,9 @@
   lyrics plugin, and serves music through the OpenSubsonic API.
 - **Music Assistant** consumes Navidrome through that API for playback.
 
-There is no shared external importer. Aurral and Lidarr each own their imports
-and tracked files, but their permanent files share the same flat library tree.
-Navidrome is the single scanner for that finished library; it does not import or
-move files.
+Lidarr imports into the curated library and applies the configured album-year
+and track-number formats. Aurral reads that library and stores direct downloads
+in its own writable folder. Navidrome serves the curated library.
 
 ## Paths
 
@@ -23,74 +22,57 @@ move files.
 | --- | --- |
 | `/mnt/media/music/import.tmp` | slskd transfers still in progress |
 | `/mnt/media/music/import` | Completed slskd downloads; application approval or consumption may still be pending |
-| `/mnt/media/music/library` | The single finished library: Aurral permanent tracks and Lidarr-managed albums in the flat `Artist/Album` layout; scanned by Navidrome and shared by slskd |
+| `/mnt/media/music/aurral` | Aurral's writable Library folder for direct downloads and flow files |
+| `/mnt/media/music/library` | Lidarr's curated library, read by Aurral, scanned by Navidrome, and shared by slskd |
 
 Navidrome's scanned folder is configured with
 `homelab.services.navidrome.musicDir`. slskd shares that same folder.
 Navidrome scans every minute because changes on the NFS share may bypass its
 native filesystem watcher.
 
-Download staging stays outside the scanned library. slskd transfers remain in
-`import.tmp` and `import`; Aurral's managed download folder is the library itself.
-The Aurral module writes a `.ndignore` there so Navidrome ignores Aurral's
-temporary flow, staging, and playlist directories while scanning permanent
-`Artist/Album` music. slskd share filters exclude the same temporary content.
-Do not point Navidrome at the music parent directory: it contains incomplete
-downloads and pending approvals.
+In Aurral, add `/mnt/media/music/library` under **Settings → Library → Read-only
+folders** and keep its writable Library folder at `/mnt/media/music/aurral`.
+Aurral honors that setting when managing files. This is an application setting.
+The service account still has the share's filesystem permissions. Keep systemd
+path restrictions off the NFS library because systemd cannot traverse it as root.
+
+Download staging stays outside the scanned library. The Navidrome module keeps
+`.ndignore` in the curated library to exclude any temporary Aurral files left
+from the previous layout. The slskd share filters exclude the same content.
 
 ## Acquisition routes
 
-### Lidarr → Tubifarry → slskd
+### Full albums through Lidarr
 
-Lidarr monitors the selected albums and uses Tubifarry to request downloads from
-slskd. Let Lidarr handle completed downloads and import them into its configured
-root folder. For those albums to appear in Navidrome, configure the Lidarr root
-folder within Navidrome's scanned library using Lidarr's native settings.
-Lidarr's saved application settings are not declared by this repository.
+Lidarr handles both its own monitored albums and full-album requests delegated by
+Aurral's Lidarr plugin. Tubifarry sends the downloads to slskd and Lidarr imports
+them into `/mnt/media/music/library`. Use Lidarr's Media Management settings to
+enable renaming and set the album and track formats. Enable MusicBrainz tag
+writing for new imports if Aurral has trouble matching the finished albums.
 
-Do not move or rename Lidarr-managed files with a second tool: Lidarr expects the
-paths recorded in its database to remain valid. Aurral and Lidarr can have files
-in the same album directory; avoid Lidarr upgrades, renames, or deletions that
-could affect Aurral-tracked singles in that directory.
+Use version 0.3.0 or later of the Aurral Lidarr plugin, give it the curated root
+for new artists, and place Lidarr first in Aurral's download source list. If an
+album falls back to another source, it goes to Aurral's own folder. To guarantee
+an album uses Lidarr's naming, request it in Lidarr directly or verify the Aurral
+request reaches Lidarr's queue.
 
-### Aurral → slskd
+### Single tracks, playlists, and flows through Aurral
 
-Aurral owns approval and consolidation of its direct downloads. Keep that
-lifecycle intact. Aurral's `DOWNLOAD_FOLDER` is `/mnt/media/music/library`,
-and permanent tracks use the same flat `Artist/Album` tree as Lidarr. Aurral
-tracks remain Aurral-owned even when they are physically in a Lidarr-managed
-album directory; do not use Lidarr to rename, upgrade, or delete those files.
-The module-managed `.ndignore` excludes Aurral temporary content from Navidrome.
+The Lidarr plugin handles full albums. Singles, playlist downloads, and flows use
+Aurral's own download sources and its fixed naming layout. Aurral owns approval
+and consolidation. Navidrome does not scan Aurral's writable folder.
 
-The wrapper uses the stock application package and the native NixOS service.
-Its saved `downloadFolderPath` setting takes precedence over `DOWNLOAD_FOLDER`,
-so a short sqlite3 startup command enforces the declared folder, backing up the
-database only when that setting changes. It does not migrate existing music or
-rewrite track paths. The existing NFS confinement workaround remains necessary.
-Keep Aurral's separate Navidrome playback integration disabled: its automatic
-library setup can rename the Navidrome library at the same filesystem path,
-conflicting with this repository's single Navidrome library configuration.
-Changing `downloadDir` does not move the existing `/mnt/media/music/aurral`
-tree. Do not activate this path change until those files have been reconciled
-into the library and Aurral's tracked paths verified: the startup setting update
-does not move files, and missing tracked paths can be requeued for download.
-Treat same-name files as conflicts to review rather than overwriting either
-application's copy. Keep the old tree until every tracked file is confirmed at
-its final path. This configuration intentionally does not run a second mover or
-perform a live migration.
-
-The download folder and Lidarr root now overlap. Aurral's legacy download-folder
-migration detects that overlap and refuses its migration pass; do not bypass that
-guard or run the legacy migration over the shared library. Keep Aurral and Lidarr
-as the owners of their respective files, and avoid Lidarr operations that could
-alter Aurral-owned tracks in a shared album directory.
+To promote a track, copy the approved file into a staging folder outside both
+libraries. Use Lidarr's Interactive Import on that copy and confirm the exact
+album edition and track. Review any replacement separately. Verify the imported
+path and playback before retiring a source copy, and keep the Aurral original
+while the application still relies on it. An import from inside the artist's
+Lidarr directory can be treated as an existing file and skip the import move.
 
 ### Direct slskd downloads
 
 Direct downloads remain in the completed download folder. Review them and use
-Lidarr's native manual import for albums it should manage. Unmanaged music can be
-organized manually into the finished library only after confirming that neither
-Aurral nor Lidarr owns the files.
+Lidarr's native manual import for the tracks or albums it should manage.
 
 There is no global completion mover. slskd's directory-complete event does not
 identify the requesting application or establish Aurral approval. Acting on every
@@ -106,9 +88,8 @@ login-page false positives. The unauthenticated backend port stays on loopback.
 
 - Use native application settings and NixOS modules. Do not add application source
   patches, database polling workers, receipt caches, or competing importers.
-- Preserve one owner for each download and its final paths. Aurral and Lidarr
-  share the flat folder structure, so avoid Lidarr operations that can alter
-  Aurral-owned files in a shared album directory.
+- Preserve one owner for each download and its final paths. Review any legacy
+  Aurral files still in Lidarr's tree before bulk renames or upgrades.
 - Keep the existing library and application databases intact when changing service
   configuration. This configuration does not migrate or delete existing music or
   historical importer state.
@@ -121,5 +102,7 @@ login-page false positives. The unauthenticated backend port stays on loopback.
 
 - [slskd event and script configuration](https://github.com/slskd/slskd/blob/master/docs/config.md#integrations)
 - [slskd event fields](https://github.com/slskd/slskd/blob/master/src/slskd/Events/Types/Events.cs)
-- [Aurral 2.10 finalization](https://github.com/lklynet/aurral/blob/v2.10.0/backend/services/pipelineHelpers.js)
+- [Aurral 3.0.1 release notes](https://github.com/lklynet/aurral/releases/tag/v3.0.1)
+- [Aurral Lidarr plugin and read-only folders](https://docs.aurral.org/integrations/lidarr/)
+- [NixOS Aurral 3.0.1 module update](https://github.com/NixOS/nixpkgs/pull/590890)
 - [Lidarr documentation](https://wiki.servarr.com/lidarr)
