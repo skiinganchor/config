@@ -73,11 +73,11 @@
         "uv2nix": "uv2nix"
       },
       "locked": {
-        "lastModified": 1795537024,
-        "narHash": "sha256-nze+uRGuLC/GObwiKW0T6PBxLZbPXqVnC4UGaHyE0gA=",
+        "lastModified": 1795578475,
+        "narHash": "sha256-eQYXdSAaBWgLcef6mCaOwEFtesK2ML8fmAlzUyWmWfM=",
         "owner": "NousResearch",
         "repo": "hermes-agent",
-        "rev": "2506f5b0a4d310b96ec2eb6f2de4ea7349ba4d15",
+        "rev": "b7ee21c14e38316273f88d8ed112491ba1c87d15",
         "type": "github"
       },
       "original": {
@@ -186,11 +186,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1795539670,
-        "narHash": "sha256-e2oGzaaoqDEO+cD1ku3idOivoykXXuImpVAXOM0/dHU=",
+        "lastModified": 1795581122,
+        "narHash": "sha256-qoCE4NghMzgePPlq9k3pUPjQ1ODs1BdfdBkVtpmqEQI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f9f2588a4eae7eab0a071091117cb736c49da841",
+        "rev": "f1c36e38738329e7579827a89d044f8612d03a4d",
         "type": "github"
       },
       "original": {
