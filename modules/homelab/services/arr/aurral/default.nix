@@ -83,7 +83,7 @@ in
   config = lib.mkIf cfg.enable {
     services.${service} = {
       enable = true;
-      package = pkgs.pkgs-unstable.aurral;
+      package = pkgs.pkgs-master.aurral;
       inherit (cfg) port openFirewall directories environmentFile;
       environment = cfg.environment // {
         DOWNLOAD_FOLDER = cfg.downloadDir;
