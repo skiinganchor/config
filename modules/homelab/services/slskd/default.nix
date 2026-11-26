@@ -68,10 +68,6 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    systemd.tmpfiles.rules = map (x: "d ${x} 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -") [
-      cfg.downloadDir
-      cfg.incompleteDownloadDir
-    ];
     services.${service} = {
       enable = true;
       user = homelab.mainUser.name;
@@ -115,6 +111,13 @@ in
     };
     systemd.services = {
       slskd = {
+        # Create missing staging directories as slskd after the NFS mount is ready.
+        unitConfig.RequiresMountsFor = [ cfg.downloadDir cfg.incompleteDownloadDir ];
+        preStart = ''
+          umask 0002
+          ${lib.getExe' pkgs.coreutils "mkdir"} -p -- ${lib.escapeShellArgs [ cfg.downloadDir cfg.incompleteDownloadDir ]}
+        '';
+
         # TODO: remove workaround for .NET mutex regression; remove once fixed upstream.
         # https://github.com/NixOS/nixpkgs/issues/588861
         serviceConfig.RuntimeDirectory = "slskd";

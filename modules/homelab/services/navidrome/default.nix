@@ -67,9 +67,6 @@ in
     };
   };
   config = lib.mkIf cfg.enable {
-    systemd.tmpfiles.rules = [
-      "d ${cfg.musicDir} 0775 ${homelab.mainUser.name} ${homelab.mainUser.group} - -"
-    ];
     systemd.services.navidrome.serviceConfig.EnvironmentFile = lib.mkIf
       (
         cfg.environmentFile != null

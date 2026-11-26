@@ -78,24 +78,22 @@ in
           (lib.concatStringsSep "," (lib.unique (cfg.directories ++ [ cfg.downloadDir ])));
       };
       dataDir = cfg.configDir;
-      user = homelab.mainUser.name;
-      group = homelab.mainUser.group;
     };
 
-    # The confined NFS bind fails with 226/NAMESPACE on Emilia.
-    # Use the host mount as Lidarr does while keeping system paths read-only.
-    # Set the curated library read-only in Aurral. A systemd ReadOnlyPaths
-    # rule there also fails because root cannot traverse the NFS share.
+    # The NFS server provisions the writable folder. The upstream tmpfiles rule
+    # would try to create it or change its metadata as squashed root.
+    systemd.tmpfiles.settings."10-aurral" = lib.mkForce { };
+
+    # Root cannot traverse the music tree when systemd sets up bind mounts.
+    # The service uses the host mount with permissions enforced by the server.
     systemd.services.aurral = {
       confinement.enable = lib.mkForce false;
       unitConfig.RequiresMountsFor = lib.unique (cfg.directories ++ [ cfg.downloadDir ]);
-      preStart = ''
-        ${lib.getExe' pkgs.coreutils "install"} -d -m 0770 -- ${lib.escapeShellArg cfg.downloadDir}
-      '';
       serviceConfig = {
         BindPaths = lib.mkForce [ ];
         BindReadOnlyPaths = lib.mkForce [ ];
         ProtectSystem = lib.mkForce "full";
+        StateDirectoryMode = "0700";
       };
     };
 

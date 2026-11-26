@@ -32,9 +32,12 @@ native filesystem watcher.
 
 In Aurral, add `/mnt/media/music/library` under **Settings → Library → Read-only
 folders** and keep its writable Library folder at `/mnt/media/music/aurral`.
-Aurral honors that setting when managing files. This is an application setting.
-The service account still has the share's filesystem permissions. Keep systemd
-path restrictions off the NFS library because systemd cannot traverse it as root.
+The configuration assigns Aurral its own NFS identity and applies Landlock
+after systemd switches to that identity. Landlock lets Aurral and its workers
+read the curated library and write to the `aurral` and `import` trees. The
+[filesystem isolation procedure](aurral-filesystem-isolation.md) covers the
+Landlock policy and service verification. Keep systemd path restrictions off
+the NFS library because systemd cannot traverse it as root.
 
 Download staging stays outside the scanned library. The Navidrome module keeps
 `.ndignore` in the curated library to exclude any temporary Aurral files left
@@ -80,11 +83,12 @@ completion can bypass approval or remove files before Lidarr consumes them.
 
 ## Maintenance rules
 
-Uptime Kuma on Alertson monitors slskd through the exact `/health` route on
-`https://slskd.tapirus.cc`, bypassing SSO only for the source IP in Emilia's
-`alertson-ip` secret. Private DNS must resolve that name directly to Emilia;
-the monitor accepts only HTTP 200 with redirects disabled to avoid OAuth2/Keycloak
-login-page false positives. The unauthenticated backend port stays on loopback.
+Uptime Kuma monitors slskd through the exact `/health` route on its HTTPS
+virtual host. The route bypasses SSO only for the configured monitoring source
+IP. Private DNS must resolve the virtual host directly to the slskd host.
+The monitor accepts only HTTP 200 with redirects disabled to avoid mistaking
+the login page for a healthy service. The unauthenticated backend port stays
+on loopback.
 
 - Use native application settings and NixOS modules. Do not add application source
   patches, database polling workers, receipt caches, or competing importers.

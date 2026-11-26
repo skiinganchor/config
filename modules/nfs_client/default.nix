@@ -66,9 +66,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Ensure required directories exist
+    # Set metadata only when creating local mount points. On activation the
+    # export may already be mounted and squashed root cannot change its metadata.
     systemd.tmpfiles.rules = map
-      (m: "d ${m.localPath} 0755 ${m.owner} ${m.group} - -")
+      (m: "d ${m.localPath} :0755 :${m.owner} :${m.group} - -")
       (lib.attrValues cfg.mounts);
 
     # Mount NFS shares via fileSystems

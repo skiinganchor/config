@@ -1,4 +1,4 @@
-{ config, lib, my-secrets, sops-nix, ... }:
+{ config, lib, my-secrets, pkgs, sops-nix, ... }:
 let
   domain = "tapirus.cc";
   mainUserName = "share";
@@ -6,11 +6,54 @@ let
   secretsPath = builtins.toString my-secrets;
   wg = config.homelab.networks.local.wireguard-ext;
   wgBase = lib.strings.removeSuffix ".1" wg.cidr.v4;
+  aurralLandlock = pkgs.writeShellScript "aurral-landlock" ''
+    landrunArgs=(
+      --unrestricted-network
+      --rox ${lib.escapeShellArg builtins.storeDir}
+      --ro /mnt/media/music
+      --ro /mnt/media/music/library
+      --rw /mnt/media/music/aurral
+      --rw /mnt/media/music/import
+      --rw /var/lib/aurral
+      --rw /tmp
+      --rw /dev/null
+      --ro /dev/urandom
+      --ro /proc
+      --ro /etc/hosts
+      --ro /etc/resolv.conf
+      --ro /etc/nsswitch.conf
+      --ro /etc/passwd
+      --ro /etc/group
+      --ro /etc/ssl/certs/ca-certificates.crt
+    )
+    if [[ -e /etc/localtime ]]; then
+      landrunArgs+=(--ro /etc/localtime)
+    fi
+    if [[ -n ''${CREDENTIALS_DIRECTORY:-} ]]; then
+      landrunArgs+=(--ro "$CREDENTIALS_DIRECTORY")
+    fi
+    # landrun requires explicit environment passthrough. Pass names only so
+    # values supplied by systemd never appear in command-line arguments.
+    while IFS= read -r -d "" entry; do
+      name="''${entry%%=*}"
+      [[ "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+      landrunArgs+=(--env "$name")
+    done < <(${lib.getExe' pkgs.coreutils "env"} -0)
+
+    exec ${lib.getExe pkgs.landrun} "''${landrunArgs[@]}" -- "$@"
+  '';
 in
 {
   imports = [
     sops-nix.nixosModules.sops
   ];
+
+  # Reserve the NFS identity for the account created by services.aurral.
+  users.users.aurral.uid = 1201;
+  users.groups.aurral.gid = 1201;
+
+  # The NFS server manages the curated library and its ACLs.
+  systemd.tmpfiles.settings.navidromeDirs.${config.homelab.services.navidrome.musicDir} = lib.mkForce { };
 
   sops = {
     secrets = {
@@ -81,6 +124,17 @@ in
   };
 
   systemd.services = {
+    aurral = lib.mkIf config.services.aurral.enable {
+      # slskd creates the completed-download directory in its pre-start hook.
+      after = lib.optionals config.services.slskd.enable [ "slskd.service" ];
+      unitConfig.RequiresMountsFor = [ "/mnt/media/music/library" "/mnt/media/music/import" ];
+      serviceConfig = {
+        # landrun execs the upstream command, keeping catatonit as PID 1.
+        ExecStart = lib.mkForce "${aurralLandlock} ${lib.getExe pkgs.catatonit} -- ${lib.getExe config.services.aurral.package}";
+        SupplementaryGroups = [ "users" ];
+        PrivateTmp = true;
+      };
+    };
     # Otherwise setupSecrets installs the template during activation, before
     # services start. Keep the same ordering if systemd activation is enabled.
     nginx = {
