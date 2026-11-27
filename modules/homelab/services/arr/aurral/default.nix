@@ -88,6 +88,7 @@ in
     # The service uses the host mount with permissions enforced by the server.
     systemd.services.aurral = {
       confinement.enable = lib.mkForce false;
+      environment.SQLITE_TMPDIR = "/tmp";
       unitConfig.RequiresMountsFor = lib.unique (cfg.directories ++ [ cfg.downloadDir ]);
       serviceConfig = {
         BindPaths = lib.mkForce [ ];
