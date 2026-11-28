@@ -211,6 +211,10 @@ in
 {
   options.homelab.services.hermes-agent = {
     enable = mkEnableOption "Hermes Agent profiles";
+    url = mkOption {
+      type = types.str;
+      default = "hermes.${config.homelab.baseDomain}";
+    };
     addToSystemPackages = mkEnableOption "profile-aware Hermes CLI launchers";
     package = mkOption {
       type = types.package;
@@ -248,6 +252,23 @@ in
   };
 
   config = mkIf cfg.enable {
+    services.nginx.virtualHosts = mkIf (cfg.backend.mode != "none") {
+      "${cfg.url}" = {
+        forceSSL = true;
+        enableACME = false;
+        extraConfig = ''
+          add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+          add_header X-XSS-Protection "1; mode=block" always;
+        '';
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString cfg.backend.port}";
+          proxyWebsockets = true;
+        };
+        sslCertificate = "/var/lib/acme/${config.homelab.baseDomain}/fullchain.pem";
+        sslCertificateKey = "/var/lib/acme/${config.homelab.baseDomain}/key.pem";
+      };
+    };
+
     users.groups.${account} = { };
     users.users.${account} = profileUser;
     sops.secrets = lib.concatMapAttrs secrets profiles;
